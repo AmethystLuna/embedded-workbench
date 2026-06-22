@@ -32,13 +32,33 @@
 
 ## 安装
 
-**开发安装：**
+### Marketplace 安装（推荐）
 
-```text
-将整个目录复制到 ~/.claude/plugins/dev/embedded-workbench/
+在 `~/.claude/settings.json` 中添加 marketplace：
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "embedded-workbench": {
+      "source": { "source": "github", "repo": "AmethystLuna/embedded-workbench" }
+    }
+  }
+}
 ```
 
-**启用插件**（在 `~/.claude/settings.json` 中）：
+然后通过 CLI 安装：
+
+```bash
+claude plugin install embedded-workbench@embedded-workbench
+```
+
+### 手动安装
+
+```bash
+git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugins/dev/embedded-workbench
+```
+
+然后在 `~/.claude/settings.json` 中启用：
 
 ```json
 {
@@ -50,12 +70,11 @@
 
 ## 使用
 
-在 `~/.claude/CLAUDE.md` 或项目 `CLAUDE.md` 中：
+插件会在每次会话启动时自动注入能力通知。技能按需加载：
 
-```markdown
-使用 `Skill("embedded-workbench")` 加载工作流与策略。
-领域指导通过 `Skill("embedded-firmware-dev")`、`Skill("c-cpp-dev")` 等按需加载。
-```
+- 说"用 Multi-Agent Workflow"或调用 `Skill("embedded-workbench")` 加载完整工作流系统
+- 领域技能在任务匹配其 `Use when` 描述时自动激活
+- 无需手动配置 CLAUDE.md
 
 ## 依赖
 

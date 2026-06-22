@@ -32,13 +32,33 @@ Embedded C/C++ firmware toolbox for Claude Code. 4 agents, 8 skills covering Fre
 
 ## Installation
 
-**Development install:**
+### Marketplace install (recommended)
 
-```text
-Copy the entire directory to ~/.claude/plugins/dev/embedded-workbench/
+Add the marketplace to `~/.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "embedded-workbench": {
+      "source": { "source": "github", "repo": "AmethystLuna/embedded-workbench" }
+    }
+  }
+}
 ```
 
-**Enable the plugin** (in `~/.claude/settings.json`):
+Then install from CLI:
+
+```bash
+claude plugin install embedded-workbench@embedded-workbench
+```
+
+### Manual install
+
+```bash
+git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugins/dev/embedded-workbench
+```
+
+Then enable in `~/.claude/settings.json`:
 
 ```json
 {
@@ -50,12 +70,11 @@ Copy the entire directory to ~/.claude/plugins/dev/embedded-workbench/
 
 ## Usage
 
-In your `~/.claude/CLAUDE.md` or project `CLAUDE.md`:
+The plugin auto-injects a capability notification at session start. Skills are loaded on demand:
 
-```markdown
-Load `Skill("embedded-workbench")` for workflows.
-Use `Skill("embedded-firmware-dev")`, `Skill("c-cpp-dev")` etc. for domain guidance.
-```
+- Say "use Multi-Agent Workflow" or invoke `Skill("embedded-workbench")` for the full workflow system
+- Domain skills activate automatically when their `Use when` description matches your task
+- No manual CLAUDE.md configuration required
 
 ## Requirements
 
