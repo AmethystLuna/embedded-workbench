@@ -1,0 +1,33 @@
+# SessionStart hook: lightweight capability notification
+param()
+$ErrorActionPreference = "Stop"
+
+$message = @"
+<EXTREMELY_IMPORTANT>
+Plugin `embedded-workbench` is active. You have access to custom agents and skills for embedded C/C++ firmware development.
+
+**Agents**: architecture-steward, design-reviewer, execution-worker, quality-coordinator
+
+**Skills** - invoke with Skill("name") when the task matches:
+
+| Skill | Use when |
+|-------|----------|
+| debug-methodology | Debugging crashes, HardFault, logs, or sensor anomalies |
+| c-cpp-dev | Writing or refactoring C/C++ code |
+| embedded-firmware-dev | FreeRTOS, ISR, NVM storage, async lifecycle, boundary analysis |
+| keil-mdk-build | Keil MDK builds, .map analysis, HardFault triage |
+| state-machine-design | Async protocols, retries, ACK/NACK, timeout logic |
+| powershell-safety | Generating PowerShell commands in Windows |
+| fact-verification | Reviewing design docs that make claims about APIs or code |
+
+**1% Rule**: If there is even a 1% chance a skill applies to your task, invoke it before responding. Do not rationalize skipping skills when the description matches.
+
+To load workflows and engineering policies: Skill("embedded-workbench")
+</EXTREMELY_IMPORTANT>
+"@
+
+# JSON-escape
+$escaped = $message -replace '\\', '\\' -replace '"', '\"' -replace "`n", '\n' -replace "`r", ''
+
+$json = "{`"hookSpecificOutput`": {`"additionalContext`": `"$escaped`"}}"
+Write-Output $json

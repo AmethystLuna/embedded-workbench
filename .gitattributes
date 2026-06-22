@@ -1,0 +1,6 @@
+* text=auto
+*.sh text eol=lf
+*.cmd text eol=crlf
+*.md text=auto
+*.json text=auto
+hooks/session-start text eol=lf

@@ -1,0 +1,15 @@
+{
+  "name": "embedded-workbench-dev",
+  "description": "Development marketplace for Embedded Workbench plugin",
+  "owner": {
+    "name": "Amethyst Luna"
+  },
+  "plugins": [
+    {
+      "name": "embedded-workbench",
+      "description": "Your embedded firmware toolkit in Claude Code | Claude Code 嵌入式固件工具箱 — 4 agents, 8 skills, battle-tested on real Cortex-M projects.",
+      "version": "0.1.0",
+      "source": "./"
+    }
+  ]
+}

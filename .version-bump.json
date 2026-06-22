@@ -1,0 +1,7 @@
+{
+  "version": "0.1.0",
+  "files": {
+    ".claude-plugin/plugin.json": "version",
+    ".claude-plugin/marketplace.json": "plugins[0].version"
+  }
+}
