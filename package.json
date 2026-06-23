@@ -1,26 +1,28 @@
 {
-  "name": "embedded-workbench",
-  "version": "0.2.0",
-  "description": "Embedded C/C++ firmware development toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, and LVGL patterns.",
-  "type": "module",
-  "author": {
-    "name": "Amethyst Luna",
-    "url": "https://github.com/AmethystLuna"
-  },
-  "license": "MIT",
-  "repository": "https://github.com/AmethystLuna/embedded-workbench",
-  "keywords": [
-    "embedded",
-    "firmware",
-    "freertos",
-    "debugging",
-    "keil",
-    "armclang",
-    "cortex-m",
-    "hardfault",
-    "state-machine",
-    "lvgl",
-    "agentskills",
-    "plugin"
-  ]
+    "name":  "embedded-workbench",
+    "version":  "0.2.0",
+    "description":  "Embedded C/C++ firmware development toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, and LVGL patterns.",
+    "author":  {
+                   "name":  "Amethyst Luna",
+                   "url":  "https://github.com/AmethystLuna"
+               },
+    "license":  "MIT",
+    "repository":  "https://github.com/AmethystLuna/embedded-workbench",
+    "keywords":  [
+                     "embedded",
+                     "firmware",
+                     "c",
+                     "cpp",
+                     "freertos",
+                     "debugging",
+                     "keil",
+                     "armclang",
+                     "cortex-m",
+                     "hardfault",
+                     "state-machine",
+                     "lvgl",
+                     "architecture",
+                     "agentskills",
+                     "plugin"
+                 ]
 }
