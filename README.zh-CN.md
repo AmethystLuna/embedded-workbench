@@ -1,6 +1,8 @@
 # 嵌入式工作台
 
-嵌入式 C/C++ 固件开发工具箱。4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则及 LVGL 陷阱。
+嵌入式 C/C++ 固件开发工具箱 — 4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则及 LVGL 陷阱。
+
+**跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
 
 ## 组件
 
@@ -8,10 +10,10 @@
 
 | 代理 | 模型 | 说明 |
 | ------ | ------ | ------ |
-| `architecture-steward` | opus | 只读规划：设计包、模块边界、切片拆分 |
-| `design-reviewer` | sonnet | 设计文档事实核查：逐条核验声称与代码库事实 |
-| `execution-worker` | haiku | 计划 → 审批 → 实施循环，含 `Bash` 编译验证 |
-| `quality-coordinator` | sonnet | 实现审查：Bug 发现、合规检查、结束完整性 |
+| `architecture-steward` | opus / gpt-5.4 | 只读规划：设计包、模块边界、切片拆分 |
+| `design-reviewer` | sonnet / gpt-5.3-codex | 设计文档事实核查：逐条核验声称与代码库事实 |
+| `execution-worker` | haiku / gpt-5.1-codex | 计划 → 审批 → 实施循环，含编译验证 |
+| `quality-coordinator` | sonnet / gpt-5.3-codex | 实现审查：Bug 发现、合规检查、结束完整性 |
 
 ### 技能 (8)
 
@@ -76,7 +78,81 @@ git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugi
 - 领域技能在任务匹配其 `Use when` 描述时自动激活
 - 无需手动配置 CLAUDE.md
 
+## Codex CLI
+
+本插件同样支持 OpenAI Codex CLI。技能遵循 Agent Skills 标准，跨平台行为一致。代理以 Codex TOML 格式提供于 `.codex/agents/`。
+
+### Codex 安装
+
+```bash
+# 添加 marketplace
+codex plugin marketplace add AmethystLuna/embedded-workbench
+
+# 安装
+codex plugin install embedded-workbench
+```
+
+或手动安装：
+
+```bash
+git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.codex/plugins/embedded-workbench
+```
+
+技能通过 `$skill-name` 调用（如 `$debug-methodology`），或由 Codex 根据任务上下文自动匹配。
+
+## Cursor
+
+Cursor 2.5+ 内置插件支持。`agents/` 中的代理自动发现。
+
+### Cursor 安装
+
+```bash
+# 克隆到 Cursor 插件目录
+git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.cursor/plugins/embedded-workbench
+```
+
+或通过 Cursor 插件市场 UI 安装：`/add-plugin AmethystLuna/embedded-workbench`
+
+## Kimi CLI
+
+Kimi CLI 自动从 `.claude/skills/` 等标准路径发现技能。`.kimi-plugin/plugin.json` 为 Kimi 插件管理器注册插件。
+
+### Kimi 安装
+
+```bash
+# 通过 Kimi 插件管理器
+/plugins install https://github.com/AmethystLuna/embedded-workbench.git
+
+# 或手动克隆
+git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.kimi/plugins/embedded-workbench
+```
+
+技能通过 `/skill:<name>` 调用（如 `/skill:debug-methodology`）。
+
+## OpenCode
+
+技能从 `.claude/skills/` 和 `.codex/skills/` 路径自动发现。在 `opencode.json` 中添加：
+
+```json
+{
+  "plugin": ["embedded-workbench@git+https://github.com/AmethystLuna/embedded-workbench.git"]
+}
+```
+
+或通过 `skop` 安装（兼容 Claude marketplace 清单）。详见 `.opencode/INSTALL.md`。
+
+## ZCode（智谱 Z.AI）
+
+ZCode 3.0+ 遵循 Agent Skills 标准。无插件商店，手动复制技能到 `.zcode/skills/`：
+
+```bash
+git clone https://github.com/AmethystLuna/embedded-workbench.git
+cp -r embedded-workbench/skills/* .zcode/skills/
+```
+
+技能通过 `$skill-name` 调用。ZCode 也自动从 `.claude/skills/` 和 `.codex/skills/` 发现技能。详见 `.zcode/INSTALL.md`。
+
 ## 依赖
 
-- Claude Code v2.1+
+- Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
 - 无外部依赖
