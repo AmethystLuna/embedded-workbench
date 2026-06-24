@@ -14,7 +14,7 @@
 | ------ | ------ | ------ |
 | `architecture-steward` | opus / gpt-5.4 | 只读规划：设计包、模块边界、切片拆分 |
 | `design-reviewer` | sonnet / gpt-5.3-codex | 设计文档事实核查：逐条核验声称与代码库事实 |
-| `execution-worker` | sonnet / gpt-5.1-codex | 计划 → 审批 → 实施循环，含编译验证 |
+| `execution-worker` | sonnet / gpt-5.3-codex | 计划 → 审批 → 实施循环，含编译验证 |
 | `quality-coordinator` | sonnet / gpt-5.3-codex | 实现审查：Bug 发现、合规检查、结束完整性 |
 
 ### 技能 (8)

@@ -14,7 +14,7 @@ Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, N
 | ------- | ------- | ------------- |
 | `architecture-steward` | opus / gpt-5.4 | Read-only planning: design packages, module boundaries, slice breakdown |
 | `design-reviewer` | sonnet / gpt-5.3-codex | Design doc fact-check: verifies claims against codebase |
-| `execution-worker` | sonnet / gpt-5.1-codex | Plan → approve → implement cycle with build verification |
+| `execution-worker` | sonnet / gpt-5.3-codex | Plan → approve → implement cycle with build verification |
 | `quality-coordinator` | sonnet / gpt-5.3-codex | Implementation review: bugs, compliance, closure |
 
 ### Skills (8)

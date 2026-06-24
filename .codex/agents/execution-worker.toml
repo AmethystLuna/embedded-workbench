@@ -1,6 +1,6 @@
 name = "execution-worker"
 description = "Concrete implementation, targeted code edit, focused investigation, test run, build run, narrow module task, delegated coding slice. Two-phase contract: plan first, get approval, then execute."
-model = "gpt-5.1-codex"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 
