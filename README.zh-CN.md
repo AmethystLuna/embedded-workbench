@@ -1,5 +1,7 @@
 # 嵌入式工作台
 
+[English](README.md)
+
 嵌入式 C/C++ 固件开发工具箱 — 4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则及 LVGL 陷阱。
 
 **跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
