@@ -1,6 +1,6 @@
 # Embedded Workbench
 
-[中文](README.zh.md)
+[中文](README.zh-CN.md)
 
 Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns.
 
