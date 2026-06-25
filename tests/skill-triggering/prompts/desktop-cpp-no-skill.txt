@@ -1,0 +1,1 @@
+My C++ desktop application crashes on startup. The stack trace shows a segfault in the constructor of MainWindow.

@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-嵌入式 C/C++ 固件开发工具箱 — 4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则及 LVGL 陷阱。
+嵌入式 C/C++ 固件开发工具箱 — 4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱、逻辑原语验证及对抗性设计审查。v0.4.0。
 
 **跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
 
@@ -21,18 +21,18 @@
 
 | 技能 | 说明 |
 | ------ | ------ |
-| `embedded-workbench` | 引导技能：工作流、策略、子代理映射、文档模板 |
+| `embedded-workbench` | 引导技能：工作流、策略、子代理映射、主动建议、跨平台工具映射、文档模板 |
 | `debug-methodology` | 8 条调试铁律、修复准则、迭代调试案例研究 |
 | `embedded-firmware-dev` | FreeRTOS、中断、NVM 存储、异步生命周期、边界分析、架构原则、LVGL 陷阱 |
 | `keil-mdk-build` | UV4 CLI、ARM Compiler 5/6、.map 分析、合并打包、构建诊断 |
 | `c-cpp-dev` | C/C++ 代码生成、风格、内存布局、重构 |
-| `state-machine-design` | 状态模型、重试、超时、转换门控 |
+| `state-machine-design` | 状态模型、重试、超时、转换门控、实现模式 |
 | `hardfault-triage` | 处理器异常分类 — 故障寄存器、栈帧、PC 定位源码、根因分类 |
-| `fact-verification` | 文档声称与代码库事实的交叉验证 |
+| `fact-verification` | 文档与计划声称核查、逻辑原语验证（7 结构 + 7 对抗探针）、重构回归检测、手动兜底模式 |
 
 ### 深度参考
 
-`embedded-firmware-dev`、`debug-methodology`、`state-machine-design`、`c-cpp-dev` 包含深度参考或代码示例。亮点：12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱、7 轮迭代调试案例研究、状态机实现模式、嵌入式 C 专项（volatile MMIO、链接器段、ISR 安全路径）。
+`embedded-firmware-dev`、`debug-methodology`、`state-machine-design`、`c-cpp-dev`、`fact-verification` 包含深度参考或代码示例。亮点：12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱、7 轮迭代调试案例研究、状态机实现模式、嵌入式 C 专项（volatile MMIO、链接器段、ISR 安全路径）、逻辑原语验证管线（7 结构原语 + 7 对抗探针）、自动化验证工具（Python + 手动兜底）。
 
 ## 安装
 
@@ -74,10 +74,11 @@ git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugi
 
 ## 使用
 
-插件会在每次会话启动时自动注入能力通知。技能按需加载：
+插件在会话启动时自动注入能力通知（含技能表、1% Rule、Red Flags 强化）。技能按需加载：
 
 - 说"用 Multi-Agent Workflow"或调用 `Skill("embedded-workbench")` 加载完整工作流系统
-- 领域技能在任务匹配其 `Use when` 描述时自动激活
+- 领域技能在任务匹配其 `Use when` 描述时自动激活——NOT 子句防止误触发（如纯格式化不会加载 c-cpp-dev）
+- Agent 在检测到状态机、行为声称或多模块任务时，主动建议验证、对抗探测和并行子代理
 - 无需手动配置 CLAUDE.md
 
 ## Codex CLI
@@ -163,4 +164,19 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 
 | 插件 | 简介 |
 |------|------|
-| [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | Windows 端的 PowerShell 安全规则——文件编码陷阱、BOM 处理、原生 exe 管道、引号处理、命令安全 |
+| [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | Windows 端的 PowerShell 安全规则——乱码检测、文件编码陷阱、BOM 处理、原生 exe 管道、引号处理、命令安全 |
+| [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎——技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
+
+## 致谢
+
+本插件的 agent 合规架构借鉴自 Jesse Vincent 的 [Superpowers](https://github.com/obra/superpowers)（MIT License）。特别感谢以下设计模式的启发：
+
+- **1% Rule** — agent 会抗拒加载技能，需要极端语言突破偏见的关键洞察
+- **Red Flags 表** — 枚举 agent 的合理化借口以预先阻断
+- **`<SUBAGENT-STOP>`** — 阻止子代理重复加载引导上下文
+- **指令优先级** — 用户 > 技能 > 系统提示的分层架构
+- **技能类型** — Rigid vs Flexible 分类体系
+- **会话启动注入模式** — 在会话启动时注入能力上下文的 hook 机制
+- **触发测试框架** — `tests/skill-triggering/` 的结构和方法论
+
+Superpowers 是通用开发插件。Embedded Workbench 将相同的纪律模式应用到嵌入式 C/C++ 领域。

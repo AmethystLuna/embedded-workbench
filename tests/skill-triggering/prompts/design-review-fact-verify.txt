@@ -1,0 +1,1 @@
+Review this design document for the DIPC module. It claims that `dipc_send()` always returns `DIPC_OK` and that the maximum message size is 256 bytes. It also describes a state machine with INIT, IDLE, CONNECTED, ERROR, and RECOVERING states.

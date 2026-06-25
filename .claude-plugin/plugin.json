@@ -1,6 +1,6 @@
 {
   "name": "embedded-workbench",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Embedded C/C++ development toolbox | 嵌入式 C/C++ 开发工具箱 — 4 agents, 8 skills: FreeRTOS, Keil MDK, ARMCLANG, HardFault triage, state machines, architecture, LVGL patterns.",
   "author": {
     "name": "Amethyst Luna",

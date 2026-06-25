@@ -1,6 +1,6 @@
 ---
 name: state-machine-design
-description: "Use when reviewing or fixing async protocols, retries, ACK/NACK handling, pending flags, timeout logic, or state-machine lockups in embedded firmware."
+description: "Use when reviewing or fixing async protocols, retries, ACK/NACK handling, pending flags, timeout logic, or state-machine lockups in embedded firmware. NOT for generic network protocol design (TCP/HTTP/MQTT) unless targeting embedded firmware stack."
 ---
 
 # State Machine Design

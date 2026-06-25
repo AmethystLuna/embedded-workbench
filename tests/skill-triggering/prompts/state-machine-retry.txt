@@ -1,0 +1,1 @@
+My I2C sensor driver has a retry mechanism but it keeps getting stuck when the ACK times out. The state machine seems to go into an error state and never recovers. Can you help fix the retry logic?

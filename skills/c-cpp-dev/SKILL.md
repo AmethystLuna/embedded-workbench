@@ -1,6 +1,6 @@
 ---
 name: c-cpp-dev
-description: "Use when writing, reviewing, or refactoring C/C++ code, especially on 32-bit ARM embedded targets."
+description: "Use when writing, reviewing, or refactoring C/C++ code, especially on 32-bit ARM embedded targets. NOT for formatting-only changes, simple file reads, non-embedded C/C++ (desktop/server), or C#/Java despite the 'C' in the name."
 ---
 
 # C/C++ Development

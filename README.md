@@ -2,7 +2,7 @@
 
 [中文](README.zh-CN.md)
 
-Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns.
+Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, LVGL patterns, logic-primitive verification, and adversarial design probing. v0.4.0.
 
 **Cross-platform** — works with Claude Code, Codex CLI, Cursor, Kimi CLI, OpenCode, and ZCode. Built on the [Agent Skills](https://agentskills.io) open standard.
 
@@ -21,18 +21,18 @@ Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, N
 
 | Skill | Description |
 | ------- | ------------- |
-| `embedded-workbench` | Bootstrap: workflows, policies, sub-agent mapping, document templates |
+| `embedded-workbench` | Bootstrap: workflows, policies, sub-agent mapping, proactive suggestions, platform tool mapping, document templates |
 | `debug-methodology` | 8 iron rules, fix principles, iterative debugging case study |
 | `embedded-firmware-dev` | FreeRTOS, ISR, NVM storage, async lifecycle, boundary analysis, architecture principles, LVGL pitfalls |
 | `keil-mdk-build` | UV4 CLI, ARM Compiler 5/6, .map analysis, merge/packaging, build diagnostics |
 | `c-cpp-dev` | Code generation, style, memory layout, refactoring for C/C++ |
-| `state-machine-design` | State models, retries, timeouts, transition gates |
+| `state-machine-design` | State models, retries, timeouts, transition gates, implementation patterns |
 | `hardfault-triage` | Processor exception triage — fault registers, stack frames, PC-to-source, root-cause classification |
-| `fact-verification` | Document claim verification against codebase |
+| `fact-verification` | Document & plan claim verification, logic-primitive verification (7 structural + 7 adversarial probes), refactoring regression detection, manual fallback mode |
 
 ### Deep References
 
-`embedded-firmware-dev`, `debug-methodology`, `state-machine-design`, and `c-cpp-dev` include in-depth reference material and code examples. Highlights: 12 architecture principles, embedded patterns (GIF timer safety, state latches, async lifecycle), LVGL pitfalls, 7-round iterative debugging case study, state machine implementation patterns, and embedded C specifics (volatile MMIO, linker sections, ISR wrappers).
+`embedded-firmware-dev`, `debug-methodology`, `state-machine-design`, `c-cpp-dev`, and `fact-verification` include in-depth reference material and code examples. Highlights: 12 architecture principles, embedded patterns (GIF timer safety, state latches, async lifecycle), LVGL pitfalls, 7-round iterative debugging case study, state machine implementation patterns, embedded C specifics (volatile MMIO, linker sections, ISR wrappers), logic-primitive verification pipeline (7 structural + 7 adversarial probes), and automated verification harness (Python + manual fallback).
 
 ## Installation
 
@@ -74,10 +74,11 @@ Then enable in `~/.claude/settings.json`:
 
 ## Usage
 
-The plugin auto-injects a capability notification at session start. Skills are loaded on demand:
+The plugin auto-injects a capability notification at session start with a skill table, 1% Rule, and Red Flags reinforcement. Skills are loaded on demand:
 
 - Say "use Multi-Agent Workflow" or invoke `Skill("embedded-workbench")` for the full workflow system
-- Domain skills activate automatically when their `Use when` description matches your task
+- Domain skills activate automatically when their `Use when` description matches your task — NOT clauses prevent false triggers (e.g., formatting-only won't load c-cpp-dev)
+- The agent proactively suggests verification, adversarial probing, and parallel subagents when it detects state machines, behavioral claims, or multi-module tasks
 - No manual CLAUDE.md configuration required
 
 ## Codex CLI
@@ -163,4 +164,19 @@ Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/s
 
 | Plugin | Description |
 |--------|-------------|
-| [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | PowerShell safety rules — file encoding pitfalls (BOM, UTF-16 LE vs UTF-8), native executable piping, quoting, and destructive command patterns |
+| [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | PowerShell safety rules — garbled text detection, file encoding pitfalls (BOM, UTF-16 LE vs UTF-8), native executable piping, quoting, and destructive command patterns |
+| [superpowers](https://github.com/obra/superpowers) | The original agent discipline engine — skill loading enforcement, Red Flags, subagent-driven development. Many of this plugin's agent-compliance patterns (1% Rule, Red Flags, `<SUBAGENT-STOP>`, instruction priority) were adapted from Superpowers. |
+
+## Acknowledgments
+
+This plugin's agent-compliance architecture is adapted from [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent (MIT License). Specific patterns adapted with gratitude:
+
+- **1% Rule** — the insight that agents resist loading skills and need extreme language to overcome that bias
+- **Red Flags table** — enumerating agent rationalizations to short-circuit them
+- **`<SUBAGENT-STOP>`** — preventing subagents from re-loading bootstrap context
+- **Instruction Priority** — user > skills > system prompt hierarchy
+- **Skill Types** — Rigid vs Flexible classification
+- **Session-start hook injection pattern** — injecting capability context at session start
+- **Trigger test framework** — `tests/skill-triggering/` structure and methodology
+
+Superpowers is a general-purpose development plugin. Embedded Workbench applies the same discipline patterns to the embedded C/C++ domain.

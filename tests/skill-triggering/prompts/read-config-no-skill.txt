@@ -1,0 +1,1 @@
+Read config.h from the project root and tell me what value DEBUG_LEVEL is set to.

@@ -1,11 +1,29 @@
 ---
 name: embedded-workbench
-description: "Use when starting any non-trivial coding task — loads multi-agent workflows, engineering policies, and principles for embedded C/C++ firmware development."
+description: "Use when starting any non-trivial coding task — loads multi-agent workflows, engineering policies, and principles for embedded C/C++ firmware development. NOT for trivial single-line fixes, formatting-only changes, or read-only queries."
 ---
+
+<SUBAGENT-STOP>
+If you were dispatched as a subagent to execute a specific task (implementation, review, search), skip this bootstrap skill. You already have your task instructions. Only load domain skills relevant to your specific task.
+</SUBAGENT-STOP>
 
 # Embedded Engineering Workflow
 
 Core workflow system and engineering principles.
+
+## Instruction Priority
+
+This plugin's skills and policies override default system behavior, but **user instructions always take precedence**:
+
+1. **User's explicit instructions** (CLAUDE.md, AGENTS.md, project rules, direct requests) — highest priority
+2. **Plugin skills and workflows** — override default system behavior where they conflict
+3. **Default system prompt** — lowest priority
+
+If a user's CLAUDE.md says "skip design review for hotfixes" and the workflow requires it, follow the user. The user is in control.
+
+## Platform Adaptation
+
+This plugin's skills and agents use Claude Code tool names (`Read`, `Write`, `Edit`, `Bash`, `Skill()`). If you are NOT on Claude Code, load `references/platform-tool-mapping.md` for the tool name equivalents on your platform (Codex CLI, Cursor, Kimi CLI, OpenCode, ZCode, Copilot CLI).
 
 ## Red Flags
 
@@ -106,25 +124,63 @@ Sub-agents are **stateless with no implicit context inheritance** — each spawn
 
 ---
 
+## Skill Types
+
+Each domain skill is classified by how strictly it should be followed:
+
+**Rigid** — follow exactly. These are rules and checklists. Don't adapt away the discipline.
+
+- `debug-methodology`: 8 iron rules are non-negotiable
+- `powershell-safety`: encoding rules are non-negotiable (external plugin)
+- `fact-verification`: claim verification must check every claim
+
+**Flexible** — adapt principles to context. These are patterns and references, not commands.
+
+- `c-cpp-dev`: style and patterns adapt to existing codebase conventions
+- `embedded-firmware-dev`: architecture principles apply based on project scale
+- `state-machine-design`: implementation patterns adapt to protocol specifics
+- `hardfault-triage`: methodology adapts to processor architecture
+- `keil-mdk-build`: build diagnostics adapt to project structure
+
+If unsure, treat a skill as Rigid until you confirm otherwise.
+
+## Skill Loading Priority
+
+When multiple skills could apply, use this order:
+
+1. **Diagnosis skills first** — `debug-methodology`, `hardfault-triage`, `fact-verification`. These determine WHAT is wrong.
+2. **Design skills second** — `state-machine-design`. These determine HOW to fix it.
+3. **Implementation skills third** — `c-cpp-dev`, `embedded-firmware-dev`, `keil-mdk-build`. These guide execution.
+
+"HardFault crash" → hardfault-triage first, then debug-methodology if root cause is complex.
+"Add retry logic" → state-machine-design first, then c-cpp-dev for implementation.
+"Review this design" → fact-verification first, then escalate findings to design-reviewer agent.
+
+**Cross-domain links**: load secondary skills ONLY when the primary skill's findings indicate they are needed. Don't pre-load. `hardfault-triage` ↔ `keil-mdk-build` (.map file bridge — load keil-mdk-build only if .map analysis is needed). `hardfault-triage` ↔ `debug-methodology` (root-cause analysis — load debug-methodology only if the fault cause is complex). `embedded-firmware-dev` ↔ `state-machine-design` (state transitions — load state-machine-design only if state logic is involved). `embedded-firmware-dev` ↔ `debug-methodology` (debugging process). `fact-verification` ↔ `design-reviewer` agent (design doc review, logic verification). `fact-verification` ↔ `state-machine-design` (behavioral claim probing).
+
 ## Domain Skills
 
 Load domain-specific guidance when the task matches. Skills marked with 📚 have deep reference material in their `references/` directory.
 
-| Task | Skill | Deep Refs |
-|------|-------|:---------:|
-| Debugging crashes, HardFault, logs | `Skill("debug-methodology")` | 📚 case study |
-| HardFault / exception triage, fault registers, .map crash resolution | `Skill("hardfault-triage")` | — |
-| C/C++ code generation or style | `Skill("c-cpp-dev")` | — |
-| FreeRTOS, ISR, NVM storage, sensor drivers | `Skill("embedded-firmware-dev")` | 📚 architecture, patterns, LVGL |
-| Keil MDK, ARMCLANG, build system, .map optimization | `Skill("keil-mdk-build")` | — |
-| State machines, retries, timeouts | `Skill("state-machine-design")` | — |
-| Design doc review, claim verification | `Skill("fact-verification")` | — |
+| Task | Skill | Type | Deep Refs |
+|------|-------|:----:|:---------:|
+| Debugging crashes, HardFault, logs | `Skill("debug-methodology")` | Rigid | 📚 case study |
+| HardFault / exception triage, fault registers, .map crash resolution | `Skill("hardfault-triage")` | Flexible | — |
+| C/C++ code generation or style | `Skill("c-cpp-dev")` | Flexible | — |
+| FreeRTOS, ISR, NVM storage, sensor drivers | `Skill("embedded-firmware-dev")` | Flexible | 📚 architecture, patterns, LVGL |
+| Keil MDK, ARMCLANG, build system, .map optimization | `Skill("keil-mdk-build")` | Flexible | — |
+| State machines, retries, timeouts | `Skill("state-machine-design")` | Flexible | — |
+| Design doc review, claim verification, logic primitive + adversarial probing | `Skill("fact-verification")` | Rigid | 📚 logic-verification-guide, verification-harness.py |
 
-**Cross-domain links**: `hardfault-triage` ↔ `keil-mdk-build` (.map file bridge). `hardfault-triage` ↔ `debug-methodology` (root-cause analysis). `embedded-firmware-dev` ↔ `state-machine-design` (state transitions). `embedded-firmware-dev` ↔ `debug-methodology` (debugging process). `fact-verification` ↔ `design-reviewer` agent (design doc review).
+## Templates & References
 
-## Templates
+This skill's `references/` directory contains document templates and platform references. Use `Read` with the skill's reference path to load the relevant file when needed:
 
-This skill's `references/` directory contains document templates. Use `Read` with the skill's reference path to load the relevant template when producing workflow artifacts:
+### Platform
+
+- `platform-tool-mapping.md` — Claude Code → Codex/Cursor/Kimi/OpenCode/ZCode/Copilot tool name equivalents. **Load this immediately if you are NOT on Claude Code.**
+
+### Workflow Templates
 
 - `detailed-change-plan.md` — Pre-edit implementation plan
 - `task-charter.md` — Task scope and slice roadmap
@@ -136,3 +192,27 @@ This skill's `references/` directory contains document templates. Use `Read` wit
 - `audit-ledger.md` — Recurring audit tracking (Framework Workflow)
 - `contract-matrix.md` — Contract-to-sentinel mapping (Framework Workflow)
 - `durable-requirement-notes.md` — Long-lived business invariants
+
+---
+
+## Proactive Suggestions
+
+When you observe any of these patterns in the user's task, **suggest the relevant feature before the user asks**. Most users don't know these capabilities exist.
+
+| Pattern You Observe | Suggest |
+|---------------------|--------|
+| User describes refactoring a state machine (splitting/merging states, changing transitions) | "Before you start, would you like me to run logic-primitive verification on the refactoring? I can extract the current state machine from code, compare it against your plan, and flag any regressions, deadlocks, or behavioral deltas before you change a single line." |
+| User describes a new state machine or protocol with ≥3 states | "I can run an adversarial verification on this design — 14 automated checks for deadlocks, unreachable states, race conditions, guard completeness, and invariant violations. Want me to do that before we implement?" |
+| User pastes or writes a state enum + switch-case dispatcher | "I notice a state machine here. Would you like me to model it and run completeness checks? I can find missing transitions, detect absorbing error loops, and verify that every state is reachable." |
+| User says "always" / "never" / "guaranteed" about behavior | "That's a behavioral invariant. I can model this and try to find a counter-example — the shortest event sequence that would violate 'X always happens before Y'. Want me to check?" |
+| User reviews a PR or diff that touches a state machine file | "This PR changes state machine logic. Would you like me to extract the before/after models and verify no regressions were introduced?" |
+| User debugs a crash or lockup in a stateful module | "This might be a state machine completeness issue. I can model the state machine from the code and check for deadlocks, unreachable states, or event ordering problems that could cause the lockup." |
+| Task would benefit from parallel execution (multiple independent modules, files, or dimensions) | "These are independent. I can dispatch parallel subagents to handle each module concurrently and synthesize the results. Want me to do that?" |
+| User writes a Detailed Change Plan without design review | "Before implementing, would you like the design-reviewer agent to fact-check this plan against the codebase? It catches API mismatches, missing modules, and mechanism feasibility issues before you write code." |
+
+### Suggestion Rules
+
+- **Suggest once per task**, not repeatedly. If the user declines, don't push.
+- **Be specific about what the feature does** — don't just name-drop. Say "I can find deadlocks and missing transitions" not "I can run fact-verification."
+- **Estimate cost**: for lightweight checks, say "this takes ~30 seconds." For Python harness runs, say "this will generate and run a verification script."
+- **Respect the user's decision**: if they decline, move on. The features are tools, not requirements.

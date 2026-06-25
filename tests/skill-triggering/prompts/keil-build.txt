@@ -1,0 +1,1 @@
+I'm getting a build error from Keil MDK: "error: L6218E: Undefined symbol SystemCoreClock". I'm using ARMCLANG V6. How do I fix this linker error?

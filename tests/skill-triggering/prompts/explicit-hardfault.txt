@@ -1,0 +1,1 @@
+Use the hardfault-triage skill to analyze this crash dump: CFSR=0x00008200, HFSR=0x40000000, MMFAR=0x00000000, BFAR=0x2000FFF8.

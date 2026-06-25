@@ -1,0 +1,1 @@
+First use the debug-methodology to analyze the crash pattern, then use state-machine-design to fix the retry logic that caused it.

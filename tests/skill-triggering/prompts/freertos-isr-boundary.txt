@@ -1,0 +1,1 @@
+This FreeRTOS queue keeps overflowing under heavy sensor load. The ISR posts samples at 1kHz but the consumer task runs at 100Hz. Is there a design pattern for this?

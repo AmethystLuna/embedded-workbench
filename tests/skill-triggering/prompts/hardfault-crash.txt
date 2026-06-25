@@ -1,0 +1,1 @@
+My firmware is crashing with a HardFault. The CPU enters the HardFault_Handler and I can see the stacked PC on the stack. How do I figure out what caused it?

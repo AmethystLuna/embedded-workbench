@@ -1,6 +1,6 @@
 ---
 name: keil-mdk-build
-description: "Use when building, flashing, or packaging firmware with Keil MDK (UV4 CLI, ARMCLANG), analyzing .map files for ROM/RAM optimization and memory budget, or diagnosing Keil-specific build failures. For crash triage see hardfault-triage."
+description: "Use when building, flashing, or packaging firmware with Keil MDK (UV4 CLI, ARMCLANG), analyzing .map files for ROM/RAM optimization and memory budget, or diagnosing Keil-specific build failures. NOT for non-Keil build systems (Makefile, CMake, IAR, GCC-only). For crash triage see hardfault-triage."
 ---
 
 # Keil MDK Build
