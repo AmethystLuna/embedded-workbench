@@ -113,14 +113,14 @@ Load domain-specific guidance when the task matches. Skills marked with 📚 hav
 | Task | Skill | Deep Refs |
 |------|-------|:---------:|
 | Debugging crashes, HardFault, logs | `Skill("debug-methodology")` | 📚 case study |
+| HardFault / exception triage, fault registers, .map crash resolution | `Skill("hardfault-triage")` | — |
 | C/C++ code generation or style | `Skill("c-cpp-dev")` | — |
 | FreeRTOS, ISR, NVM storage, sensor drivers | `Skill("embedded-firmware-dev")` | 📚 architecture, patterns, LVGL |
-| Keil MDK, ARMCLANG, map analysis, HardFault | `Skill("keil-mdk-build")` | — |
+| Keil MDK, ARMCLANG, build system, .map optimization | `Skill("keil-mdk-build")` | — |
 | State machines, retries, timeouts | `Skill("state-machine-design")` | — |
-| PowerShell command generation | `Skill("powershell-safety")` | — |
 | Design doc review, claim verification | `Skill("fact-verification")` | — |
 
-**Cross-domain links**: `embedded-firmware-dev` ↔ `state-machine-design` (state transitions). `embedded-firmware-dev` ↔ `debug-methodology` (debugging process). `fact-verification` ↔ `design-reviewer` agent (design doc review).
+**Cross-domain links**: `hardfault-triage` ↔ `keil-mdk-build` (.map file bridge). `hardfault-triage` ↔ `debug-methodology` (root-cause analysis). `embedded-firmware-dev` ↔ `state-machine-design` (state transitions). `embedded-firmware-dev` ↔ `debug-methodology` (debugging process). `fact-verification` ↔ `design-reviewer` agent (design doc review).
 
 ## Templates
 

@@ -1,6 +1,6 @@
 ---
 name: keil-mdk-build
-description: "Use when building/flashing/packaging firmware with Keil MDK, analyzing .map files for optimization, or triaging HardFault crashes on Cortex-M."
+description: "Use when building, flashing, or packaging firmware with Keil MDK (UV4 CLI, ARMCLANG), analyzing .map files for ROM/RAM optimization and memory budget, or diagnosing Keil-specific build failures. For crash triage see hardfault-triage."
 ---
 
 # Keil MDK Build
@@ -228,61 +228,6 @@ From the **Memory Map** section:
 
 Check that Stack + Heap sizes match the worst-case call chains (from `.htm` call graph) plus margin.
 
-## HardFault Analysis
+## HardFault / Exception Triage
 
-When the processor hits a HardFault, its registers are a black box recording of the crash. The `.map` file + fault registers + stacked PC = source-level crash location.
-
-### Fault Register Quick Reference
-
-All at System Control Block (SCB) base `0xE000ED00`:
-
-| Register | Address | Key Bits |
-| ---------- | --------- | ---------- |
-| **CFSR** | `0xE000ED28` | Composite: UFSR[25:16] + BFSR[15:8] + MMFSR[7:0] |
-| **HFSR** | `0xE000ED2C` | Bit 30 FORCED=1 means escalated from other fault |
-| **MMFAR** | `0xE000ED34` | Fault address (valid when MMFSR.MMARVALID=1) |
-| **BFAR** | `0xE000ED38` | Fault address (valid when BFSR.BFARVALID=1) |
-
-### Most Common Fault Signatures
-
-| CFSR Pattern | Meaning | Typical Cause |
-| ------------- | --------- | --------------- |
-| `0x00008200` | BFSR.PRECISERR | Null pointer dereference, access to unclocked peripheral |
-| `0x00000400` | BFSR.IMPRECISERR | Write-buffer async fault; DMA or cache coherency |
-| `0x00020000` | UFSR.INVSTATE | Tried to execute ARM code in Thumb mode; often corrupted function pointer |
-| `0x00010000` | UFSR.UNDEFINSTR | Jumped to data region; function pointer pointing to freed memory |
-| `0x01000000` | UFSR.UNALIGNED | Unaligned load/store (needs CCR.UNALIGN_TRP enabled) |
-| `0x00000001` | MMFSR.IACCVIOL | Executing from an XN (execute-never) region |
-| `0x00000002` | MMFSR.DACCVIOL | Writing to read-only memory (MPU violation) |
-| `0x00000800` | BFSR.STKERR | Stack overflow on exception entry |
-| `0x00001000` | BFSR.UNSTKERR | Stack corruption on exception return |
-
-### Stack Frame Capture (naked handler required)
-
-The HardFault handler must be `__attribute__((naked))` to prevent compiler prologue from corrupting SP. On exception entry, Cortex-M automatically stacks R0-R3, R12, LR, PC, PSR:
-
-1. Check LR bit 2 to determine MSP vs PSP (RTOS tasks use PSP)
-2. Read the 8 stacked registers from SP
-3. Read CFSR, HFSR, MMFAR, BFAR from SCB
-4. Store everything to retained variables or log via UART
-
-### PC-to-Source Resolution
-
-Given `stacked_pc` from the handler:
-
-1. Open the `.map` file
-2. Search for the address in **Global Symbols**
-3. Find the function whose address range contains the PC
-4. In the `.lst` (listing) file or debugger disassembly, find the exact instruction at the offset
-
-Alternatively: `arm-none-eabi-addr2line -e firmware.axf <pc_address>` resolves directly.
-
-### Common Crash Root Causes
-
-| Symptom | Likely Root Cause | Check |
-| --------- | ------------------ | ------- |
-| PC in SRAM region (`0x2xxxxxxx`) | Corrupted function pointer or stack overflow into code | Stack high-water marks, vtable integrity |
-| PC = `0x00000000` | Null function pointer call | Backtrace through LR to find caller |
-| BFAR = peripheral address | Unclocked or powered-down peripheral | RCC/peripheral init ordering |
-| IMPRECISERR, no valid BFAR | DMA write to invalid buffer after buffer freed | DMA buffer lifetimes, cache maintenance |
-| INVSTATE + LR in event dispatch | Timer callback on freed object | Timer lifecycle (see `embedded-patterns` reference) |
+For crash analysis — fault registers, stack-frame capture, PC-to-source resolution, root-cause classification — load `Skill("hardfault-triage")`. The `.map` file sections described above (Global Symbols, Memory Map) are the bridge between the two skills: build the `.map` here, debug the crash there.

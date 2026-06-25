@@ -24,15 +24,15 @@
 | `embedded-workbench` | 引导技能：工作流、策略、子代理映射、文档模板 |
 | `debug-methodology` | 8 条调试铁律、修复准则、迭代调试案例研究 |
 | `embedded-firmware-dev` | FreeRTOS、中断、NVM 存储、异步生命周期、边界分析、架构原则、LVGL 陷阱 |
-| `keil-mdk-build` | UV4 CLI、ARM Compiler 5/6、.map 分析、合并打包、HardFault 分析 |
+| `keil-mdk-build` | UV4 CLI、ARM Compiler 5/6、.map 分析、合并打包、构建诊断 |
 | `c-cpp-dev` | C/C++ 代码生成、风格、内存布局、重构 |
 | `state-machine-design` | 状态模型、重试、超时、转换门控 |
-| `powershell-safety` | PowerShell 语法、引号、文件编码、安全规则 |
+| `hardfault-triage` | 处理器异常分类 — 故障寄存器、栈帧、PC 定位源码、根因分类 |
 | `fact-verification` | 文档声称与代码库事实的交叉验证 |
 
 ### 深度参考
 
-`embedded-firmware-dev` 和 `debug-methodology` 包含深度参考资料：12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱，以及 7 轮迭代调试案例研究。
+`embedded-firmware-dev`、`debug-methodology`、`state-machine-design`、`c-cpp-dev` 包含深度参考或代码示例。亮点：12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱、7 轮迭代调试案例研究、状态机实现模式、嵌入式 C 专项（volatile MMIO、链接器段、ISR 安全路径）。
 
 ## 安装
 
@@ -158,3 +158,9 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 
 - Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
 - 无外部依赖
+
+## 其他插件推荐
+
+| 插件 | 简介 |
+|------|------|
+| [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | Windows 端的 PowerShell 安全规则——文件编码陷阱、BOM 处理、原生 exe 管道、引号处理、命令安全 |

@@ -1,6 +1,6 @@
 ---
 name: debug-methodology
-description: "Use when debugging embedded firmware issues, analyzing crash logs, triaging HardFault, investigating state machine lockups, or tracing sensor/signal anomalies."
+description: "Use when debugging embedded firmware issues — analyzing crash logs, investigating state machine lockups, tracing sensor/signal anomalies, or performing structured root-cause analysis after a crash has been located. For fault-register and stack-frame triage, load hardfault-triage first."
 ---
 
 # Debug Methodology
@@ -24,7 +24,32 @@ Debug by tracing values, not symptoms. These patterns come from real debugging s
 
 2. **Call-point census**: When a value isn't updating, find all call sites of the update function. A single call site (e.g., `sensor_update()` only at `main_loop.c:47`) immediately explains why refresh is delayed or gated by irrelevant conditions.
 
+   ```text
+   grep -rn "sensor_update" --include="*.c"
+   src/main_loop.c:128:  sensor_update(&g_pressure);
+   ```
+
+   Only two call sites. If `main_loop.c` is gated on `wifi_connected`, the sensor won't refresh until WiFi connects — that's the root cause.
+
 3. **Cache freshness ≠ source data readiness**: In embedded systems, "sensor has data" and "derived cache is refreshed" are concurrent events. Prefer **pull mode** (sync cache on read when source is ready). Avoid pure push mode (periodic background updaters may not fire before the first consumer reads).
+
+   ```c
+   // BAD: push mode — timer callback pushes data before consumer asks for it
+   static void sensor_timer_cb(TimerHandle_t xTimer) {
+       g_sensor.cache = sensor_read_raw();  // Timer owns refresh timing
+   }
+   float get_temperature(void) {
+       return g_sensor.cache.temperature;    // Stale if timer hasn't fired yet
+   }
+
+   // GOOD: pull mode — consumer triggers refresh when source is ready
+   float get_temperature(void) {
+       if (sensor_is_ready()) {
+           sensor_sync_cache(&g_sensor);     // Refresh on read
+       }
+       return g_sensor.cache.temperature;    // As fresh as hardware allows
+   }
+   ```
 
 4. **Multi-path convergence**: When multiple independent code paths show the same error, find the shared state or cache they all read. Fix once at the update point — smaller fix, and future callers can't bypass it.
 

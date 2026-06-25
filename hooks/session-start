@@ -14,9 +14,9 @@ Plugin embedded-workbench is active. You have access to custom agents and skills
 | debug-methodology | Debugging crashes, HardFault, logs, or sensor anomalies |
 | c-cpp-dev | Writing or refactoring C/C++ code |
 | embedded-firmware-dev | FreeRTOS, ISR, NVM storage, async lifecycle, boundary analysis |
-| keil-mdk-build | Keil MDK builds, .map analysis, HardFault triage |
+| keil-mdk-build | Keil MDK builds, .map analysis, build diagnostics |
 | state-machine-design | Async protocols, retries, ACK/NACK, timeout logic |
-| powershell-safety | Generating PowerShell commands in Windows |
+| hardfault-triage | Processor exception triage, fault registers, stack frames, PC-to-source |
 | fact-verification | Reviewing design docs that make claims about APIs or code |
 
 **1% Rule**: If there is even a 1% chance a skill applies to your task, invoke it before responding. Do not rationalize skipping skills when the description matches.

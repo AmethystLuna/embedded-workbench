@@ -24,15 +24,15 @@ Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, N
 | `embedded-workbench` | Bootstrap: workflows, policies, sub-agent mapping, document templates |
 | `debug-methodology` | 8 iron rules, fix principles, iterative debugging case study |
 | `embedded-firmware-dev` | FreeRTOS, ISR, NVM storage, async lifecycle, boundary analysis, architecture principles, LVGL pitfalls |
-| `keil-mdk-build` | UV4 CLI, ARM Compiler 5/6, .map analysis, merge/packaging, HardFault triage |
+| `keil-mdk-build` | UV4 CLI, ARM Compiler 5/6, .map analysis, merge/packaging, build diagnostics |
 | `c-cpp-dev` | Code generation, style, memory layout, refactoring for C/C++ |
 | `state-machine-design` | State models, retries, timeouts, transition gates |
-| `powershell-safety` | PowerShell syntax, quoting, file encoding, safety rules |
+| `hardfault-triage` | Processor exception triage — fault registers, stack frames, PC-to-source, root-cause classification |
 | `fact-verification` | Document claim verification against codebase |
 
 ### Deep References
 
-`embedded-firmware-dev` and `debug-methodology` include in-depth reference material: 12 architecture principles, embedded patterns (GIF timer safety, state latches, async lifecycle), LVGL pitfalls, and a 7-round iterative debugging case study.
+`embedded-firmware-dev`, `debug-methodology`, `state-machine-design`, and `c-cpp-dev` include in-depth reference material and code examples. Highlights: 12 architecture principles, embedded patterns (GIF timer safety, state latches, async lifecycle), LVGL pitfalls, 7-round iterative debugging case study, state machine implementation patterns, and embedded C specifics (volatile MMIO, linker sections, ISR wrappers).
 
 ## Installation
 
@@ -158,3 +158,9 @@ Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/s
 
 - Claude Code v2.1+ / Codex CLI latest / Cursor 2.5+ / Kimi CLI latest / OpenCode latest / ZCode 3.0+
 - No external dependencies
+
+## Other Plugins Recommended
+
+| Plugin | Description |
+|--------|-------------|
+| [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | PowerShell safety rules — file encoding pitfalls (BOM, UTF-16 LE vs UTF-8), native executable piping, quoting, and destructive command patterns |

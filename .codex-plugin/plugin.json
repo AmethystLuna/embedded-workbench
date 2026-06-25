@@ -1,6 +1,6 @@
 {
   "name": "embedded-workbench",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Embedded C/C++ firmware development toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns.",
   "author": {
     "name": "Amethyst Luna",
@@ -28,7 +28,7 @@
   "interface": {
     "displayName": "Embedded Workbench",
     "shortDescription": "Embedded C/C++ firmware toolbox with 4 agents and 8 skills",
-    "longDescription": "Embedded C/C++ firmware development toolbox for Cortex-M targets. Covers FreeRTOS tasks/ISR, Keil MDK builds (AC5/AC6), ARMCLANG, HardFault triage via .map analysis, state-machine design, architecture principles, LVGL patterns, and PowerShell safety. Battle-tested on real hardware projects.",
+    "longDescription": "Embedded C/C++ firmware development toolbox for Cortex-M targets. Covers FreeRTOS tasks/ISR, Keil MDK builds (AC5/AC6), ARMCLANG, HardFault triage via .map analysis, state-machine design, architecture principles, and LVGL patterns. Battle-tested on real hardware projects.",
     "developerName": "Amethyst Luna",
     "category": "Development",
     "capabilities": [

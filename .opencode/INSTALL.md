@@ -14,7 +14,7 @@ Or pin a specific version:
 
 ```json
 {
-  "plugin": ["embedded-workbench@git+https://github.com/AmethystLuna/embedded-workbench.git#v0.2.0"]
+  "plugin": ["embedded-workbench@git+https://github.com/AmethystLuna/embedded-workbench.git#v0.3.0"]
 }
 ```
 

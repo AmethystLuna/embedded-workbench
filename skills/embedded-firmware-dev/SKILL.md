@@ -38,11 +38,67 @@ description: "Use when writing or reviewing embedded C firmware, FreeRTOS tasks,
 - When adding a new async operation, audit all lifecycle entry points and ensure each path resets flags to known-safe.
 - Cleanup must happen before any new operation is attempted, not after.
 
+```c
+// CORRECT: every async flag cleared in stop path. No stale state survives restart.
+uint8_t comm_stop_sample(void) {
+    g_comm.data_ready         = false;
+    g_comm.state              = COMM_STATE_IDLE;
+    g_comm.activating         = false;
+    g_comm.command_fail_count = 0;
+    g_comm.protocol_locked    = false;
+    g_comm.communication_lost = false;
+    g_comm.warmup_start_time  = 0;
+    comm_command_complete();                     // Release any pending I/O
+    memset(&g_comm_data, 0, sizeof(g_comm_data));// Reset cached data
+    comm_process_faults(false);                  // Clear fault detection state
+    return COMM_OK;
+}
+
+// BAD: half the flags survive — next start inherits stale state
+void comm_stop_bad(void) {
+    g_comm.state = COMM_STATE_IDLE;              // Only state changed
+    // Missing: data_ready, protocol_locked, communication_lost, fail_count...
+    // Next start: data_ready==true blocks first sample; fail_count persists
+}
+
+// CALLER GUARD: clear stale flags at power-off boundaries before re-init
+void comm_handler(void) {
+    if (!power_get_status() && g_comm.command_pending) {
+        comm_command_complete();                 // Clear before deinit
+    }
+    if (power_get_status()) {
+        comm_state_process();
+    }
+}
+```
+
 ## One-Shot Event Consumption
 
 - When a low-level driver produces a transient event that multiple higher-level consumers need, use an atomic check-and-clear (consume) API rather than shared flags each consumer clears manually.
 - Manual clearing by multiple consumers creates races: consumer A clears before B reads, or B reads a flag already set again by the next cycle.
 - The consume primitive returns whether the event occurred and atomically clears the latch — every interested consumer observes the event exactly once per occurrence.
+
+```c
+// Atomic check-and-clear: every consumer sees the event exactly once
+static volatile uint32_t event_latch;
+
+uint32_t event_consume(uint32_t mask) {
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    uint32_t pending = event_latch & mask;
+    event_latch &= ~mask;               // Clear consumed bits atomically
+    if (!primask) __enable_irq();
+    return pending;                     // Non-zero = event occurred this cycle
+}
+
+// Each consumer independently observes — no races between consumers
+void ui_consume(void) {
+    if (event_consume(EVT_SENSOR_READY)) update_display();
+}
+void log_consume(void) {
+    if (event_consume(EVT_SENSOR_READY)) write_log();
+}
+```
 
 ## Storage / Persistence
 
@@ -70,4 +126,4 @@ This skill's `references/` directory contains in-depth material. Load when you n
 | `embedded-patterns.md` | GIF timer safety, async lifecycle, state latches | Debugging timer crashes, stale flags, or state corruption |
 | `lvgl-pitfalls.md` | LVGL layout, alignment, alpha, and mask traps | Debugging LVGL rendering artifacts or HardFault in draw paths |
 
-See also: `Skill("state-machine-design")` for state transition rules, `Skill("debug-methodology")` for debugging process.
+See also: `Skill("state-machine-design")` for state transition rules, `Skill("debug-methodology")` for debugging process, `Skill("hardfault-triage")` for stack overflow and ISR crash triage.
