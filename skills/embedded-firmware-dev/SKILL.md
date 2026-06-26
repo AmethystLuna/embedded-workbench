@@ -3,6 +3,10 @@ name: embedded-firmware-dev
 description: "Use when writing or reviewing embedded C firmware, FreeRTOS tasks, ISR handlers, NVM/flash storage, or sensor driver state machines. NOT for documentation-only RTOS references, conceptual RTOS discussions, or bare-metal projects without an RTOS or sensor subsystem."
 ---
 
+<HARD-GATE>
+This is a domain implementation skill. If you are planning, designing, or entering plan mode — load `Skill("embedded-workbench")` first to activate the workflow gates (Plan Verification Gate, Approval Gate, Closure Gate). Domain skills carry implementation guidance, not workflow enforcement.
+</HARD-GATE>
+
 # Embedded Firmware Development
 
 ## FreeRTOS

@@ -3,6 +3,10 @@ name: keil-mdk-build
 description: "Use when building, flashing, or packaging firmware with Keil MDK (UV4 CLI, ARMCLANG), analyzing .map files for ROM/RAM optimization and memory budget, or diagnosing Keil-specific build failures. NOT for non-Keil build systems (Makefile, CMake, IAR, GCC-only). For crash triage see hardfault-triage."
 ---
 
+<HARD-GATE>
+This is a domain implementation skill. If you are planning, designing, or entering plan mode — load `Skill("embedded-workbench")` first to activate the workflow gates (Plan Verification Gate, Approval Gate, Closure Gate). Domain skills carry implementation guidance, not workflow enforcement.
+</HARD-GATE>
+
 # Keil MDK Build
 
 Patterns for building embedded firmware with Keil MDK. Covers both ARM Compiler 5 (armcc) and ARM Compiler 6 (armclang).

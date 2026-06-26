@@ -3,6 +3,10 @@ name: c-cpp-dev
 description: "Use when writing, reviewing, or refactoring C/C++ code, especially on 32-bit ARM embedded targets. NOT for formatting-only changes, simple file reads, non-embedded C/C++ (desktop/server), or C#/Java despite the 'C' in the name."
 ---
 
+<HARD-GATE>
+This is a domain implementation skill. If you are planning, designing, or entering plan mode — load `Skill("embedded-workbench")` first to activate the workflow gates (Plan Verification Gate, Approval Gate, Closure Gate). Domain skills carry implementation guidance, not workflow enforcement.
+</HARD-GATE>
+
 # C/C++ Development
 
 Language baseline is project-specific: check the project's CLAUDE.md, build system (`-std=` flags), or compiler configuration. All rules assume 32-bit ARM target unless otherwise noted.

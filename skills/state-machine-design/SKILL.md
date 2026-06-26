@@ -3,6 +3,10 @@ name: state-machine-design
 description: "Use when reviewing or fixing async protocols, retries, ACK/NACK handling, pending flags, timeout logic, or state-machine lockups in embedded firmware. NOT for generic network protocol design (TCP/HTTP/MQTT) unless targeting embedded firmware stack."
 ---
 
+<HARD-GATE>
+This is a domain implementation skill. If you are planning, designing, or entering plan mode — load `Skill("embedded-workbench")` first to activate the workflow gates (Plan Verification Gate, Approval Gate, Closure Gate). Domain skills carry implementation guidance, not workflow enforcement.
+</HARD-GATE>
+
 # State Machine Design
 
 ## Core Rules
