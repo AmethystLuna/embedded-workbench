@@ -7,6 +7,59 @@ description: "Use when reviewing design documents, architecture specs, technical
 
 Documents are not truth — code is. Verify every verifiable claim before accepting or acting on any design.
 
+<HARD-GATE>
+## Verification Depth (Plan-Mode Gate)
+
+When loaded as a plan-mode verification gate, this skill's execution is **mandatory**. The model has no discretion to bypass it. Depth classification is gated on objective plan features extracted in Phase 0.
+
+### Phase 0: Feature Extraction (Mandatory)
+
+Before any verification, output the plan's feature summary to context:
+
+```text
+Plan features:
+  Files: [N]
+  Functions added/modified: [list or "none"]
+  Behavioral claims: [none / "invariants listed" / "always/never/guaranteed assertions"]
+  State machine changes: [none / describe topology delta]
+→ Depth: LIGHTWEIGHT | STANDARD | ESCALATED
+```
+
+This step is NOT skippable — it creates an explicit, auditable record of what the plan claims before verification begins.
+
+### Depth Classification
+
+| Plan Feature | Depth |
+|-------------|-------|
+| Single file, zero function signatures added/modified, no behavioral claims of any kind | LIGHTWEIGHT |
+| Multi-file, OR new/modified function signatures, OR implicit behavioral claims (invariants, equivalence assertions, "behavior is unchanged") | STANDARD |
+| "Always"/"never"/"guaranteed" language, OR state machine topology changes (≥1 state or ≥2 transitions modified) | ESCALATED |
+
+**"No behavioral claims" is narrow**: if the plan asserts anything about behavior preservation — including listing invariants, claiming equivalence, or saying "refactoring only, no behavior change" — that IS a behavioral claim. The absence of the literal words "always"/"never" does NOT mean there are no behavioral claims.
+
+### Output Requirements
+
+| Depth | Required |
+|-------|----------|
+| LIGHTWEIGHT | All 5 checklist items (file paths, API/type names, line numbers, behavioral claims, mechanism feasibility) answered in context with explicit results per item |
+| STANDARD | Phase 1-2: enumerate every verifiable claim → verify each against codebase with evidence |
+| ESCALATED | Full pipeline: Phase 1-5 including Logic Primitive Verification (Phase 2a + 2b, 14 checks) |
+
+### Plan Verification Block
+
+After verification, append a summary to the plan file:
+
+```markdown
+## Plan Verification
+
+- **Depth**: [LIGHTWEIGHT / STANDARD / ESCALATED]
+- **Scope**: [N] file paths, [M] API/type names, [K] line citations confirmed
+- **Escalation**: [skipped — no behavioral claims detected] or [see transcript for N-check results]
+```
+
+This block is the audit trail. A future reviewer must be able to see what was verified and when.
+</HARD-GATE>
+
 ## Methodology
 
 ### Phase 1: Enumerate Claims

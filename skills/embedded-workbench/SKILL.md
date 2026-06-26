@@ -91,17 +91,11 @@ Claude Code's built-in `EnterPlanMode` / `ExitPlanMode` maps to the **Plan phase
 
 ### Plan Verification Gate
 
-**Before calling `ExitPlanMode`**, run a lightweight fact-verification pass (`Skill("fact-verification")` Phase 2 only) on every verifiable claim in the plan. Presenting a plan with unverified claims for user approval is a gate violation.
+**Before calling `ExitPlanMode`**: load `Skill("fact-verification")`. This is mandatory for every plan. The skill internally classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED) based on objective plan features — the model does not decide whether verification is needed.
 
-- [ ] **File paths exist**: every file referenced in the plan exists at the stated path. `Glob` or `Read` to confirm.
-- [ ] **API/type/enum names match**: every function name, type, enum value, and constant in the plan matches the actual header/source. `Grep` to confirm.
-- [ ] **Line numbers are accurate**: any `[file.c#L123]` citation is verified against the current file (lines may have shifted). Re-`Read` to confirm.
-- [ ] **Behavioral claim escalation**: if the plan makes "always"/"never"/"guaranteed" assertions, OR describes state machine changes (≥3 states, guard conditions, transition topology changes), escalate to `Skill("fact-verification")` → Logic Primitive Verification BEFORE exiting plan mode.
-- [ ] **Mechanism feasibility**: if the plan claims a language/compiler feature (e.g., "compile-time resolution", "static dispatch"), verify it against the project's language standard and compiler.
+Plan mode permits `Read`, `Glob`, `Grep`, and `Skill` calls — all verification executes within plan mode before exit.
 
-If any claim fails verification, fix the plan first. Do NOT call `ExitPlanMode` with unverified claims — the user trusts the plan to be factually correct.
-
-For simple plans with no behavioral claims (pure structural refactoring, single-function changes), the checklist above is sufficient. Skip logic-primitive escalation when the plan has ≤2 states, no guards, and trivial transitions.
+After verification, the plan file must contain a `## Plan Verification` summary block (see `fact-verification` skill for format).
 
 ---
 
