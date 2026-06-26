@@ -27,6 +27,11 @@ Plugin embedded-workbench is active. You have access to custom agents and skills
 | "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
 | "I can just read the file directly" | Skills have patterns and pitfalls you will not discover by reading. |
 | "I remember this skill content" | Skills evolve. Always load the current version. |
+| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("fact-verification")`? Every plan must pass this gate before exit. |
+| "This plan is too simple for fact-verification" | The skill auto-classifies depth. You don't decide. |
+| "I already read the code, I know the file paths are correct" | Load `Skill("fact-verification")`, run Phase 0, append the `## Plan Verification` block. |
+
+**Plan Verification Gate**: Before `ExitPlanMode`, either load `Skill("fact-verification")` OR inform the user "此计划未经 fact-verification 验证，是否需要核查？" Silent skip is not an option.
 
 To load workflows and engineering policies: Skill("embedded-workbench")
 
