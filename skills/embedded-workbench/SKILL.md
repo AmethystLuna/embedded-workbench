@@ -94,11 +94,14 @@ Claude Code's built-in `EnterPlanMode` / `ExitPlanMode` maps to the **Plan phase
 
 ### Plan Verification Gate
 
-**Before calling `ExitPlanMode`**: load `Skill("fact-verification")`. This is mandatory for every plan. The skill internally classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED) based on objective plan features — the model does not decide whether verification is needed.
+**Before calling `ExitPlanMode`**, exactly one of the following must happen:
+
+1. **Load `Skill("fact-verification")`** — the skill classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED) based on objective plan features, runs verification, and appends a `## Plan Verification` summary block to the plan file.
+2. **Inform the user** — if you choose not to load the skill, you MUST say: *"此计划未经 fact-verification 验证。是否需要我在审批前运行核查？（This plan has not been fact-verified. Would you like me to run verification before approving?）"* The user must have the option to request verification before approving.
+
+Silent skip is not an option. Either verify, or tell the user you didn't.
 
 Plan mode permits `Read`, `Glob`, `Grep`, and `Skill` calls — all verification executes within plan mode before exit.
-
-After verification, the plan file must contain a `## Plan Verification` summary block (see `fact-verification` skill for format).
 
 ---
 
