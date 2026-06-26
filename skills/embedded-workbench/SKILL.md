@@ -36,6 +36,9 @@ If you catch yourself thinking any of these, STOP — you are rationalizing:
 | "The worker can figure out the details" | The worker has NO context from previous calls. A vague plan = the worker guessing. |
 | "I'll review it myself, no need for quality-coordinator" | Self-review catches ~60% of issues. A second pair catches the other 40%. |
 | "This change is too small for a Detailed Change Plan" | If it touches more than one function, it needs a plan. Even single-function changes benefit from explicit invariants. |
+| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("fact-verification")`? Every plan — simple or complex — must pass this gate before exit. |
+| "This plan is too simple for fact-verification" | The skill auto-classifies depth (LIGHTWEIGHT/STANDARD/ESCALATED). You don't decide whether verification is needed. Load it and let Phase 0 determine. |
+| "I already read the code, I know the file paths and API names are correct" | Organic verification leaves no audit trail. Load `Skill("fact-verification")`, run Phase 0, append the `## Plan Verification` block. |
 
 ---
 
