@@ -1,6 +1,8 @@
-# 嵌入式工作台
-
 [English](README.md)
+
+---
+
+# 嵌入式工作台
 
 嵌入式 C/C++ 固件开发工具箱 — 4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱、逻辑原语验证及对抗性设计审查。v0.4.0。
 
