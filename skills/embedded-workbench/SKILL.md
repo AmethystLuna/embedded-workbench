@@ -85,6 +85,26 @@ Same as Multi-Agent, plus: design package includes audit matrix + rollback trigg
 
 ---
 
+## Plan Mode Integration
+
+Claude Code's built-in `EnterPlanMode` / `ExitPlanMode` maps to the **Plan phase** of the Lite and Multi-Agent workflows. Plan mode is a read-only exploration + plan-writing phase — it does NOT exempt you from embedded-workbench verification gates.
+
+### Plan Verification Gate
+
+**Before calling `ExitPlanMode`**, run a lightweight fact-verification pass (`Skill("fact-verification")` Phase 2 only) on every verifiable claim in the plan. Presenting a plan with unverified claims for user approval is a gate violation.
+
+- [ ] **File paths exist**: every file referenced in the plan exists at the stated path. `Glob` or `Read` to confirm.
+- [ ] **API/type/enum names match**: every function name, type, enum value, and constant in the plan matches the actual header/source. `Grep` to confirm.
+- [ ] **Line numbers are accurate**: any `[file.c#L123]` citation is verified against the current file (lines may have shifted). Re-`Read` to confirm.
+- [ ] **Behavioral claim escalation**: if the plan makes "always"/"never"/"guaranteed" assertions, OR describes state machine changes (≥3 states, guard conditions, transition topology changes), escalate to `Skill("fact-verification")` → Logic Primitive Verification BEFORE exiting plan mode.
+- [ ] **Mechanism feasibility**: if the plan claims a language/compiler feature (e.g., "compile-time resolution", "static dispatch"), verify it against the project's language standard and compiler.
+
+If any claim fails verification, fix the plan first. Do NOT call `ExitPlanMode` with unverified claims — the user trusts the plan to be factually correct.
+
+For simple plans with no behavioral claims (pure structural refactoring, single-function changes), the checklist above is sufficient. Skip logic-primitive escalation when the plan has ≤2 states, no guards, and trivial transitions.
+
+---
+
 ## Workflow Policies
 
 <HARD-GATE>
