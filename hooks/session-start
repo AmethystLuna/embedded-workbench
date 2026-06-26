@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONTENT_FILE="$SCRIPT_DIR/session-start-content.md"
 
 if [ ! -f "$CONTENT_FILE" ]; then
-    echo '{"hookSpecificOutput":{"additionalContext":"embedded-workbench active (content file missing)"}}'
+    echo '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"embedded-workbench active (content file missing)"}}'
     exit 0
 fi
 
@@ -16,4 +16,4 @@ fi
 CONTENT=$(cat "$CONTENT_FILE")
 ESCAPED=$(printf '%s' "$CONTENT" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "%s\\n", $0}')
 
-printf '{"hookSpecificOutput":{"additionalContext":"%s"}}\n' "$ESCAPED"
+printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$ESCAPED"

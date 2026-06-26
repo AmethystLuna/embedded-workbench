@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 $contentFile = Join-Path $PSScriptRoot "session-start-content.md"
 
 if (-not (Test-Path $contentFile)) {
-    $fallback = '{' + '"hookSpecificOutput":{' + '"additionalContext":"embedded-workbench active (content file missing)"' + '}}'
+    $fallback = '{' + '"hookSpecificOutput":{' + '"hookEventName":"SessionStart",' + '"additionalContext":"embedded-workbench active (content file missing)"' + '}}'
     [Console]::WriteLine($fallback)
     exit 0
 }
@@ -20,7 +20,7 @@ $escaped = $content -replace '\\', '\\' -replace '"', '\"'
 $escaped = $escaped -replace "`r`n", '\n' -replace "`n", '\n' -replace "`r", '\r' -replace "`t", '\t'
 
 # Build JSON
-$json = '{' + '"hookSpecificOutput":{' + '"additionalContext":"' + $escaped + '"' + '}}'
+$json = '{' + '"hookSpecificOutput":{' + '"hookEventName":"SessionStart",' + '"additionalContext":"' + $escaped + '"' + '}}'
 
 # Output via Console.WriteLine to bypass PowerShell's encoding pipeline
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
