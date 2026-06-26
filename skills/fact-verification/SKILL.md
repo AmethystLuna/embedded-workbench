@@ -1,6 +1,6 @@
 ---
 name: fact-verification
-description: "Use when reviewing design documents, architecture specs, technical proposals, or refactoring plans that make claims about API names, file locations, enum values, or mechanism feasibility. When the document contains state machines, protocol logic, or behavioral claims (≥3 states, ACK/NACK/retry sequences, 'always'/'never'/'guaranteed' assertions, or refactoring that modifies state topology), escalate into logic-primitive verification — generate and run executable models to check mathematical completeness before trusting any claim. For refactoring specifically, the pipeline compares before/after models to verify behavioral preservation and regression freedom."
+description: "Use when reviewing design documents, architecture specs, technical proposals, or refactoring plans that make claims about API names, file locations, enum values, or mechanism feasibility. When the document contains state machines, protocol logic, or behavioral claims (≥3 states, ACK/NACK/retry sequences, 'always'/'never'/'guaranteed' assertions, or refactoring that modifies state topology), escalate into logic-primitive verification — generate and run executable models to check mathematical completeness before trusting any claim. For refactoring specifically, the pipeline compares before/after models to verify behavioral preservation and regression freedom. ALSO proactively SUGGEST this skill (do not require) when a user asks code-level behavioral questions — 'check this timing for bugs', 'could this state machine deadlock', 'is this retry limit safe' — since plan-level verification has usually already been done."
 ---
 
 # Fact Verification
@@ -172,6 +172,21 @@ RECOVERING  | reinit_complete            | IDLE          | -
 ```
 
 **CRITICAL**: Show this table to the user and ask for confirmation before generating the harness. The #1 failure mode of verification is extracting the wrong model. If the plan is ambiguous, flag it as a finding first — don't guess.
+
+### Code-Level Behavioral Suggestion
+
+When the task is NOT document/plan review but involves code-level behavioral questions — e.g., the user is editing source files and asks:
+
+- "check this timing sequence for bugs"
+- "could this state machine deadlock here"
+- "is this retry limit safe"
+- "what happens if event X arrives during state Y"
+
+→ **Proactively suggest** fact-verification as an optional verification pass. Do NOT escalate automatically — plan-level verification was likely already done. The suggestion is: "I can run a logic-primitive verification on this state machine to check for deadlocks, unreachable states, and boundary issues. Want me to?"
+
+If the user says yes, extract the model from the existing code (not a plan document), and run the standard pipeline. Output the findings as suggestions, not requirements.
+
+This covers the gap where behavioral verification is useful even when no design document is being reviewed.
 
 ### When NOT to Escalate
 
