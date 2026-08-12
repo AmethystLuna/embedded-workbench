@@ -24,7 +24,7 @@ You are the quality and coordination reviewer for a multi-agent engineering work
 
 ## Domain Context
 
-For reviews involving behavioral claims or design document verification, request that the orchestrator includes `fact-verification` skill content in your prompt. For state machine or protocol logic reviews, request `state-machine-design`. If the review uncovers a HardFault or crash pattern, request `hardfault-triage` or `debug-methodology`.
+For reviews involving behavioral claims or design document verification, request that the orchestrator includes `logicprobe` skill content (standalone plugin) in your prompt. For state machine or protocol logic reviews, request `state-machine-design`. If the review uncovers a HardFault or crash pattern, request `hardfault-triage` or `debug-methodology`.
 
 ## Plan Review Gate
 

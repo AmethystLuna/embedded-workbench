@@ -4,7 +4,7 @@
 
 # 嵌入式工作台
 
-嵌入式 C/C++ 固件开发工具箱 — 4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱、逻辑原语验证及对抗性设计审查。v0.4.0。
+嵌入式 C/C++ 固件开发工具箱 — 4 个代理、7 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱。v0.6.0。
 
 **跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
 
@@ -30,11 +30,12 @@
 | `c-cpp-dev` | C/C++ 代码生成、风格、内存布局、重构 |
 | `state-machine-design` | 状态模型、重试、超时、转换门控、实现模式 |
 | `hardfault-triage` | 处理器异常分类 — 故障寄存器、栈帧、PC 定位源码、根因分类 |
-| `fact-verification` | 文档与计划声称核查、逻辑原语验证（7 结构 + 7 对抗探针）、重构回归检测、手动兜底模式 |
+
+`logicprobe`（文档与计划声称核查、逻辑原语验证、对抗性探测）自 v0.6.0 起**拆分为独立插件** — 见下方[其他插件推荐](#其他插件推荐)。
 
 ### 深度参考
 
-`embedded-firmware-dev`、`debug-methodology`、`state-machine-design`、`c-cpp-dev`、`fact-verification` 包含深度参考或代码示例。亮点：12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱、7 轮迭代调试案例研究、状态机实现模式、嵌入式 C 专项（volatile MMIO、链接器段、ISR 安全路径）、逻辑原语验证管线（7 结构原语 + 7 对抗探针）、自动化验证工具（Python + 手动兜底）。
+`embedded-firmware-dev`、`debug-methodology`、`state-machine-design`、`c-cpp-dev` 包含深度参考或代码示例。亮点：12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱、7 轮迭代调试案例研究、状态机实现模式、嵌入式 C 专项（volatile MMIO、链接器段、ISR 安全路径）。
 
 ## 安装
 
@@ -167,6 +168,7 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 | 插件 | 简介 |
 |------|------|
 | [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | Windows 端的 PowerShell 安全规则——乱码检测、文件编码陷阱、BOM 处理、原生 exe 管道、引号处理、命令安全 |
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 文档与计划声称核查——逻辑原语验证（7 结构 + 7 对抗探针）、重构回归检测。自本插件 v0.6.0 拆分；Plan Verification Gate 依赖它。 |
 | [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎——技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
 
 ## 致谢

@@ -36,9 +36,9 @@ If you catch yourself thinking any of these, STOP — you are rationalizing:
 | "The worker can figure out the details" | The worker has NO context from previous calls. A vague plan = the worker guessing. |
 | "I'll review it myself, no need for quality-coordinator" | Self-review catches ~60% of issues. A second pair catches the other 40%. |
 | "This change is too small for a Detailed Change Plan" | If it touches more than one function, it needs a plan. Even single-function changes benefit from explicit invariants. |
-| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("fact-verification")`? Every plan — simple or complex — must pass this gate before exit. |
-| "This plan is too simple for fact-verification" | The skill auto-classifies depth (LIGHTWEIGHT/STANDARD/ESCALATED). You don't decide whether verification is needed. Load it and let Phase 0 determine. |
-| "I already read the code, I know the file paths and API names are correct" | Organic verification leaves no audit trail. Load `Skill("fact-verification")`, run Phase 0, append the `## Plan Verification` block. |
+| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("logicprobe")` (独立插件 / standalone plugin)? Every plan — simple or complex — must pass this gate before exit. |
+| "This plan is too simple for logicprobe" | The skill auto-classifies depth (LIGHTWEIGHT/STANDARD/ESCALATED). You don't decide whether verification is needed. Load it (外部插件) and let Phase 0 determine. |
+| "I already read the code, I know the file paths and API names are correct" | Organic verification leaves no audit trail. Load `Skill("logicprobe")` (外部插件), run Phase 0, append the `## Plan Verification` block. |
 
 ---
 
@@ -61,7 +61,7 @@ Sub-agents are **stateless** — each `Agent()` call is a fresh process. Plan-th
 
 **When**: single file/module, known repro, no cross-module boundaries. Trivial changes (typo, constant) — fix directly.
 
-`execution-worker` → Plan → **suggest user run `design-reviewer` or `fact-verification` to verify Plan claims against codebase** → approve → `execution-worker` → implement + verify. Self-check. Uncertain → `quality-coordinator`.
+`execution-worker` → Plan → **suggest user run `design-reviewer` or `logicprobe` to verify Plan claims against codebase** → approve → `execution-worker` → implement + verify. Self-check. Uncertain → `quality-coordinator`.
 
 Escalate to Multi-Agent when cross-module or two revisions don't converge.
 
@@ -94,10 +94,12 @@ Claude Code's built-in `EnterPlanMode` / `ExitPlanMode` maps to the **Plan phase
 
 ### Plan Verification Gate
 
+> **logicprobe 已拆分为独立插件 / moved to a standalone plugin** (v0.6.0): the verification skill below now ships in its own plugin — <https://github.com/AmethystLuna/logicprobe>. Install it with `claude plugin install logicprobe@logicprobe` (or clone to `~/.claude/plugins/dev/logicprobe`). Without it, this gate degrades to option 2 below.
+
 **Before calling `ExitPlanMode`**, exactly one of the following must happen:
 
-1. **Load `Skill("fact-verification")`** — the skill classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED) based on objective plan features, runs verification, and appends a `## Plan Verification` summary block to the plan file.
-2. **Inform the user** — if you choose not to load the skill, you MUST say: *"此计划未经 fact-verification 验证。是否需要我在审批前运行核查？（This plan has not been fact-verified. Would you like me to run verification before approving?）"* The user must have the option to request verification before approving.
+1. **Load `Skill("logicprobe")`** (standalone plugin — install separately if missing) — the skill classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED) based on objective plan features, runs verification, and appends a `## Plan Verification` summary block to the plan file.
+2. **Inform the user** — if you choose not to load the skill, you MUST say: *"此计划未经 logicprobe 验证。是否需要我在审批前运行核查？（This plan has not been fact-verified. Would you like me to run verification before approving?）"* The user must have the option to request verification before approving.
 
 Silent skip is not an option. Either verify, or tell the user you didn't.
 
@@ -152,7 +154,7 @@ Each domain skill is classified by how strictly it should be followed:
 
 - `debug-methodology`: 8 iron rules are non-negotiable
 - `powershell-safety`: encoding rules are non-negotiable (external plugin)
-- `fact-verification`: claim verification must check every claim
+- `logicprobe` (external plugin): claim verification must check every claim
 
 **Flexible** — adapt principles to context. These are patterns and references, not commands.
 
@@ -168,15 +170,15 @@ If unsure, treat a skill as Rigid until you confirm otherwise.
 
 When multiple skills could apply, use this order:
 
-1. **Diagnosis skills first** — `debug-methodology`, `hardfault-triage`, `fact-verification`. These determine WHAT is wrong.
+1. **Diagnosis skills first** — `debug-methodology`, `hardfault-triage`, `logicprobe` (external plugin). These determine WHAT is wrong.
 2. **Design skills second** — `state-machine-design`. These determine HOW to fix it.
 3. **Implementation skills third** — `c-cpp-dev`, `embedded-firmware-dev`, `keil-mdk-build`. These guide execution.
 
 "HardFault crash" → hardfault-triage first, then debug-methodology if root cause is complex.
 "Add retry logic" → state-machine-design first, then c-cpp-dev for implementation.
-"Review this design" → fact-verification first, then escalate findings to design-reviewer agent.
+"Review this design" → logicprobe first, then escalate findings to design-reviewer agent.
 
-**Cross-domain links**: load secondary skills ONLY when the primary skill's findings indicate they are needed. Don't pre-load. `hardfault-triage` ↔ `keil-mdk-build` (.map file bridge — load keil-mdk-build only if .map analysis is needed). `hardfault-triage` ↔ `debug-methodology` (root-cause analysis — load debug-methodology only if the fault cause is complex). `embedded-firmware-dev` ↔ `state-machine-design` (state transitions — load state-machine-design only if state logic is involved). `embedded-firmware-dev` ↔ `debug-methodology` (debugging process). `fact-verification` ↔ `design-reviewer` agent (design doc review, logic verification). `fact-verification` ↔ `state-machine-design` (behavioral claim probing).
+**Cross-domain links**: load secondary skills ONLY when the primary skill's findings indicate they are needed. Don't pre-load. `hardfault-triage` ↔ `keil-mdk-build` (.map file bridge — load keil-mdk-build only if .map analysis is needed). `hardfault-triage` ↔ `debug-methodology` (root-cause analysis — load debug-methodology only if the fault cause is complex). `embedded-firmware-dev` ↔ `state-machine-design` (state transitions — load state-machine-design only if state logic is involved). `embedded-firmware-dev` ↔ `debug-methodology` (debugging process). `logicprobe` ↔ `design-reviewer` agent (design doc review, logic verification). `logicprobe` ↔ `state-machine-design` (behavioral claim probing).
 
 ## Domain Skills
 
@@ -190,7 +192,8 @@ Load domain-specific guidance when the task matches. Skills marked with 📚 hav
 | FreeRTOS, ISR, NVM storage, sensor drivers | `Skill("embedded-firmware-dev")` | Flexible | 📚 architecture, patterns, LVGL |
 | Keil MDK, ARMCLANG, build system, .map optimization | `Skill("keil-mdk-build")` | Flexible | — |
 | State machines, retries, timeouts | `Skill("state-machine-design")` | Flexible | — |
-| Design doc review, claim verification, logic primitive + adversarial probing | `Skill("fact-verification")` | Rigid | 📚 logic-verification-guide, verification-harness.py |
+
+Design doc review, claim verification, logic primitive + adversarial probing → `Skill("logicprobe")` — **standalone plugin** (see Plan Verification Gate above).
 
 ## Templates & References
 
@@ -233,6 +236,6 @@ When you observe any of these patterns in the user's task, **suggest the relevan
 ### Suggestion Rules
 
 - **Suggest once per task**, not repeatedly. If the user declines, don't push.
-- **Be specific about what the feature does** — don't just name-drop. Say "I can find deadlocks and missing transitions" not "I can run fact-verification."
+- **Be specific about what the feature does** — don't just name-drop. Say "I can find deadlocks and missing transitions" not "I can run logicprobe."
 - **Estimate cost**: for lightweight checks, say "this takes ~30 seconds." For Python harness runs, say "this will generate and run a verification script."
 - **Respect the user's decision**: if they decline, move on. The features are tools, not requirements.

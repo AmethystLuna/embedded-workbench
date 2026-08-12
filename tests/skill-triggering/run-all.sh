@@ -31,7 +31,6 @@ echo ""
 run_test "HardFault crash → hardfault-triage" "hardfault-triage" "hardfault-crash.txt" "trigger"
 run_test "State machine retry → state-machine-design" "state-machine-design" "state-machine-retry.txt" "trigger"
 run_test "Keil build error → keil-mdk-build" "keil-mdk-build" "keil-build.txt" "trigger"
-run_test "Design doc review → fact-verification" "fact-verification" "design-review-fact-verify.txt" "trigger"
 run_test "Explicit skill request → hardfault-triage" "hardfault-triage" "explicit-hardfault.txt" "trigger"
 run_test "FreeRTOS ISR boundary → embedded-firmware-dev" "embedded-firmware-dev" "freertos-isr-boundary.txt" "trigger"
 
