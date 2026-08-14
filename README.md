@@ -179,7 +179,6 @@ Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/s
 
 | Plugin | Description |
 |--------|-------------|
-| [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | PowerShell safety rules — garbled text detection, file encoding pitfalls (BOM, UTF-16 LE vs UTF-8), native executable piping, quoting, and destructive command patterns |
 | [logicprobe](https://github.com/AmethystLuna/logicprobe) | Design doc & plan claim verification — logic-primitive verification (7 structural + 7 adversarial probes), refactoring regression detection. Split out of this plugin in v0.6.0; the Plan Verification Gate requires it. |
 | [superpowers](https://github.com/obra/superpowers) | The original agent discipline engine — skill loading enforcement, Red Flags, subagent-driven development. Many of this plugin's agent-compliance patterns (1% Rule, Red Flags, `<SUBAGENT-STOP>`, instruction priority) were adapted from Superpowers. |
 

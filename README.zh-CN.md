@@ -177,7 +177,6 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 
 | 插件 | 简介 |
 |------|------|
-| [powershell-safety](https://github.com/AmethystLuna/powershell-safety) | Windows 端的 PowerShell 安全规则——乱码检测、文件编码陷阱、BOM 处理、原生 exe 管道、引号处理、命令安全 |
 | [logicprobe](https://github.com/AmethystLuna/logicprobe) | 文档与计划声称核查——逻辑原语验证（7 结构 + 7 对抗探针）、重构回归检测。自本插件 v0.6.0 拆分；Plan Verification Gate 依赖它。 |
 | [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎——技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
 

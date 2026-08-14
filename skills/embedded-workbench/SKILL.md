@@ -153,7 +153,6 @@ Each domain skill is classified by how strictly it should be followed:
 **Rigid** — follow exactly. These are rules and checklists. Don't adapt away the discipline.
 
 - `debug-methodology`: 8 iron rules are non-negotiable
-- `powershell-safety`: encoding rules are non-negotiable (external plugin)
 - `logicprobe` (external plugin): claim verification must check every claim
 
 **Flexible** — adapt principles to context. These are patterns and references, not commands.
