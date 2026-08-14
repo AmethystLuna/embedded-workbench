@@ -22,6 +22,7 @@ import z from '@deepseek-ai/schemastery'
 import type { PreStepDecision } from '@deepseek-ai/dsh-agent'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import type { UserMessage } from '@deepseek-ai/dsh-session'
+import type { HostCordisInspectProviderRegistration } from '@deepseek-ai/dsh-cordis-host-runner'
 
 export const name = 'embedded-workbench'
 
@@ -90,7 +91,58 @@ function isGateMessage(message: UserMessage): boolean {
   return message.source.kind === 'plugin' && message.source.plugin === GATE_PLUGIN_ID
 }
 
+/**
+ * Model-visible catalog entry (cordis_inspect_list / cordis_inspect_query):
+ * lets the model read this plugin's runtime status without guessing. Mirrors
+ * the registration pattern of the official dsh-tool-cordis host providers.
+ */
+function inspectProvider(config: Config): HostCordisInspectProviderRegistration {
+  return {
+    manifest: {
+      id: 'embedded-workbench',
+      description: 'Session-start gate injection for the Embedded Workbench toolbox — folds the 1% Rule / Red Flags / Plan Verification Gate text into the first model step of every agent session.',
+      methods: [
+        {
+          name: 'status',
+          description: 'Read whether the gate injection is active and how large the injected gate text is.',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+            additionalProperties: false,
+          },
+          outputSchema: {
+            type: 'object',
+            description: 'Gate-injection plugin status.',
+            properties: {
+              enabled: { type: 'boolean', description: 'Whether the gate folds into the first model step.' },
+              gateContentLength: { type: 'integer', description: 'Length in characters of the injected gate text.' },
+            },
+            required: ['enabled', 'gateContentLength'],
+            additionalProperties: false,
+          },
+        },
+      ],
+    },
+    query: async (method) => {
+      if (method === 'status') {
+        return {
+          enabled: config.enabled,
+          gateContentLength: config.gateContent.length,
+        }
+      }
+      return null
+    },
+  }
+}
+
 export function apply(ctx: Context, config: Config): void {
+  // Catalog visibility is optional: register only when the inspect registry
+  // service is mounted (web profile), so headless assemblies without it keep
+  // the gate injection working.
+  const inspect = ctx.get('cordisInspect')
+  if (inspect !== undefined) {
+    ctx.effect(() => inspect.register(inspectProvider(config)), 'embedded-workbench: inspect provider')
+  }
   if (!config.enabled) return
   ctx.on('agent/pre-step', async (
     { messages, step },

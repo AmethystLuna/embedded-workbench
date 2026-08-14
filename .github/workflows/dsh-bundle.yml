@@ -1,0 +1,45 @@
+name: dsh-bundle
+
+on:
+  push:
+    paths:
+      - 'packages/dsh-plugin/**'
+      - '.dsh/**'
+      - 'README.md'
+      - 'README.zh-CN.md'
+      - '.github/workflows/dsh-bundle.yml'
+  pull_request:
+    paths:
+      - 'packages/dsh-plugin/**'
+      - '.dsh/**'
+      - 'README.md'
+      - 'README.zh-CN.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/dsh-plugin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/dsh-plugin/package-lock.json
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+      - name: Committed build artifact is current
+        run: git diff --exit-code -- lib
+
+  markdownlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint dsh docs
+        run: npx --yes markdownlint-cli@0.42.0 ".dsh/**/*.md" "packages/dsh-plugin/README.md"
