@@ -137,17 +137,29 @@ function inspectProvider(config: Config): HostCordisInspectProviderRegistration 
 
 export function apply(ctx: Context, config: Config): void {
   // Catalog visibility is optional: register only when the inspect registry
-  // service is mounted (web profile), so headless assemblies without it keep
-  // the gate injection working.
-  const inspect = ctx.get('cordisInspect')
-  if (inspect !== undefined) {
-    ctx.effect(() => inspect.register(inspectProvider(config)), 'embedded-workbench: inspect provider')
+  // service is mounted, so headless assemblies without it keep the gate
+  // injection working. The registry may be provided AFTER this row applies
+  // (base-bundle rows can mount later), so registration is retried on the
+  // first agent/pre-step — by then the app is fully booted.
+  let providerRegistered = false
+  const registerProvider = (): void => {
+    if (providerRegistered) return
+    const inspect = ctx.get('cordisInspect')
+    if (inspect === undefined) return
+    try {
+      ctx.effect(() => inspect.register(inspectProvider(config)), 'embedded-workbench: inspect provider')
+      providerRegistered = true
+    } catch (err) {
+      console.warn('[embedded-workbench] inspect provider registration failed', err)
+    }
   }
+  registerProvider()
   if (!config.enabled) return
   ctx.on('agent/pre-step', async (
     { messages, step },
     next,
   ): Promise<PreStepDecision> => {
+    registerProvider()
     const decision = await next()
     // Gate only the first real step; a no-step first entry stays untouched.
     if (decision.kind === 'reject') return decision
