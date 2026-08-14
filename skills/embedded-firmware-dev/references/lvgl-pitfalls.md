@@ -23,7 +23,8 @@ Non-obvious traps when working with LVGL on embedded targets.
 **Pitfall**: `lv_obj_clean(parent)` recursively frees children but does not NULL any static pointers that reference those children.
 
 **Fix Pattern**:
-```
+
+```c
 anim_timer_del();      // 1. Kill async operations
 icon = NULL;           // 2. NULL all static pointers
 label = NULL;
@@ -37,7 +38,8 @@ On page re-entry, always guard with NULL checks before using any cached LVGL obj
 **Pitfall**: A scrollable menu with header/footer inside the scroll container scrolls those elements along with the content.
 
 **Fix**: Move fixed elements outside the scrollable container:
-```
+
+```text
 Page (flex column)
 ├── Header (fixed, outside scroll)
 ├── Scroll container (flex grow)
@@ -50,7 +52,8 @@ Page (flex column)
 **Pitfall**: Creating an LVGL draw mask and not removing it before the next draw pass causes unrelated elements to be incorrectly masked.
 
 **Fix**: Always pair mask creation with removal:
-```
+
+```c
 int16_t mask_id = lv_draw_mask_angle_init(&param);
 // ... draw ...
 lv_draw_mask_remove_id(mask_id);

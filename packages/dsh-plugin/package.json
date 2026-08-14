@@ -1,6 +1,6 @@
 {
   "name": "embedded-workbench-dsh",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "description": "DeepSeek Harness (dsh) native plugin for the Embedded Workbench toolbox: injects the session-start gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session. Skills install separately (see README).",
   "type": "module",
   "main": "lib/index.js",

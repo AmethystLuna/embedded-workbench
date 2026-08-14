@@ -12,7 +12,7 @@ Animated UI elements (GIFs, sprite sheets, frame animations) use hardware timers
 
 **Fix**: Maintain a module-level `generation` counter. Increment on each `Create`/`Delete` cycle. The timer callback captures the generation at creation time and compares it to the current value before accessing any object.
 
-```
+```c
 timer_cb:
   if (captured_generation != global_generation) {
     // Object was deleted and recreated; safely delete this stale timer
@@ -28,7 +28,7 @@ timer_cb:
 
 **Fix**: Always delete the animation timer **first**, then clean the parent object. In page exit functions:
 
-```
+```c
 void page_exit() {
     anim_timer_del();    // 1. Kill the timer
     lv_obj_clean(page);  // 2. Then clean objects
@@ -57,7 +57,7 @@ A state variable transitions `A → B` when condition X becomes true, but never 
 
 Add a reverse check at the top of the state update function, before the forward transition:
 
-```
+```c
 void state_update() {
     // Reverse guard: if preconditions are lost, go back
     if (state == Ready && error_is_active()) {
