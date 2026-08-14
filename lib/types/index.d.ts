@@ -11,10 +11,11 @@
  * the text enters durable context before the first request — the dsh-native
  * counterpart of the Claude SessionStart matcher (startup|clear|compact;
  * resume keeps the gate already in history). The default gate text is the
- * dsh-shaped twin of `hooks/session-start-content.md` in the plugin root —
- * same content, with Claude tool names mapped to the dsh catalog (`skill`
- * tool, `exit_plan_mode`) — and stays in sync with it; deployments override
- * via Config.
+ * dsh-native adaptation of `hooks/session-start-content.md`: behavior rules
+ * (1% Rule / Red Flags / Plan Verification Gate) stay in sync, while
+ * presentation is adapted to dsh's native skill catalog — no roster table
+ * (the model sees skills in its catalog) and no install instructions (those
+ * live in `.dsh/INSTALL.md`). Deployments override via Config.
  *
  * @module embedded-workbench-dsh
  */

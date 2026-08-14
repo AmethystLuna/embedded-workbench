@@ -11,10 +11,11 @@
  * the text enters durable context before the first request — the dsh-native
  * counterpart of the Claude SessionStart matcher (startup|clear|compact;
  * resume keeps the gate already in history). The default gate text is the
- * dsh-shaped twin of `hooks/session-start-content.md` in the plugin root —
- * same content, with Claude tool names mapped to the dsh catalog (`skill`
- * tool, `exit_plan_mode`) — and stays in sync with it; deployments override
- * via Config.
+ * dsh-native adaptation of `hooks/session-start-content.md`: behavior rules
+ * (1% Rule / Red Flags / Plan Verification Gate) stay in sync, while
+ * presentation is adapted to dsh's native skill catalog — no roster table
+ * (the model sees skills in its catalog) and no install instructions (those
+ * live in `.dsh/INSTALL.md`). Deployments override via Config.
  *
  * @module embedded-workbench-dsh
  */
@@ -30,22 +31,7 @@ export const name = 'embedded-workbench'
 const GATE_PLUGIN_ID = 'embedded-workbench'
 
 const DEFAULT_GATE_CONTENT = `<EXTREMELY_IMPORTANT>
-Plugin embedded-workbench is active. You have access to embedded C/C++ firmware development skills (custom agents are not ported to dsh — parallel multi-agent work uses the native subagent tooling when needed).
-
-**Skills** — load with the skill tool when the task matches:
-
-| Skill | Use when | NOT for |
-|-------|----------|---------|
-| debug-methodology | Debugging crashes, HardFault, logs, or sensor anomalies | Fault-register triage (use hardfault-triage) |
-| c-cpp-dev | Writing or refactoring embedded C/C++ code on ARM targets | Formatting-only, simple reads, C# or non-embedded |
-| embedded-firmware-dev | FreeRTOS, ISR, NVM storage, async lifecycle, boundary analysis | Documentation-only RTOS references |
-| keil-mdk-build | Keil MDK/ARMCLANG builds, .map analysis, build diagnostics | Non-Keil builds (Makefile, CMake, IAR, GCC-only) |
-| state-machine-design | Async protocols, retries, ACK/NACK, timeout logic in embedded firmware | Generic network protocol design (TCP/HTTP/MQTT) |
-| hardfault-triage | Processor exception triage, fault registers, stack frames, PC-to-source | — |
-
-> **⚠️ logicprobe 已拆分为独立插件 / moved to a standalone plugin** (v0.6.0):
-> The design-doc & plan claim-verification skill (logic-primitive verification, adversarial probing, refactoring regression detection) now lives in its own plugin: <https://github.com/AmethystLuna/logicprobe>
-> Install it for dsh by copying its skills/ to ~/.agents/skills/ (or via its dsh bundle once published). Without it, the Plan Verification Gate below degrades to manual confirmation mode.
+Plugin embedded-workbench is active. You have embedded C/C++ firmware development skills — names and "Use when" triggers are in your skill catalog; load them with the skill tool. No custom agents in dsh: use the native subagent tooling for parallel work.
 
 **1% Rule**: If there is even a 1% chance a skill applies to your task, invoke it before responding. If the skill turns out to be wrong for the situation, discard it and move on. The cost of loading a skill is trivial compared to the cost of a preventable mistake.
 
@@ -59,11 +45,11 @@ Plugin embedded-workbench is active. You have access to embedded C/C++ firmware 
 | "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
 | "I can just read the file directly" | Skills have patterns and pitfalls you will not discover by reading. |
 | "I remember this skill content" | Skills evolve. Always load the current version. |
-| "I've explored enough, time to exit plan mode" | The exit_plan_mode tool is the verification gate. Have you loaded the logicprobe skill (独立插件 / standalone plugin)? Every plan must pass this gate before exit. |
+| "I've explored enough, time to exit plan mode" | The exit_plan_mode tool is the verification gate. Have you loaded the logicprobe skill? Every plan must pass this gate before exit. |
 | "This plan is too simple for logicprobe" | The skill auto-classifies depth. You don't decide. |
-| "I already read the code, I know the file paths are correct" | Load the logicprobe skill (外部插件), run Phase 0, append the "## Plan Verification" block. |
+| "I already read the code, I know the file paths are correct" | Load the logicprobe skill, run Phase 0, append the "## Plan Verification" block. |
 
-**Plan Verification Gate**: Before calling exit_plan_mode (or presenting a plan for approval), either load the logicprobe skill (standalone plugin — install separately if missing) OR inform the user "此计划未经 logicprobe 验证，是否需要核查？" Silent skip is not an option.
+**Plan Verification Gate**: Before calling exit_plan_mode (or presenting a plan for approval), either load the logicprobe skill (a separate plugin — if it is missing from your skill catalog, tell the user to install it) OR inform the user "此计划未经 logicprobe 验证，是否需要核查？" Silent skip is not an option.
 
 To load workflows and engineering policies: load the embedded-workbench skill.
 

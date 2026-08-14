@@ -64,7 +64,8 @@ To change the gate text or disable injection, override the row by id in your pro
 - DSH is in v0.1 developer preview; breaking changes are expected. Pin your `dsh` version.
 - DSH has no plugin marketplace for this repo — manual install only.
 - The session-start gate injection is provided natively by the root bundle (Option D). The 4 custom agents (`architecture-steward`, `design-reviewer`, `execution-worker`, `quality-coordinator`) are intentionally **not** ported — dsh's native subagent tooling covers parallel multi-agent work, and the main model takes the steward/reviewer roles directly.
-- **Gate injection semantics**: the gate is injected exactly once per session lifecycle via the official `agent/session-start` event — on `startup`, `clear`, and `compact` (matching the Claude SessionStart matcher); `resume` keeps the gate already in durable history. The gate text is the dsh-shaped twin of `hooks/session-start-content.md` — review it per deployment and override via `gateContent`.
+- The Plan Verification Gate references the `logicprobe` skill — a **separate plugin** (same author). Install it too; without it the gate degrades to manual confirmation mode.
+- **Gate injection semantics**: the gate is injected exactly once per session lifecycle via the official `agent/session-start` event — on `startup`, `clear`, and `compact` (matching the Claude SessionStart matcher); `resume` keeps the gate already in durable history. The gate text is the dsh-native adaptation of `hooks/session-start-content.md` — behavior rules synced, presentation adapted to the dsh skill catalog (no roster table, no install instructions); review it per deployment and override via `gateContent`.
 
 ## Tool Mapping
 
