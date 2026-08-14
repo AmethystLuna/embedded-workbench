@@ -1,0 +1,6 @@
+# Files Codex should never read or package. Mirrors the repo .gitignore.
+node_modules/
+.mypy_cache/
+.worktrees/
+*.swp
+*.swo
