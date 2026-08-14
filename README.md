@@ -173,6 +173,7 @@ Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/s
 ## Requirements
 
 - Claude Code v2.1+ / Codex CLI latest / Cursor 2.5+ / Kimi CLI latest / OpenCode latest / ZCode 3.0+
+- DeepSeek Harness (dsh): dev preview — verified on mainline 2026-08-14 (gate bundle loaded and injected in-session)
 - No external dependencies
 
 ## Other Plugins Recommended

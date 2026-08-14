@@ -171,6 +171,7 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 ## 依赖
 
 - Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
+- DeepSeek Harness (dsh): dev preview — 已实测 mainline 2026-08-14（gate bundle 加载并注入会话成功）
 - 无外部依赖
 
 ## 其他插件推荐
