@@ -6,20 +6,21 @@
  * plugin installs. The 7 skills themselves are discovered by dsh's
  * `skill-filesystem` provider and need no code.
  *
- * Injection follows the mechanism of @deepseek-ai/dsh-agent-instructions:
- * fold the context message into the `agent/pre-step` waterfall decision so
- * the text enters durable context before the first request. The default
- * gate text is the dsh-shaped twin of `hooks/session-start-content.md` in
- * the plugin root — same content, with Claude tool names mapped to the dsh
- * catalog (`skill` tool, `exit_plan_mode`) — and stays in sync with it;
- * deployments override via Config.
+ * Injection listens on the official `agent/session-start` lifecycle event
+ * (once before the first turn) and seeds the gate via `agent.inject`, so
+ * the text enters durable context before the first request — the dsh-native
+ * counterpart of the Claude SessionStart matcher (startup|clear|compact;
+ * resume keeps the gate already in history). The default gate text is the
+ * dsh-shaped twin of `hooks/session-start-content.md` in the plugin root —
+ * same content, with Claude tool names mapped to the dsh catalog (`skill`
+ * tool, `exit_plan_mode`) — and stays in sync with it; deployments override
+ * via Config.
  *
  * @module embedded-workbench-dsh
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import type { PreStepDecision } from '@deepseek-ai/dsh-agent'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import type { UserMessage } from '@deepseek-ai/dsh-session'
 import type { HostCordisInspectProviderRegistration } from '@deepseek-ai/dsh-cordis-host-runner'
@@ -87,10 +88,6 @@ function gateMessage(text: string): UserMessage {
   })
 }
 
-function isGateMessage(message: UserMessage): boolean {
-  return message.source.kind === 'plugin' && message.source.plugin === GATE_PLUGIN_ID
-}
-
 /**
  * Model-visible catalog entry (cordis_inspect_list / cordis_inspect_query):
  * lets the model read this plugin's runtime status without guessing. Mirrors
@@ -140,7 +137,7 @@ export function apply(ctx: Context, config: Config): void {
   // service is mounted, so headless assemblies without it keep the gate
   // injection working. The registry may be provided AFTER this row applies
   // (base-bundle rows can mount later), so registration is retried on the
-  // first agent/pre-step — by then the app is fully booted.
+  // first agent/session-start — by then the app is fully booted.
   let providerRegistered = false
   const registerProvider = (): void => {
     if (providerRegistered) return
@@ -155,26 +152,14 @@ export function apply(ctx: Context, config: Config): void {
   }
   registerProvider()
   if (!config.enabled) return
-  ctx.on('agent/pre-step', async (
-    { messages, step },
-    next,
-  ): Promise<PreStepDecision> => {
+  // Inject the gate exactly once per session lifecycle — the dsh-native
+  // counterpart of the Claude SessionStart matcher (startup|clear|compact).
+  // `agent.inject` seeds the message into the next step's claimed batch, so
+  // it enters durable context before the first request. Resume is skipped:
+  // the gate is already part of the resumed history.
+  ctx.on('agent/session-start', ({ agent, source }) => {
     registerProvider()
-    const decision = await next()
-    // Gate only the first real step; a no-step first entry stays untouched.
-    if (decision.kind === 'reject') return decision
-    if (step !== 1 || decision.messages.length === 0) return decision
-    // Never re-inject when the gate text is already in the batch.
-    if (decision.messages.some(isGateMessage)) return decision
-    const gate = gateMessage(config.gateContent)
-    // Fold the gate right after the claimed batch, mirroring the ordering
-    // dsh-agent-instructions uses (direct prompt first, driver context last).
-    let lastClaimedIndex = -1
-    for (let i = 0; i < decision.messages.length; i++) {
-      if (messages.includes(decision.messages[i])) lastClaimedIndex = i
-    }
-    const entered = [...decision.messages]
-    entered.splice(lastClaimedIndex + 1, 0, gate)
-    return { kind: 'enter', messages: entered }
+    if (source === 'resume') return
+    agent.inject(gateMessage(config.gateContent))
   })
 }

@@ -6,13 +6,15 @@
  * plugin installs. The 7 skills themselves are discovered by dsh's
  * `skill-filesystem` provider and need no code.
  *
- * Injection follows the mechanism of @deepseek-ai/dsh-agent-instructions:
- * fold the context message into the `agent/pre-step` waterfall decision so
- * the text enters durable context before the first request. The default
- * gate text is the dsh-shaped twin of `hooks/session-start-content.md` in
- * the plugin root — same content, with Claude tool names mapped to the dsh
- * catalog (`skill` tool, `exit_plan_mode`) — and stays in sync with it;
- * deployments override via Config.
+ * Injection listens on the official `agent/session-start` lifecycle event
+ * (once before the first turn) and seeds the gate via `agent.inject`, so
+ * the text enters durable context before the first request — the dsh-native
+ * counterpart of the Claude SessionStart matcher (startup|clear|compact;
+ * resume keeps the gate already in history). The default gate text is the
+ * dsh-shaped twin of `hooks/session-start-content.md` in the plugin root —
+ * same content, with Claude tool names mapped to the dsh catalog (`skill`
+ * tool, `exit_plan_mode`) — and stays in sync with it; deployments override
+ * via Config.
  *
  * @module embedded-workbench-dsh
  */
