@@ -1,4 +1,4 @@
-# embedded-workbench-dsh bundle patch — one insert over the profile root.
+# embedded-workbench bundle patch — one insert over the profile root.
 #
 # Row ids are stable identity in the config tree; later layers (the user's
 # profile cordis.patch.yml, $DSH_HOME/cordis.patch.yml, --patch overlays)
@@ -6,6 +6,6 @@
 
 - insert:
     - id: embedded-workbench
-      name: 'embedded-workbench-dsh'
+      name: 'embedded-workbench'
       config:
         enabled: true

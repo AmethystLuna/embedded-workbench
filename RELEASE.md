@@ -1,16 +1,15 @@
 # Release Checklist — Embedded Workbench
 
-Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem and the other marketplaces. Run the items top to bottom; the dsh bundle is the only piece that ships code (`packages/dsh-plugin`), everything else is manifests, skills, and docs.
+Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem and the other marketplaces. Run the items top to bottom; the dsh bundle is the only piece that ships code (the repository root package), everything else is manifests, skills, and docs.
 
 ## 0. Pre-flight (local)
 
 - [ ] Working tree clean; current branch is `master`
-- [ ] Version bumped in **every** manifest listed in `.version-bump.json` and kept identical (`.claude-plugin/plugin.json`, marketplace, `.codex-plugin`, `.cursor-plugin`, `.kimi-plugin`, root `package.json`, `packages/dsh-plugin/package.json`)
+- [ ] Version bumped in **every** manifest listed in `.version-bump.json` and kept identical (`.claude-plugin/plugin.json`, marketplace, `.codex-plugin`, `.cursor-plugin`, `.kimi-plugin`, root `package.json`)
 - [ ] `npx markdownlint-cli --ignore "**/node_modules/**" .` passes with the repo's `.markdownlint.json`
 - [ ] Bundle checks (rc-era dsh packages have peer conflicts — `--legacy-peer-deps` is required):
 
   ```bash
-  cd packages/dsh-plugin
   npm ci --legacy-peer-deps
   npm run typecheck
   npm run build
@@ -20,7 +19,7 @@ Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem a
 - [ ] Bundle mounts locally:
 
   ```bash
-  dsh plugin --profile scratch add "file:$PWD/packages/dsh-plugin"
+  dsh plugin --profile scratch add "file:$PWD"
   dsh --profile scratch --dump-config    # expect: id: embedded-workbench / enabled: true
   rm -rf ~/.dsh/profiles/scratch
   ```
@@ -29,7 +28,7 @@ Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem a
 
 ## 1. Push to GitHub
 
-- [ ] `git push origin master`
+- [ ] `git push embedded-workbench master`
 - [ ] CI (`dsh-bundle` workflow) green: typecheck, build, committed-lib drift guard, markdownlint
 - [ ] Remote install works (skills layer + bundle row):
 
@@ -41,8 +40,8 @@ Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem a
 ## 2. npm publish (optional — enables bare-package installs)
 
 - [ ] `npm login`
-- [ ] `cd packages/dsh-plugin && npm publish` (publish whitelist: `lib/`, `cordis.patch.yml`)
-- [ ] Verify: `dsh plugin --profile scratch add embedded-workbench-dsh` → `--dump-config` shows the row
+- [ ] `npm publish` from the repository root (publish whitelist: `lib/`, `src/`, `cordis.patch.yml`; the root package is the dsh bundle)
+- [ ] Verify: `dsh plugin --profile scratch add embedded-workbench` → `--dump-config` shows the row
 - [ ] Developer preview policy: prefer publishing a fixed version over `npm unpublish`/`npm deprecate` for broken releases
 
 ## 3. Real-profile trial (end-to-end, requires restarting the target profile)
@@ -59,5 +58,5 @@ Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem a
 
 - [ ] Tag the release (`git tag vX.Y.Z && git push --tags`)
 - [ ] Keep `.dsh/INSTALL.md` install options in sync with what is actually published
-- [ ] Keep `packages/dsh-plugin/README.md` "Version pinning" note in sync with the dsh release actually verified
+- [ ] Keep the "Version pinning" note in `.dsh/INSTALL.md` in sync with the dsh release actually verified
 - [ ] Update `.version-bump.json` `version` field to the next target before starting the next cycle

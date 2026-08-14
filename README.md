@@ -77,10 +77,10 @@ Then enable in `~/.claude/settings.json`:
 
 ## DeepSeek Harness (dsh)
 
-Native dsh support ships as a cordis plugin bundle in [`packages/dsh-plugin/`](packages/dsh-plugin/README.md):
+Native dsh support ships as a cordis plugin bundle at the repository root (the root `package.json` declares `dsh.bundle`):
 
 - The skills are discovered as-is by dsh's `skill-filesystem` provider (Agent Skills open standard) — zero code.
-- The `embedded-workbench-dsh` bundle injects the session-start gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. It also registers a model-visible catalog entry (`cordis_inspect`).
+- The bundle injects the session-start gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. It also registers a model-visible catalog entry (`cordis_inspect`).
 - The 4 custom agents are intentionally not ported — dsh's native subagent tooling covers parallel multi-agent work.
 
 Install: see [`.dsh/INSTALL.md`](.dsh/INSTALL.md) (four options, from plain skill copy to `dsh plugin add`).

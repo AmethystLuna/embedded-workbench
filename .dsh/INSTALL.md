@@ -29,24 +29,42 @@ If your `dsh` configuration supports `customSkillDirs` (rank 300), point it at t
 
 ### Option D — native plugin (session-start gate injection)
 
-Install the bundle from [packages/dsh-plugin](../packages/dsh-plugin/README.md):
+Install the bundle from the repository root (the root `package.json` declares `dsh.bundle`):
 
 ```bash
 npx -p @deepseek-ai/dsh dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
 ```
 
-This mounts a native cordis plugin that folds the session-start gate text (1% Rule / Red Flags / Plan Verification Gate) into the first model step — the dsh-native counterpart of the Claude Code `SessionStart` hook.
+Restart the target profile. This mounts a native cordis plugin that folds the session-start gate text (1% Rule / Red Flags / Plan Verification Gate) into the first model step — the dsh-native counterpart of the Claude Code `SessionStart` hook.
+
+To change the gate text or disable injection, override the row by id in your profile's `cordis.patch.yml` (the row's `config` is replaced wholesale, not deep-merged):
+
+```yaml
+- insert:
+    - id: embedded-workbench
+      name: 'embedded-workbench'
+      config:
+        enabled: true
+        gateContent: |
+          <EXTREMELY_IMPORTANT>
+          Your own gate text...
+          </EXTREMELY_IMPORTANT>
+```
 
 ## Verify
 
-Ask in a `dsh` session: "What embedded firmware skills do you have available?"
+- `dsh --profile <scratch> --dump-config` shows the `embedded-workbench` row with `enabled: true` (create a scratch profile with `dsh plugin --profile <scratch> add ...` first).
+- Start a session and check the gate text appears in the model context of the first step.
+- `cordis_inspect_list` shows the `embedded-workbench` provider; `cordis_inspect_query` with method `status` returns `enabled: true`.
+- Ask in a `dsh` session: "What embedded firmware skills do you have available?"
 
 ## Notes
 
 - Skill frontmatter already matches the DSH expectations: `name` is kebab-case and matches the directory name; `description` is present. The policy keys `disable-model-invocation` / `user-invocable` are omitted, which defaults to model- AND user-invocable — the intended behavior.
 - DSH is in v0.1 developer preview; breaking changes are expected. Pin your `dsh` version.
 - DSH has no plugin marketplace for this repo — manual install only.
-- The session-start gate injection is provided natively by the `embedded-workbench-dsh` bundle (Option D). The 4 custom agents (`architecture-steward`, `design-reviewer`, `execution-worker`, `quality-coordinator`) are intentionally **not** ported — dsh's native subagent tooling covers parallel multi-agent work, and the main model takes the steward/reviewer roles directly.
+- The session-start gate injection is provided natively by the root bundle (Option D). The 4 custom agents (`architecture-steward`, `design-reviewer`, `execution-worker`, `quality-coordinator`) are intentionally **not** ported — dsh's native subagent tooling covers parallel multi-agent work, and the main model takes the steward/reviewer roles directly.
+- **Known limitations of the gate injection**: it folds into `step === 1` with a non-empty message batch (a no-step first entry is left untouched); the gate text is the dsh-shaped twin of `hooks/session-start-content.md` — review it per deployment and override via `gateContent`.
 
 ## Tool Mapping
 

@@ -3,31 +3,38 @@ name: dsh-bundle
 on:
   push:
     paths:
-      - 'packages/dsh-plugin/**'
+      - 'src/**'
+      - 'lib/**'
       - '.dsh/**'
+      - 'cordis.patch.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
       - 'README.md'
       - 'README.zh-CN.md'
       - '.github/workflows/dsh-bundle.yml'
   pull_request:
     paths:
-      - 'packages/dsh-plugin/**'
+      - 'src/**'
+      - 'lib/**'
       - '.dsh/**'
+      - 'cordis.patch.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
       - 'README.md'
       - 'README.zh-CN.md'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/dsh-plugin
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: packages/dsh-plugin/package-lock.json
+          cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
       - name: Typecheck
@@ -42,4 +49,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Lint dsh docs
-        run: npx --yes markdownlint-cli@0.42.0 ".dsh/**/*.md" "packages/dsh-plugin/README.md"
+        run: npx --yes markdownlint-cli@0.42.0 ".dsh/**/*.md" "README.md" "README.zh-CN.md" "RELEASE.md"

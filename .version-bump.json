@@ -6,7 +6,6 @@
     ".codex-plugin/plugin.json": "version",
     ".cursor-plugin/plugin.json": "version",
     ".kimi-plugin/plugin.json": "version",
-    "package.json": "version",
-    "packages/dsh-plugin/package.json": "version"
+    "package.json": "version"
   }
 }
