@@ -1,6 +1,6 @@
 {
     "name":  "embedded-workbench",
-    "version":  "0.6.0",
+    "version": "0.7.0",
     "description":  "Embedded C/C++ firmware development toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, and LVGL patterns. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
     "type":  "module",
     "main":  "lib/index.js",
@@ -16,6 +16,7 @@
     "files":  [
                   "lib",
                   "src",
+                  "skills",
                   "cordis.patch.yml"
               ],
     "dsh":  {
@@ -28,6 +29,7 @@
                     "typecheck":  "tsc -p tsconfig.json --noEmit"
                 },
     "dependencies":  {
+                         "@deepseek-ai/dsh-skill-filesystem":  "^0.1.0-rc.6",
                          "@deepseek-ai/schemastery":  "^3.18.1"
                      },
     "peerDependencies":  {
@@ -37,13 +39,18 @@
                              "@deepseek-ai/dsh-session":  "^0.0.1-rc.1"
                          },
     "devDependencies":  {
-                            "@deepseek-ai/cordis":  "^4.0.1",
-                            "@deepseek-ai/dsh-agent":  "^0.1.0-rc.6",
-                            "@deepseek-ai/dsh-cordis-host-runner":  "^0.1.0-rc.6",
-                            "@deepseek-ai/dsh-llm":  "^0.0.1-rc.1",
-                            "@deepseek-ai/dsh-session":  "^0.0.1-rc.1",
-                            "typescript":  "^5.0.0"
-                        },
+                             "@deepseek-ai/cordis":  "^4.0.1",
+                             "@deepseek-ai/dsh-agent":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-cordis-host-runner":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-home-paths":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-llm":  "^0.0.1-rc.1",
+                             "@deepseek-ai/dsh-scope":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-session":  "^0.0.1-rc.1",
+                             "@deepseek-ai/dsh-skill":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-timeout":  "^0.0.1-rc.1",
+                             "@types/node":  "^20.0.0",
+                             "typescript":  "^5.0.0"
+                         },
     "author":  {
                    "name":  "Amethyst Luna",
                    "url":  "https://github.com/AmethystLuna"

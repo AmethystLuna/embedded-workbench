@@ -3,8 +3,10 @@
  * Workbench toolbox. Injects the session-start gate text (1% Rule, Red
  * Flags, Plan Verification Gate, skills roster) into the first model step
  * of every agent session, mirroring the SessionStart hook the Claude Code
- * plugin installs. The 7 skills themselves are discovered by dsh's
- * `skill-filesystem` provider and need no code.
+ * plugin installs. The 7 skills ship in this package's `skills/` directory
+ * and are registered at apply time into dsh's `ctx.skills` registry through
+ * the standard filesystem provider, so they appear in every session catalog
+ * without a manual copy step.
  *
  * Injection listens on the official `agent/session-start` lifecycle event
  * (once before the first turn) and seeds the gate via `agent.inject`, so
@@ -22,6 +24,7 @@
 import type { Context } from '@deepseek-ai/cordis';
 import z from '@deepseek-ai/schemastery';
 export declare const name = "embedded-workbench";
+export declare const inject: string[];
 export interface Config {
     enabled: boolean;
     gateContent: string;
