@@ -40,7 +40,7 @@ Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem a
 ## 2. npm publish (optional — enables bare-package installs)
 
 - [ ] `npm login`
-- [ ] `npm publish` from the repository root (publish whitelist: `lib/`, `src/`, `cordis.patch.yml`; the root package is the dsh bundle)
+- [ ] `npm publish` from the repository root (publish whitelist: `lib/`, `src/`, `skills/`, `cordis.patch.yml`; the root package is the dsh bundle)
 - [ ] Verify: `dsh plugin --profile scratch add embedded-workbench` → `--dump-config` shows the row
 - [ ] Developer preview policy: prefer publishing a fixed version over `npm unpublish`/`npm deprecate` for broken releases
 
