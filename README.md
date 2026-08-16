@@ -190,7 +190,7 @@ To change it, override the row by id in your profile's `cordis.patch.yml`:
 ```yaml
 - insert:
     - id: embedded-workbench
-      name: 'embedded-workbench'
+      name: '@amethystluna/embedded-workbench'
       config:
         enabled: true
         gateContent: |

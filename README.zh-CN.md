@@ -188,7 +188,7 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 ```yaml
 - insert:
     - id: embedded-workbench
-      name: 'embedded-workbench'
+      name: '@amethystluna/embedded-workbench'
       config:
         enabled: true
         gateContent: |

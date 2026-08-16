@@ -42,7 +42,7 @@ To change the gate text or disable injection, override the row by id in your pro
 ```yaml
 - insert:
     - id: embedded-workbench
-      name: 'embedded-workbench'
+      name: '@amethystluna/embedded-workbench'
       config:
         enabled: true
         gateContent: |
