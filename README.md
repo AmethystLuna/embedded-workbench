@@ -176,6 +176,68 @@ Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/s
 - DeepSeek Harness (dsh): dev preview — verified on mainline 2026-08-14 (gate bundle loaded and injected in-session)
 - No external dependencies
 
+## Configuration
+
+In DeepSeek Harness, the bundle accepts a small configuration object:
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `enabled` | boolean | `true` | Set to `false` to disable the session-start gate injection. |
+| `gateContent` | string | built-in gate text | Override the text injected into the first model step. |
+
+To change it, override the row by id in your profile's `cordis.patch.yml`:
+
+```yaml
+- insert:
+    - id: embedded-workbench
+      name: 'embedded-workbench'
+      config:
+        enabled: true
+        gateContent: |
+          ...
+```
+
+## Uninstall
+
+- If you installed through the DSH plugin manager, remove the `embedded-workbench` plugin from the target profile using the same manager you used to install it.
+- If you copied `skills/*` manually, delete the copied skill directories from `~/.agents/skills/` or the project `.dsh/skills/`.
+- If you added the bundle as a `cordis.patch.yml` row, remove the row with `id: embedded-workbench` from the profile patch and restart DSH.
+
+## Permissions & Data
+
+- The plugin runtime reads only the `skills/` directory shipped inside the package, in order to register skills through DSH's standard filesystem skill provider.
+- It injects the configured gate text into the first model step of a session.
+- It does not read credentials, open network connections, or access user data outside the DSH session context.
+- When the skills are actually used, the model may read project files as directed by the user, just like any other coding skill.
+
+## Troubleshooting
+
+- Skills not visible in DSH: confirm you are on a DSH version that supports `ctx.skills`/Agent Skills discovery, and restart the profile after install.
+- Gate not injected: check that `enabled` is not `false` and that the row id `embedded-workbench` is present in the active profile patch.
+- Plugin manager rejects installation: make sure `@deepseek-ai/*` packages are declared as `peerDependencies`, not regular `dependencies`.
+- After manual copy, DSH still doesn't see the skills: use the native bundle install (`dsh plugin add "github:AmethystLuna/embedded-workbench"`) instead of copying.
+
+## Development
+
+```bash
+npm install
+npm run typecheck
+npm run build
+```
+
+Run the DSH skills registration test and trigger tests:
+
+```bash
+node tests/dsh-skills-registration.test.mjs
+bash tests/skill-triggering/run-all.sh
+```
+
+## License & Security
+
+Licensed under MIT. See [LICENSE](LICENSE).
+
+To report a security vulnerability, do **not** open a public issue. Use the private Security Advisory path or the contact method in [SECURITY.md](SECURITY.md).
+
 ## Other Plugins Recommended
 
 | Plugin | Description |

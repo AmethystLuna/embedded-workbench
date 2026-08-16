@@ -174,6 +174,68 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 - DeepSeek Harness (dsh): dev preview — 已实测 mainline 2026-08-14（gate bundle 加载并注入会话成功）
 - 无外部依赖
 
+## 配置
+
+在 DeepSeek Harness 中，bundle 支持以下配置：
+
+| 键 | 类型 | 默认值 | 说明 |
+|---|---|---|---|
+| `enabled` | boolean | `true` | 设为 `false` 可关闭会话开始时的 gate 注入。 |
+| `gateContent` | string | 内置 gate 文本 | 覆盖注入到首轮模型上下文中的文本。 |
+
+在 profile 的 `cordis.patch.yml` 中按 row id 覆盖：
+
+```yaml
+- insert:
+    - id: embedded-workbench
+      name: 'embedded-workbench'
+      config:
+        enabled: true
+        gateContent: |
+          ...
+```
+
+## 卸载
+
+- 如果通过 DSH 插件管理器安装，请使用同一管理器从目标 profile 中移除 `embedded-workbench`。
+- 如果手动复制过 `skills/*`，请删除复制到 `~/.agents/skills/` 或项目 `.dsh/skills/` 下的对应目录。
+- 如果通过 `cordis.patch.yml` 添加，请删除 profile patch 中 `id: embedded-workbench` 对应的行，并重启 DSH。
+
+## 权限与数据
+
+- 插件运行时只读取包内自带的 `skills/` 目录，用于通过 DSH 标准 filesystem skill provider 注册技能。
+- 它会在会话首轮向模型上下文注入配置好的 gate 文本。
+- 它不读取凭据、不发起网络连接，也不会访问 DSH 会话上下文之外的用户数据。
+- 实际使用技能时，模型会像使用其他编码技能一样，按用户指示读取项目文件。
+
+## 故障排查
+
+- 技能在 DSH 中不可见：确认 DSH 版本支持 `ctx.skills` / Agent Skills 发现，并在安装后重启 profile。
+- Gate 未注入：检查 `enabled` 是否为 `false`，以及 profile patch 中是否存在 `id: embedded-workbench` 的行。
+- 插件管理器拒绝安装：确认 `@deepseek-ai/*` 包声明在 `peerDependencies` 中，而不是 `dependencies`。
+- 手动复制后 DSH 仍看不到技能：改用原生 bundle 安装（`dsh plugin add "github:AmethystLuna/embedded-workbench"`）。
+
+## 开发
+
+```bash
+npm install
+npm run typecheck
+npm run build
+```
+
+运行 DSH 技能注册测试和触发测试：
+
+```bash
+node tests/dsh-skills-registration.test.mjs
+bash tests/skill-triggering/run-all.sh
+```
+
+## 许可证与安全
+
+本项目使用 MIT 许可证，见 [LICENSE](LICENSE)。
+
+如发现安全漏洞，请**不要**公开创建 issue，应使用 GitHub Security Advisory 或 [SECURITY.md](SECURITY.md) 中的联系方式私下报告。
+
 ## 其他插件推荐
 
 | 插件 | 简介 |
