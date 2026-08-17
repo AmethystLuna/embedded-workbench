@@ -8,12 +8,16 @@
  * the standard filesystem provider, so they appear in every session catalog
  * without a manual copy step.
  *
- * Injection listens on the official `agent/session-start` lifecycle event
- * (once before the first turn) and seeds the gate via `agent.inject`, so
- * the text enters durable context before the first request — the dsh-native
- * counterpart of the Claude SessionStart matcher (startup|clear|compact;
- * resume keeps the gate already in history). The default gate text is the
- * dsh-native adaptation of `hooks/session-start-content.md`: behavior rules
+ * Injection listens on agent/pre-step and appends the gate to the FIRST
+ * model step that runs, once per session (guarded by the session's durable
+ * history). Session-start inbox injection was dropped: a blank-session preset
+ * switch (agentPreset.select -> recompose) can clear the inbox before the
+ * first step, losing the gate for the whole session. The pre-step decision is
+ * the durable path - anchored/bootstrap presets that strip first-step injected
+ * reminders (skill catalog, AGENTS.md, gate plugins) simply defer this message
+ * to the first step after their promotion, and the history guard re-injects it
+ * there. The default gate text is the dsh-native adaptation of
+ * `hooks/session-start-content.md`: behavior rules
  * (1% Rule / Red Flags / Plan Verification Gate) stay in sync, while
  * presentation is adapted to dsh's native skill catalog — no roster table
  * (the model sees skills in its catalog) and no install instructions (those
