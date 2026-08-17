@@ -80,14 +80,16 @@ git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugi
 原生 dsh 支持以 cordis 插件 bundle 的形式提供，位于**仓库根**（根 `package.json` 声明了 `dsh.bundle`）：
 
 - 技能遵循 Agent Skills 开放标准，被 dsh 的 `skill-filesystem` provider 原样发现——零代码。
-- bundle 将会话启动门禁（1% Rule / Red Flags / Plan Verification Gate）注入每个 agent 会话的第一个模型步骤——是 Claude `SessionStart` hook 在 dsh 的原生对应物，并注册了模型可见的目录条目（`cordis_inspect`）。
+- bundle 将首步门禁（1% Rule / Red Flags / Plan Verification Gate）注入每个 agent 会话的第一个模型步骤——是 Claude `SessionStart` hook 在 dsh 的原生对应物，并注册了模型可见的目录条目（`cordis_inspect`）。
 - 4 个自定义 agent 有意不移植——dsh 原生 subagent 工具已覆盖并行多 agent 工作。
 
 安装：参见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)（四种方式，从纯技能拷贝到 `dsh plugin add`）。
 
+> DSH 安装注意：包名已使用 scoped 形式 `@amethystluna/embedded-workbench`。在 web profile 的 `package.json` 中，依赖键与 `dsh.profile.bundles` 必须写 `@amethystluna/embedded-workbench`；否则 dsh 加载器会因找不到 `node_modules/@amethystluna/embedded-workbench` 而启动失败。
+
 ## 使用
 
-插件在会话启动时自动注入能力通知（含技能表、1% Rule、Red Flags 强化）。技能按需加载：
+插件在会话首个模型步骤自动注入能力通知（含技能表、1% Rule、Red Flags 强化）。技能按需加载：
 
 - 说"用 Multi-Agent Workflow"或调用 `Skill("embedded-workbench")` 加载完整工作流系统
 - 领域技能在任务匹配其 `Use when` 描述时自动激活——NOT 子句防止误触发（如纯格式化不会加载 c-cpp-dev）
@@ -180,7 +182,7 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 
 | 键 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
-| `enabled` | boolean | `true` | 设为 `false` 可关闭会话开始时的 gate 注入。 |
+| `enabled` | boolean | `true` | 设为 `false` 可关闭首步 Gate 注入。 |
 | `gateContent` | string | 内置 gate 文本 | 覆盖注入到首轮模型上下文中的文本。 |
 
 在 profile 的 `cordis.patch.yml` 中按 row id 覆盖：

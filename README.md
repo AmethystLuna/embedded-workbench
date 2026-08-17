@@ -82,14 +82,16 @@ Then enable in `~/.claude/settings.json`:
 Native dsh support ships as a cordis plugin bundle at the repository root (the root `package.json` declares `dsh.bundle`):
 
 - The skills are discovered as-is by dsh's `skill-filesystem` provider (Agent Skills open standard) — zero code.
-- The bundle injects the session-start gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. It also registers a model-visible catalog entry (`cordis_inspect`).
+- The bundle injects the first-model-step gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. It also registers a model-visible catalog entry (`cordis_inspect`).
 - The 4 custom agents are intentionally not ported — dsh's native subagent tooling covers parallel multi-agent work.
 
 Install: see [`.dsh/INSTALL.md`](.dsh/INSTALL.md) (four options, from plain skill copy to `dsh plugin add`).
 
+> DSH install note: the package name is scoped as `@amethystluna/embedded-workbench`. In the web profile's `package.json`, both the dependency key and the `dsh.profile.bundles` entry must use the scoped name; the old unscoped name causes the dsh loader to fail with `ERR_MODULE_NOT_FOUND`.
+
 ## Usage
 
-The plugin auto-injects a capability notification at session start with a skill table, 1% Rule, and Red Flags reinforcement. Skills are loaded on demand:
+The plugin auto-injects a capability notification into the first model step with a skill table, 1% Rule, and Red Flags reinforcement. Skills are loaded on demand:
 
 - Say "use Multi-Agent Workflow" or invoke `Skill("embedded-workbench")` for the full workflow system
 - Domain skills activate automatically when their `Use when` description matches your task — NOT clauses prevent false triggers (e.g., formatting-only won't load c-cpp-dev)
