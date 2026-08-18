@@ -2,7 +2,6 @@
 
 <p align="center"><strong>English</strong> · <a href="README.md">中文</a></p>
 
-
 [![HOL Guard Scanner](https://img.shields.io/badge/HOL%20Guard-passing-00a67e)](https://github.com/hashgraph-online/hol-guard)
 
 Embedded C/C++ firmware toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns. v0.6.0.
