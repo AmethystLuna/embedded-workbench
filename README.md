@@ -1,49 +1,46 @@
-[中文](README.zh-CN.md)
+# 嵌入式工作台
 
----
+<p align="center"><a href="README.en-US.md">English</a> · <strong>中文</strong></p>
 
-# Embedded Workbench
 
-[![HOL Guard Scanner](https://img.shields.io/badge/HOL%20Guard-passing-00a67e)](https://github.com/hashgraph-online/hol-guard)
+嵌入式 C/C++ 固件开发工具箱 — 4 个代理、7 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱。v0.6.0。
 
-Embedded C/C++ firmware toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns. v0.6.0.
+**跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
 
-**Cross-platform** — works with Claude Code, Codex CLI, Cursor, Kimi CLI, OpenCode, and ZCode. Built on the [Agent Skills](https://agentskills.io) open standard.
+## 组件
 
-## Components
+### 代理 (4)
 
-### Agents (4)
+| 代理 | 模型 | 说明 |
+| ------ | ------ | ------ |
+| `architecture-steward` | opus / gpt-5.4 | 只读规划：设计包、模块边界、切片拆分 |
+| `design-reviewer` | sonnet / gpt-5.3-codex | 设计文档事实核查：逐条核验声称与代码库事实 |
+| `execution-worker` | sonnet / gpt-5.3-codex | 计划 → 审批 → 实施循环，含编译验证 |
+| `quality-coordinator` | sonnet / gpt-5.3-codex | 实现审查：Bug 发现、合规检查、结束完整性 |
 
-| Agent | Model | Description |
-| ------- | ------- | ------------- |
-| `architecture-steward` | opus / gpt-5.4 | Read-only planning: design packages, module boundaries, slice breakdown |
-| `design-reviewer` | sonnet / gpt-5.3-codex | Design doc fact-check: verifies claims against codebase |
-| `execution-worker` | sonnet / gpt-5.3-codex | Plan → approve → implement cycle with build verification |
-| `quality-coordinator` | sonnet / gpt-5.3-codex | Implementation review: bugs, compliance, closure |
+### 技能 (8)
 
-### Skills (8)
+| 技能 | 说明 |
+| ------ | ------ |
+| `embedded-workbench` | 引导技能：工作流、策略、子代理映射、主动建议、跨平台工具映射、文档模板 |
+| `debug-methodology` | 8 条调试铁律、修复准则、迭代调试案例研究 |
+| `embedded-firmware-dev` | FreeRTOS、中断、NVM 存储、异步生命周期、边界分析、架构原则、LVGL 陷阱 |
+| `keil-mdk-build` | UV4 CLI、ARM Compiler 5/6、.map 分析、合并打包、构建诊断 |
+| `c-cpp-dev` | C/C++ 代码生成、风格、内存布局、重构 |
+| `state-machine-design` | 状态模型、重试、超时、转换门控、实现模式 |
+| `hardfault-triage` | 处理器异常分类 — 故障寄存器、栈帧、PC 定位源码、根因分类 |
 
-| Skill | Description |
-| ------- | ------------- |
-| `embedded-workbench` | Bootstrap: workflows, policies, sub-agent mapping, proactive suggestions, platform tool mapping, document templates |
-| `debug-methodology` | 8 iron rules, fix principles, iterative debugging case study |
-| `embedded-firmware-dev` | FreeRTOS, ISR, NVM storage, async lifecycle, boundary analysis, architecture principles, LVGL pitfalls |
-| `keil-mdk-build` | UV4 CLI, ARM Compiler 5/6, .map analysis, merge/packaging, build diagnostics |
-| `c-cpp-dev` | Code generation, style, memory layout, refactoring for C/C++ |
-| `state-machine-design` | State models, retries, timeouts, transition gates, implementation patterns |
-| `hardfault-triage` | Processor exception triage — fault registers, stack frames, PC-to-source, root-cause classification |
+`logicprobe`（文档与计划声称核查、逻辑原语验证、对抗性探测）自 v0.6.0 起**拆分为独立插件** — 见下方[其他插件推荐](#其他插件推荐)。
 
-`logicprobe` (design doc & plan claim verification, logic-primitive verification, adversarial probing) was **split out into its own plugin** in v0.6.0 — see [Other Plugins Recommended](#other-plugins-recommended).
+### 深度参考
 
-### Deep References
+`embedded-firmware-dev`、`debug-methodology`、`state-machine-design`、`c-cpp-dev` 包含深度参考或代码示例。亮点：12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱、7 轮迭代调试案例研究、状态机实现模式、嵌入式 C 专项（volatile MMIO、链接器段、ISR 安全路径）。
 
-`embedded-firmware-dev`, `debug-methodology`, `state-machine-design`, and `c-cpp-dev` include in-depth reference material and code examples. Highlights: 12 architecture principles, embedded patterns (GIF timer safety, state latches, async lifecycle), LVGL pitfalls, 7-round iterative debugging case study, state machine implementation patterns, and embedded C specifics (volatile MMIO, linker sections, ISR wrappers).
+## 安装
 
-## Installation
+### Marketplace 安装（推荐）
 
-### Marketplace install (recommended)
-
-Add the marketplace to `~/.claude/settings.json`:
+在 `~/.claude/settings.json` 中添加 marketplace：
 
 ```json
 {
@@ -55,19 +52,19 @@ Add the marketplace to `~/.claude/settings.json`:
 }
 ```
 
-Then install from CLI:
+然后通过 CLI 安装：
 
 ```bash
 claude plugin install embedded-workbench@embedded-workbench
 ```
 
-### Manual install
+### 手动安装
 
 ```bash
 git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugins/dev/embedded-workbench
 ```
 
-Then enable in `~/.claude/settings.json`:
+然后在 `~/.claude/settings.json` 中启用：
 
 ```json
 {
@@ -79,79 +76,79 @@ Then enable in `~/.claude/settings.json`:
 
 ## DeepSeek Harness (dsh)
 
-Native dsh support ships as a cordis plugin bundle at the repository root (the root `package.json` declares `dsh.bundle`):
+原生 dsh 支持以 cordis 插件 bundle 的形式提供，位于**仓库根**（根 `package.json` 声明了 `dsh.bundle`）：
 
-- The skills are discovered as-is by dsh's `skill-filesystem` provider (Agent Skills open standard) — zero code.
-- The bundle injects the first-model-step gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. It also registers a model-visible catalog entry (`cordis_inspect`).
-- The 4 custom agents are intentionally not ported — dsh's native subagent tooling covers parallel multi-agent work.
+- 技能遵循 Agent Skills 开放标准，被 dsh 的 `skill-filesystem` provider 原样发现——零代码。
+- bundle 将首步门禁（1% Rule / Red Flags / Plan Verification Gate）注入每个 agent 会话的第一个模型步骤——是 Claude `SessionStart` hook 在 dsh 的原生对应物，并注册了模型可见的目录条目（`cordis_inspect`）。
+- 4 个自定义 agent 有意不移植——dsh 原生 subagent 工具已覆盖并行多 agent 工作。
 
-Install: see [`.dsh/INSTALL.md`](.dsh/INSTALL.md) (four options, from plain skill copy to `dsh plugin add`).
+安装：参见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)（四种方式，从纯技能拷贝到 `dsh plugin add`）。
 
-> DSH install note: the package name is scoped as `@amethystluna/embedded-workbench`. In the web profile's `package.json`, both the dependency key and the `dsh.profile.bundles` entry must use the scoped name; the old unscoped name causes the dsh loader to fail with `ERR_MODULE_NOT_FOUND`.
+> DSH 安装注意：包名已使用 scoped 形式 `@amethystluna/embedded-workbench`。在 web profile 的 `package.json` 中，依赖键与 `dsh.profile.bundles` 必须写 `@amethystluna/embedded-workbench`；否则 dsh 加载器会因找不到 `node_modules/@amethystluna/embedded-workbench` 而启动失败。
 
-## Usage
+## 使用
 
-The plugin auto-injects a capability notification into the first model step with a skill table, 1% Rule, and Red Flags reinforcement. Skills are loaded on demand:
+插件在会话首个模型步骤自动注入能力通知（含技能表、1% Rule、Red Flags 强化）。技能按需加载：
 
-- Say "use Multi-Agent Workflow" or invoke `Skill("embedded-workbench")` for the full workflow system
-- Domain skills activate automatically when their `Use when` description matches your task — NOT clauses prevent false triggers (e.g., formatting-only won't load c-cpp-dev)
-- The agent proactively suggests verification, adversarial probing, and parallel subagents when it detects state machines, behavioral claims, or multi-module tasks
-- No manual CLAUDE.md configuration required
+- 说"用 Multi-Agent Workflow"或调用 `Skill("embedded-workbench")` 加载完整工作流系统
+- 领域技能在任务匹配其 `Use when` 描述时自动激活——NOT 子句防止误触发（如纯格式化不会加载 c-cpp-dev）
+- Agent 在检测到状态机、行为声称或多模块任务时，主动建议验证、对抗探测和并行子代理
+- 无需手动配置 CLAUDE.md
 
 ## Codex CLI
 
-This plugin also supports OpenAI Codex CLI. Skills follow the Agent Skills standard and work identically across both platforms. Agents are provided in Codex TOML format under `.codex/agents/`.
+本插件同样支持 OpenAI Codex CLI。技能遵循 Agent Skills 标准，跨平台行为一致。代理以 Codex TOML 格式提供于 `.codex/agents/`。
 
-### Codex install
+### Codex 安装
 
 ```bash
-# Add as a marketplace
+# 添加 marketplace
 codex plugin marketplace add AmethystLuna/embedded-workbench
 
-# Install
+# 安装
 codex plugin install embedded-workbench
 ```
 
-Or manually:
+或手动安装：
 
 ```bash
 git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.codex/plugins/embedded-workbench
 ```
 
-Skills are invoked with `$skill-name` (e.g. `$debug-methodology`) or auto-selected by Codex based on task context.
+技能通过 `$skill-name` 调用（如 `$debug-methodology`），或由 Codex 根据任务上下文自动匹配。
 
 ## Cursor
 
-Cursor 2.5+ has built-in plugin support. Agents in `agents/` are auto-discovered.
+Cursor 2.5+ 内置插件支持。`agents/` 中的代理自动发现。
 
-### Cursor install
+### Cursor 安装
 
 ```bash
-# Clone to Cursor plugins directory
+# 克隆到 Cursor 插件目录
 git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.cursor/plugins/embedded-workbench
 ```
 
-Or install from the Cursor plugin marketplace UI: `/add-plugin AmethystLuna/embedded-workbench`
+或通过 Cursor 插件市场 UI 安装：`/add-plugin AmethystLuna/embedded-workbench`
 
 ## Kimi CLI
 
-Kimi CLI discovers skills from `.claude/skills/` paths automatically. The `.kimi-plugin/plugin.json` manifest registers the plugin for Kimi's plugin manager.
+Kimi CLI 自动从 `.claude/skills/` 等标准路径发现技能。`.kimi-plugin/plugin.json` 为 Kimi 插件管理器注册插件。
 
-### Kimi install
+### Kimi 安装
 
 ```bash
-# Via Kimi plugin manager
+# 通过 Kimi 插件管理器
 /plugins install https://github.com/AmethystLuna/embedded-workbench.git
 
-# Or clone manually
+# 或手动克隆
 git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.kimi/plugins/embedded-workbench
 ```
 
-Skills are invoked with `/skill:<name>` (e.g. `/skill:debug-methodology`).
+技能通过 `/skill:<name>` 调用（如 `/skill:debug-methodology`）。
 
 ## OpenCode
 
-Skills are auto-discovered from `.claude/skills/` and `.codex/skills/` paths. Add to your `opencode.json`:
+技能从 `.claude/skills/` 和 `.codex/skills/` 路径自动发现。在 `opencode.json` 中添加：
 
 ```json
 {
@@ -159,35 +156,35 @@ Skills are auto-discovered from `.claude/skills/` and `.codex/skills/` paths. Ad
 }
 ```
 
-Or install via `skop` which consumes the Claude marketplace manifest. See `.opencode/INSTALL.md` for detailed instructions.
+或通过 `skop` 安装（兼容 Claude marketplace 清单）。详见 `.opencode/INSTALL.md`。
 
-## ZCode (Z.AI)
+## ZCode（智谱 Z.AI）
 
-ZCode 3.0+ follows the Agent Skills standard. No plugin marketplace — manually copy skills to `.zcode/skills/`:
+ZCode 3.0+ 遵循 Agent Skills 标准。无插件商店，手动复制技能到 `.zcode/skills/`：
 
 ```bash
 git clone https://github.com/AmethystLuna/embedded-workbench.git
 cp -r embedded-workbench/skills/* .zcode/skills/
 ```
 
-Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/skills/` and `.codex/skills/`. See `.zcode/INSTALL.md` for details.
+技能通过 `$skill-name` 调用。ZCode 也自动从 `.claude/skills/` 和 `.codex/skills/` 发现技能。详见 `.zcode/INSTALL.md`。
 
-## Requirements
+## 依赖
 
-- Claude Code v2.1+ / Codex CLI latest / Cursor 2.5+ / Kimi CLI latest / OpenCode latest / ZCode 3.0+
-- DeepSeek Harness (dsh): dev preview — verified on mainline 2026-08-14 (gate bundle loaded and injected in-session)
-- No external dependencies
+- Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
+- DeepSeek Harness (dsh): dev preview — 已实测 mainline 2026-08-14（gate bundle 加载并注入会话成功）
+- 无外部依赖
 
-## Configuration
+## 配置
 
-In DeepSeek Harness, the bundle accepts a small configuration object:
+在 DeepSeek Harness 中，bundle 支持以下配置：
 
-| Key | Type | Default | Description |
+| 键 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
-| `enabled` | boolean | `true` | Set to `false` to disable the session-start gate injection. |
-| `gateContent` | string | built-in gate text | Override the text injected into the first model step. |
+| `enabled` | boolean | `true` | 设为 `false` 可关闭首步 Gate 注入。 |
+| `gateContent` | string | 内置 gate 文本 | 覆盖注入到首轮模型上下文中的文本。 |
 
-To change it, override the row by id in your profile's `cordis.patch.yml`:
+在 profile 的 `cordis.patch.yml` 中按 row id 覆盖：
 
 ```yaml
 - insert:
@@ -199,27 +196,27 @@ To change it, override the row by id in your profile's `cordis.patch.yml`:
           ...
 ```
 
-## Uninstall
+## 卸载
 
-- If you installed through the DSH plugin manager, remove the `embedded-workbench` plugin from the target profile using the same manager you used to install it.
-- If you copied `skills/*` manually, delete the copied skill directories from `~/.agents/skills/` or the project `.dsh/skills/`.
-- If you added the bundle as a `cordis.patch.yml` row, remove the row with `id: embedded-workbench` from the profile patch and restart DSH.
+- 如果通过 DSH 插件管理器安装，请使用同一管理器从目标 profile 中移除 `embedded-workbench`。
+- 如果手动复制过 `skills/*`，请删除复制到 `~/.agents/skills/` 或项目 `.dsh/skills/` 下的对应目录。
+- 如果通过 `cordis.patch.yml` 添加，请删除 profile patch 中 `id: embedded-workbench` 对应的行，并重启 DSH。
 
-## Permissions & Data
+## 权限与数据
 
-- The plugin runtime reads only the `skills/` directory shipped inside the package, in order to register skills through DSH's standard filesystem skill provider.
-- It injects the configured gate text into the first model step of a session.
-- It does not read credentials, open network connections, or access user data outside the DSH session context.
-- When the skills are actually used, the model may read project files as directed by the user, just like any other coding skill.
+- 插件运行时只读取包内自带的 `skills/` 目录，用于通过 DSH 标准 filesystem skill provider 注册技能。
+- 它会在会话首轮向模型上下文注入配置好的 gate 文本。
+- 它不读取凭据、不发起网络连接，也不会访问 DSH 会话上下文之外的用户数据。
+- 实际使用技能时，模型会像使用其他编码技能一样，按用户指示读取项目文件。
 
-## Troubleshooting
+## 故障排查
 
-- Skills not visible in DSH: confirm you are on a DSH version that supports `ctx.skills`/Agent Skills discovery, and restart the profile after install.
-- Gate not injected: check that `enabled` is not `false` and that the row id `embedded-workbench` is present in the active profile patch.
-- Plugin manager rejects installation: make sure `@deepseek-ai/*` packages are declared as `peerDependencies`, not regular `dependencies`.
-- After manual copy, DSH still doesn't see the skills: use the native bundle install (`dsh plugin add "github:AmethystLuna/embedded-workbench"`) instead of copying.
+- 技能在 DSH 中不可见：确认 DSH 版本支持 `ctx.skills` / Agent Skills 发现，并在安装后重启 profile。
+- Gate 未注入：检查 `enabled` 是否为 `false`，以及 profile patch 中是否存在 `id: embedded-workbench` 的行。
+- 插件管理器拒绝安装：确认 `@deepseek-ai/*` 包声明在 `peerDependencies` 中，而不是 `dependencies`。
+- 手动复制后 DSH 仍看不到技能：改用原生 bundle 安装（`dsh plugin add "github:AmethystLuna/embedded-workbench"`）。
 
-## Development
+## 开发
 
 ```bash
 npm install
@@ -227,36 +224,36 @@ npm run typecheck
 npm run build
 ```
 
-Run the DSH skills registration test and trigger tests:
+运行 DSH 技能注册测试和触发测试：
 
 ```bash
 node tests/dsh-skills-registration.test.mjs
 bash tests/skill-triggering/run-all.sh
 ```
 
-## License & Security
+## 许可证与安全
 
-Licensed under MIT. See [LICENSE](LICENSE).
+本项目使用 MIT 许可证，见 [LICENSE](LICENSE)。
 
-To report a security vulnerability, do **not** open a public issue. Use the private Security Advisory path or the contact method in [SECURITY.md](SECURITY.md).
+如发现安全漏洞，请**不要**公开创建 issue，应使用 GitHub Security Advisory 或 [SECURITY.md](SECURITY.md) 中的联系方式私下报告。
 
-## Other Plugins Recommended
+## 其他插件推荐
 
-| Plugin | Description |
-|--------|-------------|
-| [logicprobe](https://github.com/AmethystLuna/logicprobe) | Design doc & plan claim verification — logic-primitive verification (7 structural + 7 adversarial probes), refactoring regression detection. Split out of this plugin in v0.6.0; the Plan Verification Gate requires it. |
-| [superpowers](https://github.com/obra/superpowers) | The original agent discipline engine — skill loading enforcement, Red Flags, subagent-driven development. Many of this plugin's agent-compliance patterns (1% Rule, Red Flags, `<SUBAGENT-STOP>`, instruction priority) were adapted from Superpowers. |
+| 插件 | 简介 |
+|------|------|
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 文档与计划声称核查——逻辑原语验证（7 结构 + 7 对抗探针）、重构回归检测。自本插件 v0.6.0 拆分；Plan Verification Gate 依赖它。 |
+| [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎——技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
 
-## Acknowledgments
+## 致谢
 
-This plugin's agent-compliance architecture is adapted from [Superpowers](https://github.com/obra/superpowers) by Jesse Vincent (MIT License). Specific patterns adapted with gratitude:
+本插件的 agent 合规架构借鉴自 Jesse Vincent 的 [Superpowers](https://github.com/obra/superpowers)（MIT License）。特别感谢以下设计模式的启发：
 
-- **1% Rule** — the insight that agents resist loading skills and need extreme language to overcome that bias
-- **Red Flags table** — enumerating agent rationalizations to short-circuit them
-- **`<SUBAGENT-STOP>`** — preventing subagents from re-loading bootstrap context
-- **Instruction Priority** — user > skills > system prompt hierarchy
-- **Skill Types** — Rigid vs Flexible classification
-- **Session-start hook injection pattern** — injecting capability context at session start
-- **Trigger test framework** — `tests/skill-triggering/` structure and methodology
+- **1% Rule** — agent 会抗拒加载技能，需要极端语言突破偏见的关键洞察
+- **Red Flags 表** — 枚举 agent 的合理化借口以预先阻断
+- **`<SUBAGENT-STOP>`** — 阻止子代理重复加载引导上下文
+- **指令优先级** — 用户 > 技能 > 系统提示的分层架构
+- **技能类型** — Rigid vs Flexible 分类体系
+- **会话启动注入模式** — 在会话启动时注入能力上下文的 hook 机制
+- **触发测试框架** — `tests/skill-triggering/` 的结构和方法论
 
-Superpowers is a general-purpose development plugin. Embedded Workbench applies the same discipline patterns to the embedded C/C++ domain.
+Superpowers 是通用开发插件。Embedded Workbench 将相同的纪律模式应用到嵌入式 C/C++ 领域。

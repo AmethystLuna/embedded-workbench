@@ -11,7 +11,7 @@ on:
       - 'package-lock.json'
       - 'tsconfig.json'
       - 'README.md'
-      - 'README.zh-CN.md'
+      - 'README.en-US.md'
       - '.github/workflows/dsh-bundle.yml'
   pull_request:
     paths:
@@ -23,7 +23,7 @@ on:
       - 'package-lock.json'
       - 'tsconfig.json'
       - 'README.md'
-      - 'README.zh-CN.md'
+      - 'README.en-US.md'
 
 jobs:
   build:
@@ -49,4 +49,4 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Lint dsh docs
-        run: npx --yes markdownlint-cli@0.42.0 ".dsh/**/*.md" "README.md" "README.zh-CN.md" "RELEASE.md"
+        run: npx --yes markdownlint-cli@0.42.0 ".dsh/**/*.md" "README.md" "README.en-US.md" "RELEASE.md"
