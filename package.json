@@ -20,7 +20,7 @@
                   "cordis.patch.yml"
               ],
     "dsh":  {
-                "category":  "extension",
+                "category":  "skill",
                 "displayName":  "嵌入式工作台",
                 "bundle":  {
                                "patch":  "./cordis.patch.yml"
