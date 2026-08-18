@@ -2,7 +2,7 @@
 
 <p align="center"><a href="README.en-US.md">English</a> · <strong>中文</strong></p>
 
-嵌入式 C/C++ 固件开发工具箱 — 4 个代理、7 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱。v0.6.0。
+嵌入式 C/C++ 固件开发工具箱 — 4 个代理、7 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱。
 
 **跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
 
@@ -10,12 +10,12 @@
 
 ### 代理 (4)
 
-| 代理 | 模型 | 说明 |
-| ------ | ------ | ------ |
-| `architecture-steward` | opus / gpt-5.4 | 只读规划：设计包、模块边界、切片拆分 |
-| `design-reviewer` | sonnet / gpt-5.3-codex | 设计文档事实核查：逐条核验声称与代码库事实 |
-| `execution-worker` | sonnet / gpt-5.3-codex | 计划 → 审批 → 实施循环，含编译验证 |
-| `quality-coordinator` | sonnet / gpt-5.3-codex | 实现审查：Bug 发现、合规检查、结束完整性 |
+| 代理 | 说明 |
+| ------ | ------ |
+| `architecture-steward` | 只读规划：设计包、模块边界、切片拆分 |
+| `design-reviewer` | 设计文档事实核查：逐条核验声称与代码库事实 |
+| `execution-worker` | 计划 → 审批 → 实施循环，含编译验证 |
+| `quality-coordinator` | 实现审查：Bug 发现、合规检查、结束完整性 |
 
 ### 技能 (8)
 
@@ -29,7 +29,9 @@
 | `state-machine-design` | 状态模型、重试、超时、转换门控、实现模式 |
 | `hardfault-triage` | 处理器异常分类 — 故障寄存器、栈帧、PC 定位源码、根因分类 |
 
-`logicprobe`（文档与计划声称核查、逻辑原语验证、对抗性探测）自 v0.6.0 起**拆分为独立插件** — 见下方[其他插件推荐](#其他插件推荐)。
+`logicprobe`（文档与计划声称核查、逻辑原语验证、对抗性探测）**已拆分为独立插件** — 见下方[其他插件推荐](#其他插件推荐)。
+
+> 技能内容大多来自作者个人嵌入式/固件开发工作经验和代码洁癖，按实际工程踩坑与约束沉淀，而非泛泛的模型生成内容。
 
 ### 深度参考
 
@@ -240,7 +242,7 @@ bash tests/skill-triggering/run-all.sh
 
 | 插件 | 简介 |
 |------|------|
-| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 文档与计划声称核查——逻辑原语验证（7 结构 + 7 对抗探针）、重构回归检测。自本插件 v0.6.0 拆分；Plan Verification Gate 依赖它。 |
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 文档与计划声称核查——逻辑原语验证（7 结构 + 7 对抗探针）、重构回归检测。自本插件拆分；Plan Verification Gate 依赖它。 |
 | [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎——技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
 
 ## 致谢
