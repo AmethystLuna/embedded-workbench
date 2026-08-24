@@ -32,7 +32,10 @@ If your `dsh` configuration supports `customSkillDirs` (rank 300), point it at t
 Install the bundle from the repository root (the root `package.json` declares `dsh.bundle`):
 
 ```bash
+# from GitHub (source of truth)
 npx -p @deepseek-ai/dsh dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
+# or from npm (published as dsh-embedded-workbench)
+npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 ```
 
 This installs under the package name `dsh-embedded-workbench`. If you manage the profile's `package.json` manually, use `dsh-embedded-workbench` for both the dependency key and the `dsh.profile.bundles` entry.
@@ -64,7 +67,7 @@ To change the gate text or disable injection, override the row by id in your pro
 
 - Skill frontmatter already matches the DSH expectations: `name` is kebab-case and matches the directory name; `description` is present. The policy keys `disable-model-invocation` / `user-invocable` are omitted, which defaults to model- AND user-invocable — the intended behavior.
 - DSH is in v0.1 developer preview; breaking changes are expected. Pin your `dsh` version.
-- DSH has no plugin marketplace for this repo — manual install only.
+- DSH has no plugin marketplace for this repo — install via npm (`dsh-embedded-workbench`) or manually.
 - The first-model-step gate injection is provided natively by the root bundle (Option D). The 4 custom agents (`architecture-steward`, `design-reviewer`, `execution-worker`, `quality-coordinator`) are intentionally **not** ported — dsh's native subagent tooling covers parallel multi-agent work, and the main model takes the steward/reviewer roles directly.
 - The Plan Verification Gate references the `logicprobe` skill — a **separate plugin** (same author). Install it too; without it the gate degrades to manual confirmation mode.
 - **Gate injection semantics**: the gate is appended to the first model step that runs via `agent/pre-step`, once per session, guarded by the session's durable history. This is resilient to blank-session preset switches that clear the agent inbox before the first step; anchored/bootstrap presets may strip first-step Gate messages and the plugin re-injects after promotion. The gate text is the dsh-native adaptation of `hooks/session-start-content.md` — behavior rules synced, presentation adapted to the dsh skill catalog (no roster table, no install instructions); review it per deployment and override via `gateContent`.

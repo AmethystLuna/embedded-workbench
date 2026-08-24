@@ -46,7 +46,7 @@ Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem a
 
 ## 3. Real-profile trial (end-to-end, requires restarting the target profile)
 
-- [ ] `dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"` (or the npm package name)
+- [ ] `dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"` (or `dsh plugin --profile web add dsh-embedded-workbench`)
 - [ ] Restart the web profile
 - [ ] Confirm all three:
   - `dsh --profile web --dump-config` contains the `embedded-workbench` row

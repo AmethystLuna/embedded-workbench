@@ -85,7 +85,7 @@ git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugi
 
 安装：参见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)（四种方式，从纯技能拷贝到 `dsh plugin add`）。
 
-> DSH 安装注意：包名已使用 scoped 形式 `dsh-embedded-workbench`。在 web profile 的 `package.json` 中，依赖键与 `dsh.profile.bundles` 必须写 `dsh-embedded-workbench`；否则 dsh 加载器会因找不到 `node_modules/dsh-embedded-workbench` 而启动失败。
+> DSH 安装注意：npm 包名为 `dsh-embedded-workbench`（无 scope）。在 web profile 的 `package.json` 中，依赖键与 `dsh.profile.bundles` 必须写 `dsh-embedded-workbench`；否则 dsh 加载器会因找不到 `node_modules/dsh-embedded-workbench` 而启动失败。
 
 ## 使用
 
