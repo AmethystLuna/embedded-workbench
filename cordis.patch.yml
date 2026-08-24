@@ -6,6 +6,6 @@
 
 - insert:
     - id: embedded-workbench
-      name: '@amethystluna/embedded-workbench'
+      name: 'dsh-embedded-workbench'
       config:
         enabled: true

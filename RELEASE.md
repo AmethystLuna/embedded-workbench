@@ -41,7 +41,7 @@ Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem a
 
 - [ ] `npm login`
 - [ ] `npm publish` from the repository root (publish whitelist: `lib/`, `src/`, `skills/`, `cordis.patch.yml`; the root package is the dsh bundle)
-- [ ] Verify: `dsh plugin --profile scratch add @amethystluna/embedded-workbench` → `--dump-config` shows the row
+- [ ] Verify: `dsh plugin --profile scratch add dsh-embedded-workbench` → `--dump-config` shows the row
 - [ ] Developer preview policy: prefer publishing a fixed version over `npm unpublish`/`npm deprecate` for broken releases
 
 ## 3. Real-profile trial (end-to-end, requires restarting the target profile)

@@ -1,5 +1,5 @@
 {
-    "name":  "@amethystluna/embedded-workbench",
+    "name":  "dsh-embedded-workbench",
     "version": "0.7.1",
     "description":  "Embedded C/C++ firmware development toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, and LVGL patterns. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
     "type":  "module",

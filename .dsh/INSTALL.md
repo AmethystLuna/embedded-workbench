@@ -35,7 +35,7 @@ Install the bundle from the repository root (the root `package.json` declares `d
 npx -p @deepseek-ai/dsh dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
 ```
 
-This installs under the scoped package name `@amethystluna/embedded-workbench`. If you manage the profile's `package.json` manually, use `@amethystluna/embedded-workbench` for both the dependency key and the `dsh.profile.bundles` entry.
+This installs under the package name `dsh-embedded-workbench`. If you manage the profile's `package.json` manually, use `dsh-embedded-workbench` for both the dependency key and the `dsh.profile.bundles` entry.
 
 Restart the target profile. This mounts a native cordis plugin that folds the gate text (1% Rule / Red Flags / Plan Verification Gate) into the first model step — the dsh-native counterpart of the Claude Code `SessionStart` hook — and registers the 7 skills in the package's `skills/` directory into dsh's `ctx.skills` registry via the standard filesystem provider, so they appear in the session skill catalog with no manual copy step.
 
@@ -44,7 +44,7 @@ To change the gate text or disable injection, override the row by id in your pro
 ```yaml
 - insert:
     - id: embedded-workbench
-      name: '@amethystluna/embedded-workbench'
+      name: 'dsh-embedded-workbench'
       config:
         enabled: true
         gateContent: |
