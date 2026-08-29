@@ -4,7 +4,9 @@
 
 [![HOL Guard Scanner](https://img.shields.io/badge/HOL%20Guard-passing-00a67e)](https://github.com/hashgraph-online/hol-guard)
 
-Embedded C/C++ firmware toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns.
+Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM
+storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines,
+architecture principles, LVGL patterns, and claim fact-checking.
 
 **Cross-platform** — works with Claude Code, Codex CLI, Cursor, Kimi CLI, OpenCode, and ZCode. Built on the [Agent Skills](https://agentskills.io) open standard.
 

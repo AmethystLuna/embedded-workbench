@@ -1,7 +1,7 @@
 {
     "name":  "dsh-embedded-workbench",
     "version": "0.8.0",
-    "description":  "Embedded C/C++ firmware development toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, and LVGL patterns. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
+    "description":  "Embedded C/C++ firmware development toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, LVGL patterns, and claim fact-checking. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
     "type":  "module",
     "main":  "lib/index.js",
     "types":  "lib/types/index.d.ts",

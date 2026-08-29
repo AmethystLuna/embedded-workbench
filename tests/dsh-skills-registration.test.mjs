@@ -16,6 +16,7 @@ const expected = {
     'debug-methodology',
     'embedded-firmware-dev',
     'embedded-workbench',
+    'fact-check',
     'hardfault-triage',
     'keil-mdk-build',
     'state-machine-design',

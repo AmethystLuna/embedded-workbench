@@ -73,7 +73,7 @@ This plugin defines 4 sub-agents. On platforms without an `Agent` tool:
 | Claude Code Agent | Alternative Approach |
 |-------------------|---------------------|
 | `architecture-steward` | Ask user to run a separate session with planning prompt |
-| `design-reviewer` | Load `logicprobe` skill (standalone plugin) in current session; manually verify claims |
+| `design-reviewer` | Load `logicprobe` skill (standalone plugin; built-in `fact-check` fallback if logicprobe is not installed); manually verify claims |
 | `execution-worker` | Sequential implementation in current session with approval gates |
 | `quality-coordinator` | Self-review checklist from `references/final-qc.md` template |
 

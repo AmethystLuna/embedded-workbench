@@ -1,6 +1,9 @@
 # Installing Embedded Workbench for DeepSeek Harness (dsh)
 
-DeepSeek Harness (`dsh`) discovers skills via the Agent Skills open standard (agentskills.io) — the same `skill-name/SKILL.md` + frontmatter layout this plugin already uses. All 7 skills are discovered as-is; no content changes required.
+DeepSeek Harness (`dsh`) discovers skills via the Agent Skills open standard
+(agentskills.io) — the same `skill-name/SKILL.md` + frontmatter layout this
+plugin already uses. All 8 skills are discovered as-is; no content changes
+required.
 
 ## Install
 
@@ -40,7 +43,12 @@ npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 
 This installs under the package name `dsh-embedded-workbench`. If you manage the profile's `package.json` manually, use `dsh-embedded-workbench` for both the dependency key and the `dsh.profile.bundles` entry.
 
-Restart the target profile. This mounts a native cordis plugin that folds the gate text (1% Rule / Red Flags / Plan Verification Gate) into the first model step — the dsh-native counterpart of the Claude Code `SessionStart` hook — and registers the 7 skills in the package's `skills/` directory into dsh's `ctx.skills` registry via the standard filesystem provider, so they appear in the session skill catalog with no manual copy step.
+Restart the target profile. This mounts a native cordis plugin that folds the
+gate text (1% Rule / Red Flags / Plan Verification Gate) into the first model
+step — the dsh-native counterpart of the Claude Code `SessionStart` hook — and
+registers the 8 skills in the package's `skills/` directory into dsh's
+`ctx.skills` registry via the standard filesystem provider, so they appear in
+the session skill catalog with no manual copy step.
 
 To change the gate text or disable injection, override the row by id in your profile's `cordis.patch.yml` (the row's `config` is replaced wholesale, not deep-merged):
 

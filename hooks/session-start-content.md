@@ -13,10 +13,11 @@ Plugin embedded-workbench is active. You have access to custom agents and skills
 | keil-mdk-build | Keil MDK/ARMCLANG builds, .map analysis, build diagnostics | Non-Keil builds (Makefile, CMake, IAR, GCC-only) |
 | state-machine-design | Async protocols, retries, ACK/NACK, timeout logic in embedded firmware | Generic network protocol design (TCP/HTTP/MQTT) |
 | hardfault-triage | Processor exception triage, fault registers, stack frames, PC-to-source | — |
+| fact-check | Claim-by-claim verification of docs/plans against the codebase — built-in fallback when logicprobe is not installed | State machines / behavioral claims needing model verification (use logicprobe) |
 
 > **⚠️ logicprobe 已拆分为独立插件 / moved to a standalone plugin** (v0.6.0):
-> The design-doc & plan claim-verification skill (logic-primitive verification, adversarial probing, refactoring regression detection) now lives in its own plugin: <https://github.com/AmethystLuna/logicprobe>
-> Install it with `claude plugin install logicprobe@logicprobe` (or clone to `~/.claude/plugins/dev/logicprobe`). Without it, the Plan Verification Gate below degrades to manual confirmation mode.
+> The full claim-verification skill with executable model verification (logic-primitive verification, adversarial probing, refactoring regression detection) now lives in its own plugin: <https://github.com/AmethystLuna/logicprobe>
+> This plugin ships a built-in simplified fallback — `Skill("fact-check")` — for claim-by-claim verification when logicprobe is not installed. Install logicprobe with `claude plugin install logicprobe@logicprobe` (or clone to `~/.claude/plugins/dev/logicprobe`). Without it, behavioral/model claims degrade to manual confirmation mode.
 
 **1% Rule**: If there is even a 1% chance a skill applies to your task, invoke it before responding. If the skill turns out to be wrong for the situation, discard it and move on. The cost of loading a skill is trivial compared to the cost of a preventable mistake.
 
@@ -30,13 +31,16 @@ Plugin embedded-workbench is active. You have access to custom agents and skills
 | "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
 | "I can just read the file directly" | Skills have patterns and pitfalls you will not discover by reading. |
 | "I remember this skill content" | Skills evolve. Always load the current version. |
-| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("logicprobe")` (独立插件 / standalone plugin)? Every plan must pass this gate before exit. |
-| "This plan is too simple for logicprobe" | The skill auto-classifies depth. You don't decide. |
-| "I already read the code, I know the file paths are correct" | Load `Skill("logicprobe")` (外部插件), run Phase 0, append the `## Plan Verification` block. |
+| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("logicprobe")` or, if it is not installed, the built-in fallback `Skill("fact-check")`? Every plan must pass this gate before exit. |
+| "This plan is too simple for logicprobe" | logicprobe auto-classifies depth; the fallback fact-check verifies every claim regardless. You don't decide. |
+| "I already read the code, I know the file paths are correct" | Load `Skill("logicprobe")` or the fallback `Skill("fact-check")`, verify each claim, append the `## Plan Verification` block. |
 
-**Plan Verification Gate**: Before `ExitPlanMode`, either load `Skill("logicprobe")` (standalone plugin — install separately if missing) OR inform the user "此计划未经 logicprobe 验证，是否需要核查？" Silent skip is not an option.
+**Plan Verification Gate**: Before `ExitPlanMode`, exactly one of:
+1. Load `Skill("logicprobe")` (standalone plugin) — full verification, including executable model checks for behavioral claims; OR
+2. If logicprobe is not installed, load the built-in fallback `Skill("fact-check")` (claim-by-claim verification with evidence), tell the user that behavioral/model claims degrade to manual confirmation, and recommend installing logicprobe.
+If neither is loaded, inform the user "此计划未经核查，是否需要我先做事实核查？（This plan has not been fact-verified. Would you like me to verify before approving?）" Silent skip is not an option.
 
 To load workflows and engineering policies: Skill("embedded-workbench")
 
-**Proactive features**: When you see state machines, protocol refactoring, behavioral claims ("always"/"never"), or multi-module tasks — suggest verification, adversarial probing, or parallel subagents BEFORE the user asks. Most users do not know these exist.
+**Proactive features**: When you see state machines, protocol refactoring, behavioral claims ("always"/"never"), or multi-module tasks — suggest verification (logicprobe, or the built-in fact-check fallback if logicprobe is not installed), adversarial probing, or parallel subagents BEFORE the user asks. Most users do not know these exist.
 </EXTREMELY_IMPORTANT>

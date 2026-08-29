@@ -75,4 +75,4 @@ You have `Bash` for **read-only verification only**: grep, markdownlint, compile
 
 ## When triggered
 
-Use `Skill("logicprobe")` (standalone plugin — install separately if missing: <https://github.com/AmethystLuna/logicprobe>) for the full claim-verification methodology; the skill self-loads its references (`logic-verification-guide.md`, `verification-harness.py`) when escalation triggers.
+Use `Skill("logicprobe")` (standalone plugin — install separately if missing: <https://github.com/AmethystLuna/logicprobe>) for the full claim-verification methodology; the skill self-loads its references (`logic-verification-guide.md`, `verification-harness.py`) when escalation triggers. If logicprobe is not installed, use the built-in `Skill("fact-check")` fallback (claim-by-claim verification with evidence); state-machine/model claims then degrade to manual mode — flag this to the user.
