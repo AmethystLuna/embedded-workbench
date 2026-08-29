@@ -1,7 +1,7 @@
 {
     "name":  "dsh-embedded-workbench",
     "version": "0.8.0",
-    "description":  "Embedded C/C++ firmware development toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, and LVGL patterns. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
+    "description":  "Embedded C/C++ firmware development toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, LVGL patterns, and claim fact-checking. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
     "type":  "module",
     "main":  "lib/index.js",
     "types":  "lib/types/index.d.ts",
@@ -44,7 +44,8 @@
             },
     "scripts":  {
                     "build":  "tsc -p tsconfig.json",
-                    "typecheck":  "tsc -p tsconfig.json --noEmit"
+                    "typecheck":  "tsc -p tsconfig.json --noEmit",
+                    "bump":  "node scripts/bump-version.mjs"
                 },
     "dependencies":  {},
     "peerDependencies":  {
@@ -59,7 +60,7 @@
                              "@deepseek-ai/cordis":  "^4.0.1",
                              "@deepseek-ai/dsh-agent":  "^0.1.0-rc.6",
                              "@deepseek-ai/dsh-cordis-host-runner":  "^0.1.0-rc.8",
-                             "@deepseek-ai/dsh-home-paths":  "^0.1.0-rc.6",
+                             "@deepseek-ai/dsh-home-paths":  "^0.1.0-rc.8",
                              "@deepseek-ai/dsh-llm":  "^0.1.0-rc.6",
                              "@deepseek-ai/dsh-scope":  "^0.1.0-rc.6",
                              "@deepseek-ai/dsh-session":  "^0.1.0-rc.6",

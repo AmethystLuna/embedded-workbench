@@ -2,10 +2,27 @@
 
 Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem and the other marketplaces. Run the items top to bottom; the dsh bundle is the only piece that ships code (the repository root package), everything else is manifests, skills, and docs.
 
+## Version policy
+
+Strict semver (`X.Y.Z`); the current pre-1.0 line is `0.Y.Z`:
+
+- **Patch** (`0.5.2 → 0.5.3`): bug fixes, docs, dependency bumps, CI/tooling changes. The default for routine updates.
+- **Minor** (`0.5.3 → 0.6.0`): new features, new checks/tools, or backward-compatible behavior changes.
+- **Major** (`0.6.0 → 1.0.0`): breaking changes (or the first stable 1.0 release).
+
+Don't bump the version just because something changed — routine dependency/docs/CI
+updates are patches; when in doubt, patch. Every release bumps with an explicit
+target version (`node scripts/bump-version.mjs <new-version>`), so the choice is
+deliberate instead of habitual.
+
 ## 0. Pre-flight (local)
 
 - [ ] Working tree clean; current branch is `master`
-- [ ] Version bumped in **every** manifest listed in `.version-bump.json` and kept identical (`.claude-plugin/plugin.json`, marketplace, `.codex-plugin`, `.cursor-plugin`, `.kimi-plugin`, root `package.json`)
+- [ ] Version bumped with the release tool — `node scripts/bump-version.mjs <new-version>` —
+  which updates every declared manifest in `.version-bump.json` (`package.json`,
+  `package-lock.json` ×2, all plugin manifests, `.version-bump.json` itself) plus
+  the `DSH-COMPATIBILITY.md` "Package under test" row, then audits for missed files
+- [ ] `node scripts/bump-version.mjs --check` confirms all declared files are in sync
 - [ ] `npx markdownlint-cli --ignore "**/node_modules/**" .` passes with the repo's `.markdownlint.json`
 - [ ] Bundle checks (rc-era dsh packages have peer conflicts — `--legacy-peer-deps` is required):
 
@@ -59,4 +76,4 @@ Shipping checklist for this plugin across the DeepSeek Harness (dsh) ecosystem a
 - [ ] Tag the release (`git tag vX.Y.Z && git push --tags`)
 - [ ] Keep `.dsh/INSTALL.md` install options in sync with what is actually published
 - [ ] Keep the "Version pinning" note in `.dsh/INSTALL.md` in sync with the dsh release actually verified
-- [ ] Update `.version-bump.json` `version` field to the next target before starting the next cycle
+- [ ] Decide the next version per the Version policy; bump it at the start of the next cycle with `node scripts/bump-version.mjs <new-version>`

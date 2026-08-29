@@ -4,7 +4,9 @@
 
 [![HOL Guard Scanner](https://img.shields.io/badge/HOL%20Guard-passing-00a67e)](https://github.com/hashgraph-online/hol-guard)
 
-Embedded C/C++ firmware toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns.
+Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM
+storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines,
+architecture principles, LVGL patterns, and claim fact-checking.
 
 **Cross-platform** — works with Claude Code, Codex CLI, Cursor, Kimi CLI, OpenCode, and ZCode. Built on the [Agent Skills](https://agentskills.io) open standard.
 
@@ -31,7 +33,7 @@ Embedded C/C++ firmware toolbox — 4 agents, 7 skills covering FreeRTOS, ISR, N
 | `state-machine-design` | State models, retries, timeouts, transition gates, implementation patterns |
 | `hardfault-triage` | Processor exception triage — fault registers, stack frames, PC-to-source, root-cause classification |
 
-`logicprobe` (design doc & plan claim verification, logic-primitive verification, adversarial probing) was **split out into its own plugin** — see [Other Plugins Recommended](#other-plugins-recommended).
+`logicprobe` (design-doc & plan claim verification) was **split out into its own plugin** — see [Other Plugins Recommended](#other-plugins-recommended).
 
 > The skill content is mostly distilled from the author's personal embedded/firmware engineering experience and code-cleanliness discipline, based on real-world pitfalls and engineering constraints.
 
@@ -244,7 +246,7 @@ To report a security vulnerability, do **not** open a public issue. Use the priv
 
 | Plugin | Description |
 |--------|-------------|
-| [logicprobe](https://github.com/AmethystLuna/logicprobe) | Design doc & plan claim verification — logic-primitive verification (7 structural + 7 adversarial probes), refactoring regression detection. Split out of this plugin; the Plan Verification Gate requires it. |
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | Claim-verification skill: checks every verifiable claim in design docs, architecture specs, and refactoring plans against the codebase, escalating behavioral claims to executable-model verification. Split out of this plugin; the Plan Verification Gate requires it. |
 | [superpowers](https://github.com/obra/superpowers) | The original agent discipline engine — skill loading enforcement, Red Flags, subagent-driven development. Many of this plugin's agent-compliance patterns (1% Rule, Red Flags, `<SUBAGENT-STOP>`, instruction priority) were adapted from Superpowers. |
 
 ## Acknowledgments

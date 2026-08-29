@@ -3,7 +3,7 @@
  * Workbench toolbox. Injects the session-start gate text (1% Rule, Red
  * Flags, Plan Verification Gate, skills roster) into the first model step
  * of every agent session, mirroring the SessionStart hook the Claude Code
- * plugin installs. The 7 skills ship in this package's `skills/` directory
+ * plugin installs. The 8 skills ship in this package's `skills/` directory
  * and are registered at apply time into dsh's `ctx.skills` registry through
  * the standard filesystem provider, so they appear in every session catalog
  * without a manual copy step.
