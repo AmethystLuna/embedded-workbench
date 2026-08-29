@@ -1,98 +1,99 @@
 {
-    "name":  "dsh-embedded-workbench",
+    "name": "dsh-embedded-workbench",
     "version": "0.8.0",
-    "description":  "Embedded C/C++ firmware development toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, LVGL patterns, and claim fact-checking. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
-    "type":  "module",
-    "main":  "lib/index.js",
-    "types":  "lib/types/index.d.ts",
-    "exports":  {
-                    ".":  {
-                              "types":  "./lib/types/index.d.ts",
-                              "default":  "./lib/index.js"
-                          },
-                    "./cordis.patch.yml":  "./cordis.patch.yml",
-                    "./package.json":  "./package.json"
-                },
-    "files":  [
-                  "lib",
-                  "src",
-                  "skills",
-                  "cordis.patch.yml"
-              ],
-    "engines":  {
-                    "node":  ">=20"
-                },
-    "dsh":  {
-                "engines":  {
-                                  "dsh":  ">=0.1.0-rc.7"
-                              },
-                "category":  "skill",
-                "displayName":  "嵌入式工作台",
-                "bundle":  {
-                               "patch":  "./cordis.patch.yml"
-                           },
-                "compatibility":  {
-                                       "dsh":  "^0.1.0-rc.7 || ^0.1.1-rc.1",
-                                       "dshReleases":  {
-                                                          "0.1.0-rc.7":  "compatible",
-                                                          "0.1.0-rc.8":  "compatible",
-                                                          "0.1.1-rc.1":  "compatible",
-                                                          "0.1.1-rc.2":  "compatible"
-                                                      },
-                                       "profiles":  ["headless"]
-                                   }
+    "description": "Embedded C/C++ firmware development toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, LVGL patterns, and claim fact-checking. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
+    "type": "module",
+    "main": "lib/index.js",
+    "types": "lib/types/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./lib/types/index.d.ts",
+            "default": "./lib/index.js"
+        },
+        "./cordis.patch.yml": "./cordis.patch.yml",
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "lib",
+        "src",
+        "skills",
+        "cordis.patch.yml"
+    ],
+    "engines": {
+        "node": ">=20"
+    },
+    "dsh": {
+        "engines": {
+            "dsh": ">=0.1.0-rc.7"
+        },
+        "category": "skill",
+        "displayName": "嵌入式工作台",
+        "bundle": {
+            "patch": "./cordis.patch.yml"
+        },
+        "compatibility": {
+            "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1",
+            "dshReleases": {
+                "0.1.0-rc.7": "compatible",
+                "0.1.0-rc.8": "compatible",
+                "0.1.1-rc.1": "compatible",
+                "0.1.1-rc.2": "compatible"
             },
-    "scripts":  {
-                    "build":  "tsc -p tsconfig.json",
-                    "typecheck":  "tsc -p tsconfig.json --noEmit",
-                    "bump":  "node scripts/bump-version.mjs"
-                },
-    "dependencies":  {},
-    "peerDependencies":  {
-                             "@deepseek-ai/cordis":  "^4.0.1",
-                             "@deepseek-ai/dsh-agent":  "^0.1.0-rc.6",
-                             "@deepseek-ai/dsh-llm":  "^0.1.0-rc.6",
-                             "@deepseek-ai/dsh-session":  "^0.1.0-rc.6",
-                             "@deepseek-ai/dsh-skill-filesystem":  "^0.1.0-rc.8",
-                             "@deepseek-ai/schemastery":  "^3.18.1"
-                         },
-    "devDependencies":  {
-                             "@deepseek-ai/cordis":  "^4.0.1",
-                             "@deepseek-ai/dsh-agent":  "^0.1.0-rc.6",
-                             "@deepseek-ai/dsh-cordis-host-runner":  "^0.1.0-rc.8",
-                             "@deepseek-ai/dsh-home-paths":  "^0.1.0-rc.8",
-                             "@deepseek-ai/dsh-llm":  "^0.1.0-rc.6",
-                             "@deepseek-ai/dsh-scope":  "^0.1.0-rc.8",
-                             "@deepseek-ai/dsh-session":  "^0.1.0-rc.6",
-                             "@deepseek-ai/dsh-skill":  "^0.1.0-rc.8",
-                             "@deepseek-ai/dsh-skill-filesystem":  "^0.1.0-rc.8",
-                             "@deepseek-ai/schemastery":  "^3.18.1",
-                             "@deepseek-ai/dsh-timeout":  "^0.0.1-rc.1",
-                             "@types/node":  "^20.0.0",
-                             "typescript":  "^5.0.0"
-                         },
-    "author":  {
-                   "name":  "Amethyst Luna",
-                   "url":  "https://github.com/AmethystLuna"
-               },
-    "license":  "MIT",
-    "repository":  "https://github.com/AmethystLuna/embedded-workbench",
-    "keywords":  [
-                     "embedded",
-                     "firmware",
-                     "c",
-                     "cpp",
-                     "freertos",
-                     "debugging",
-                     "keil",
-                     "armclang",
-                     "cortex-m",
-                     "hardfault",
-                     "state-machine",
-                     "lvgl",
-                     "architecture",
-                     "agentskills",
-                     "plugin",
-                     "dsh"
-                 ]
+            "profiles": [
+                "headless"
+            ]
+        }
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
+        "bump": "node scripts/bump-version.mjs"
+    },
+    "peerDependencies": {
+        "@deepseek-ai/cordis": "^4.0.1",
+        "@deepseek-ai/dsh-agent": "^0.1.0-rc.6",
+        "@deepseek-ai/dsh-llm": "^0.1.0-rc.6",
+        "@deepseek-ai/dsh-session": "^0.1.0-rc.6",
+        "@deepseek-ai/dsh-skill-filesystem": "^0.1.0-rc.8",
+        "@deepseek-ai/schemastery": "^3.18.1"
+    },
+    "devDependencies": {
+        "@deepseek-ai/cordis": "^4.0.1",
+        "@deepseek-ai/dsh-agent": "^0.1.0-rc.6",
+        "@deepseek-ai/dsh-cordis-host-runner": "^0.1.0-rc.8",
+        "@deepseek-ai/dsh-home-paths": "^0.1.0-rc.8",
+        "@deepseek-ai/dsh-llm": "^0.1.0-rc.6",
+        "@deepseek-ai/dsh-scope": "^0.1.0-rc.8",
+        "@deepseek-ai/dsh-session": "^0.1.0-rc.6",
+        "@deepseek-ai/dsh-skill": "^0.1.0-rc.8",
+        "@deepseek-ai/dsh-skill-filesystem": "^0.1.0-rc.8",
+        "@deepseek-ai/dsh-timeout": "^0.0.1-rc.1",
+        "@deepseek-ai/schemastery": "^3.18.1",
+        "@types/node": "^20.0.0",
+        "typescript": "^7.0.2"
+    },
+    "author": {
+        "name": "Amethyst Luna",
+        "url": "https://github.com/AmethystLuna"
+    },
+    "license": "MIT",
+    "repository": "https://github.com/AmethystLuna/embedded-workbench",
+    "keywords": [
+        "embedded",
+        "firmware",
+        "c",
+        "cpp",
+        "freertos",
+        "debugging",
+        "keil",
+        "armclang",
+        "cortex-m",
+        "hardfault",
+        "state-machine",
+        "lvgl",
+        "architecture",
+        "agentskills",
+        "plugin",
+        "dsh"
+    ]
 }

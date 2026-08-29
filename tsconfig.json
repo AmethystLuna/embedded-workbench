@@ -13,6 +13,7 @@
     "declarationMap": false,
     "sourceMap": false,
     "skipLibCheck": true,
+    "types": ["node"],
     "verbatimModuleSyntax": true
   },
   "include": ["src"]
