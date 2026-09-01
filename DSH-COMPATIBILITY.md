@@ -13,8 +13,8 @@ dsh bundle against the DSH releases listed in `dsh.compatibility.dshReleases`.
 | Node.js | v24.17.0 |
 | npm | 11.13.0 |
 | pnpm | 11.21.0 |
-| Test date | 2026-08-29 |
-| Package under test | `dsh-embedded-workbench` 0.8.1 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
+| Test date | 2026-09-01 |
+| Package under test | `dsh-embedded-workbench` 0.8.2 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
 
 ## Method (one disposable profile per version)
 
@@ -51,6 +51,7 @@ model calls were not exercised (no real provider key used).
 | 0.1.1-rc.1 | pass | pass | pass (AUTH-only) | pass |
 | 0.1.1-rc.2 | pass | pass | pass (AUTH-only) | pass |
 | 0.1.2-alpha.2 | pass | pass | pass (AUTH-only) | pass |
+| 0.1.2-alpha.3 | pass | pass | pass (AUTH-only) | pass |
 
 ## Declared compatibility (package.json)
 
@@ -59,13 +60,14 @@ model calls were not exercised (no real provider key used).
 "dsh": {
   "engines": { "dsh": ">=0.1.0-rc.7" },
   "compatibility": {
-    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2",
+    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3",
     "dshReleases": {
       "0.1.0-rc.7": "compatible",
       "0.1.0-rc.8": "compatible",
       "0.1.1-rc.1": "compatible",
       "0.1.1-rc.2": "compatible",
-      "0.1.2-alpha.2": "compatible"
+      "0.1.2-alpha.2": "compatible",
+      "0.1.2-alpha.3": "compatible"
     },
     "profiles": ["headless"]
   }
