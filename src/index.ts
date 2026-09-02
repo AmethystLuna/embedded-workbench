@@ -91,6 +91,33 @@ function gateMessage(text: string): UserMessage {
   })
 }
 
+interface SessionEventLike {
+  type: string
+  data?: Record<string, unknown>
+}
+
+/**
+ * Minimum session-store surface this plugin reads. DSH 0.1.2-alpha.4 replaced
+ * the `Session.events` getter with on-demand reads (`seq`, `eventAt()`,
+ * `snapshotEvents()`); releases up to 0.1.2-alpha.3 expose `events` as the
+ * full log snapshot. Read through a structural union so one build serves every
+ * declared DSH release.
+ */
+interface SessionEventSource {
+  events?: readonly SessionEventLike[]
+  snapshotEvents?: () => readonly SessionEventLike[]
+}
+
+function readSessionEvents(session: Session): readonly SessionEventLike[] {
+  const source = session as unknown as SessionEventSource
+  if (typeof source.snapshotEvents === 'function') {
+    const snapshot = source.snapshotEvents()
+    if (Array.isArray(snapshot)) return snapshot
+  }
+  if (Array.isArray(source.events)) return source.events
+  return []
+}
+
 /**
  * Model-visible catalog entry (cordis_inspect_list / cordis_inspect_query):
  * lets the model read this plugin's runtime status without guessing. Mirrors
@@ -201,9 +228,9 @@ export function apply(ctx: Context, config: Config): void {
  * first step that runs.
  */
 function gateInHistory(session: Session): boolean {
-  return session.events.some((event) => {
+  return readSessionEvents(session).some((event) => {
     if (event.type !== 'user/message') return false
-    const source = event.data.source
-    return source.kind === 'plugin' && source.plugin === GATE_PLUGIN_ID
+    const source = event.data?.source as { kind?: string; plugin?: string } | undefined
+    return source?.kind === 'plugin' && source.plugin === GATE_PLUGIN_ID
   })
 }

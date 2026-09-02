@@ -1,6 +1,6 @@
 {
     "name": "dsh-embedded-workbench",
-    "version": "0.8.2",
+    "version": "0.8.3",
     "description": "Embedded C/C++ firmware development toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK, ARMCLANG, HardFault, state machines, architecture, LVGL patterns, and claim fact-checking. Ships a native DeepSeek Harness (dsh) bundle that injects the session-start gate into the first model step.",
     "type": "module",
     "main": "lib/index.js",
@@ -32,14 +32,15 @@
             "patch": "./cordis.patch.yml"
         },
         "compatibility": {
-            "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3",
+            "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4",
             "dshReleases": {
                 "0.1.0-rc.7": "compatible",
                 "0.1.0-rc.8": "compatible",
                 "0.1.1-rc.1": "compatible",
                 "0.1.1-rc.2": "compatible",
                 "0.1.2-alpha.2": "compatible",
-                "0.1.2-alpha.3": "compatible"
+                "0.1.2-alpha.3": "compatible",
+                "0.1.2-alpha.4": "compatible"
             },
             "profiles": [
                 "headless"
