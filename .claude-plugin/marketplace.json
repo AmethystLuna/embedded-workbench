@@ -8,7 +8,7 @@
     {
       "name": "embedded-workbench",
       "description": "Your embedded firmware toolkit in Claude Code | Claude Code 嵌入式固件工具箱 — 4 agents, 7 skills, battle-tested on real Cortex-M projects.",
-      "version": "0.8.3",
+      "version": "0.8.4",
       "source": "./"
     }
   ]
