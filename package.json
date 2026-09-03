@@ -32,7 +32,7 @@
             "patch": "./cordis.patch.yml"
         },
         "compatibility": {
-            "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4",
+            "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1",
             "dshReleases": {
                 "0.1.0-rc.7": "compatible",
                 "0.1.0-rc.8": "compatible",
@@ -40,7 +40,9 @@
                 "0.1.1-rc.2": "compatible",
                 "0.1.2-alpha.2": "compatible",
                 "0.1.2-alpha.3": "compatible",
-                "0.1.2-alpha.4": "compatible"
+                "0.1.2-alpha.4": "compatible",
+                "0.1.2-alpha.5": "compatible",
+                "0.1.2-rc.1": "compatible"
             },
             "profiles": [
                 "headless"
