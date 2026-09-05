@@ -6,6 +6,11 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    groups:
+      # One PR for all @deepseek-ai/* dev-dependency bumps (dsh API mirrors).
+      dsh-ecosystem:
+        patterns:
+          - "@deepseek-ai/*"
 
   # GitHub Actions are pinned to commit SHAs; Dependabot opens the bump PRs.
   - package-ecosystem: "github-actions"
