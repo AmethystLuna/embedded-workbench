@@ -13,20 +13,22 @@ dsh bundle against the DSH releases listed in `dsh.compatibility.dshReleases`.
 | Node.js | v22.22.3 |
 | npm | 10.9.8 |
 | pnpm | 11.21.0 |
-| Test date | 2026-09-05 |
-| Package under test | `dsh-embedded-workbench` 0.8.5 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
+| Test date | 2026-09-08 |
+| Package under test | `dsh-embedded-workbench` 0.8.6 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
 
 ## Method (one disposable profile per version)
 
 Each DSH release was run from its own runtime (global CLI for
 0.1.0-rc.7 … 0.1.2-alpha.3; temporary npm install under an isolated prefix for
-0.1.2-alpha.4, 0.1.2-alpha.5, and 0.1.2-rc.1) against a fresh `DSH_HOME`, so
-no state leaked between versions. 0.1.3-alpha.1 predates its npm publish, so it
-ran from a local pnpm workspace build of git tag `dsh-v0.1.3-alpha.1`; the new
-`fs-ext` native dependency (cross-process session write lease) was substituted
-with a no-op override for this run because the test host has no MSVC toolchain —
-the Windows lease path holds a kernel semaphore and never calls `fs-ext`'s
-`flock`.
+0.1.2-alpha.4 through 0.1.3-alpha.2) against a fresh `DSH_HOME`, so no state
+leaked between versions. 0.1.3-alpha.1 predates its npm publish, so it ran from
+a local pnpm workspace build of git tag `dsh-v0.1.3-alpha.1`; 0.1.3-alpha.2 was
+installed from its published npm release. The new `fs-ext` native dependency
+(cross-process session write lease) is a POSIX `flock` shim that the Windows
+lease path never calls — it takes a kernel semaphore instead — so both 0.1.3
+rows ran with `fs-ext` substituted by a no-op stub on this MSVC-less host
+(`npm install --ignore-scripts`); `koffi`, the Win32 FFI that performs the
+Windows lock, ships a prebuilt `koffi.node` and was used as published.
 
 ```bash
 # 1) install: fresh profile, plugin added as a file: dependency
@@ -49,6 +51,12 @@ The headless `AUTH` rejection proves the profile booted with the plugin applied
 (any bundle apply error would surface before the provider call). End-to-end
 model calls were not exercised (no real provider key used).
 
+For the 0.1.3-alpha.2 row the boot was additionally inspected at the session-log
+level: the persisted v2 log (`session.v2.jsonl.zstd`) records the injected gate
+as a `user/message` event with `data.source = {"kind":"plugin",
+"plugin":"embedded-workbench"}`. That proves the `agent/pre-step` hook ran and
+its `Session` snapshot read resolved on the new release.
+
 ## Results
 
 | dsh release | install | dump-config row | start (headless boot) | uninstall |
@@ -63,6 +71,7 @@ model calls were not exercised (no real provider key used).
 | 0.1.2-alpha.5 | pass | pass | pass (AUTH-only) | pass |
 | 0.1.2-rc.1 | pass | pass | pass (AUTH-only) | pass |
 | 0.1.3-alpha.1 | pass | pass | pass (AUTH-only) | pass |
+| 0.1.3-alpha.2 | pass | pass | pass (AUTH-only) | pass |
 
 ## Declared compatibility (package.json)
 
@@ -71,7 +80,7 @@ model calls were not exercised (no real provider key used).
 "dsh": {
   "engines": { "dsh": ">=0.1.0-rc.7" },
   "compatibility": {
-    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1 || ^0.1.3-alpha.1",
+    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1 || ^0.1.3-alpha.1 || ^0.1.3-alpha.2",
     "dshReleases": {
       "0.1.0-rc.7": "compatible",
       "0.1.0-rc.8": "compatible",
@@ -82,7 +91,8 @@ model calls were not exercised (no real provider key used).
       "0.1.2-alpha.4": "compatible",
       "0.1.2-alpha.5": "compatible",
       "0.1.2-rc.1": "compatible",
-      "0.1.3-alpha.1": "compatible"
+      "0.1.3-alpha.1": "compatible",
+      "0.1.3-alpha.2": "compatible"
     },
     "profiles": ["headless"]
   }
@@ -113,8 +123,18 @@ model calls were not exercised (no real provider key used).
   them. Verified per release with the disposable-profile matrix above (0.8.5
   keeps 0.1.0-rc.7 … 0.1.3-alpha.1 working). The 0.1.3-alpha.1 row ran a local
   source build of the git tag with the new `fs-ext` native dependency stubbed
-  out on this no-MSVC host (see Method); re-verify against the npm release on a
-  toolchain-equipped host once published.
+  out on this no-MSVC host (see Method); 0.1.3-alpha.2 re-verified the same
+  seams from the published npm release.
+- DSH 0.1.3-alpha.2 (persona configuration split into prefix/suffix, default
+  read/write/edit file tools for SDK/Headless/ACP, and subprocess handles
+  dropping `pid`) renames `PERSONA_SECTION` to `PERSONA_PREFIX_SECTION` and
+  replaces `Config.persona` with `personaPrefix`/`personaSuffix`, but this
+  bundle never reads the persona slot and touches neither subprocess handles nor
+  the `agent/pre-step` / `Session` snapshot seams. `Session.fromRestore` gained
+  a fifth `eventState` parameter and `dsh-session` dropped its internal
+  `chunk-rows` exports; this bundle uses neither. Verified with the
+  disposable-profile matrix above plus the session-log gate evidence (0.8.6
+  keeps 0.1.0-rc.7 … 0.1.3-alpha.2 working).
 - 0.8.2 is deprecated on npm with a warning pointing to 0.8.3 (npmjs blocks
   `npm unpublish` for automation tokens under its 2FA write policy): its
   `dsh.compatibility.dsh` range (`^0.1.2-alpha.3`) admitted 0.1.2-alpha.4
