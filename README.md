@@ -40,9 +40,9 @@ MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL
 
 ## 安装
 
-### Marketplace 安装（推荐）
+### Claude Code 安装（推荐）
 
-在 `~/.claude/settings.json` 中添加 marketplace：
+在 **Claude Code** 的 `~/.claude/settings.json` 中添加 marketplace：
 
 ```json
 {
@@ -60,7 +60,7 @@ MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL
 claude plugin install embedded-workbench@embedded-workbench
 ```
 
-### 手动安装
+### Claude Code 手动安装
 
 ```bash
 git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugins/dev/embedded-workbench
@@ -84,7 +84,18 @@ git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugi
 - bundle 将首步门禁（1% Rule / Red Flags / Plan Verification Gate）注入每个 agent 会话的第一个模型步骤——是 Claude `SessionStart` hook 在 dsh 的原生对应物，并注册了模型可见的目录条目（`cordis_inspect`）。
 - 4 个自定义 agent 有意不移植——dsh 原生 subagent 工具已覆盖并行多 agent 工作。
 
-安装：参见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)（四种方式，从纯技能拷贝到 `dsh plugin add`）。
+安装（原生 bundle，推荐）：
+
+```bash
+# 从 npm 安装（包名 dsh-embedded-workbench）
+dsh plugin --profile web add dsh-embedded-workbench
+# 或从 GitHub 源码安装
+dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
+# 未全局安装 dsh 时可用 npx
+npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
+```
+
+安装后重启 profile，运行 `dsh --profile web --dump-config` 应看到 `id: embedded-workbench` 且 `enabled: true`。更多方式（纯技能拷贝、项目级等）见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)。
 
 > DSH 安装注意：npm 包名为 `dsh-embedded-workbench`（无 scope）。在 web profile 的 `package.json` 中，依赖键与 `dsh.profile.bundles` 必须写 `dsh-embedded-workbench`；否则 dsh 加载器会因找不到 `node_modules/dsh-embedded-workbench` 而启动失败。
 

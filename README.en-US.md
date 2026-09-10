@@ -43,9 +43,9 @@ architecture principles, LVGL patterns, and claim fact-checking.
 
 ## Installation
 
-### Marketplace install (recommended)
+### Claude Code install (recommended)
 
-Add the marketplace to `~/.claude/settings.json`:
+Add the marketplace to **Claude Code**'s `~/.claude/settings.json`:
 
 ```json
 {
@@ -63,7 +63,7 @@ Then install from CLI:
 claude plugin install embedded-workbench@embedded-workbench
 ```
 
-### Manual install
+### Claude Code manual install
 
 ```bash
 git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugins/dev/embedded-workbench
@@ -87,7 +87,18 @@ Native dsh support ships as a cordis plugin bundle at the repository root (the r
 - The bundle injects the first-model-step gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. It also registers a model-visible catalog entry (`cordis_inspect`).
 - The 4 custom agents are intentionally not ported — dsh's native subagent tooling covers parallel multi-agent work.
 
-Install: see [`.dsh/INSTALL.md`](.dsh/INSTALL.md) (four options, from plain skill copy to `dsh plugin add`).
+Install (native bundle, recommended):
+
+```bash
+# from npm (package name: dsh-embedded-workbench)
+dsh plugin --profile web add dsh-embedded-workbench
+# or from GitHub source
+dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
+# when dsh is not installed globally
+npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
+```
+
+Restart the profile, then run `dsh --profile web --dump-config`: the `id: embedded-workbench` row must appear with `enabled: true`. More options (plain skill copy, project-level, ...) are in [`.dsh/INSTALL.md`](.dsh/INSTALL.md).
 
 > DSH install note: the package name is `dsh-embedded-workbench`. In the web profile's `package.json`, both the dependency key and the `dsh.profile.bundles` entry must use the same name; a mismatch causes the dsh loader to fail with `ERR_MODULE_NOT_FOUND`.
 
