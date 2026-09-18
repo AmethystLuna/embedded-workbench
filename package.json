@@ -80,7 +80,7 @@
         "@deepseek-ai/dsh-skill": "^0.1.0-rc.8",
         "@deepseek-ai/dsh-skill-filesystem": "^0.1.0-rc.8",
         "@deepseek-ai/dsh-timeout": "^0.0.1-rc.1",
-        "@types/node": "^26.5.0",
+        "@types/node": "^26.6.1",
         "@deepseek-ai/schemastery": "^3.18.2",
         "typescript": "^7.0.2"
     },
