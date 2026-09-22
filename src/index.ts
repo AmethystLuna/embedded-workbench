@@ -30,9 +30,22 @@ import { fileURLToPath } from 'node:url'
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
+import type { ContextFormed } from '@deepseek-ai/dsh-llm'
 import type { Session, UserMessage } from '@deepseek-ai/dsh-session'
 import type { HostCordisInspectProviderRegistration } from '@deepseek-ai/dsh-cordis-host-runner'
 import { FileSystemSkillProvider } from '@deepseek-ai/dsh-skill-filesystem'
+
+// DSH 0.1.7-alpha.1 (session format v4) retires the shared
+// `{ kind: 'plugin', plugin }` wrapper: native admission rejects it in every
+// declared durable message slot, and the official v3-to-v4 migration rewrites
+// those historical rows to `plugin:<name>`. Declaring the producer-owned kind
+// here keeps the write path and the history guard on one identity, and still
+// compiles against the earlier releases that only declare `plugin`.
+declare module '@deepseek-ai/dsh-llm' {
+  interface MessageSourceMap {
+    'plugin:embedded-workbench': { kind: 'plugin:embedded-workbench' } & ContextFormed
+  }
+}
 
 export const name = 'embedded-workbench'
 
@@ -46,6 +59,9 @@ export const inject = ['skills']
 const SKILLS_DIR = fileURLToPath(new URL('../skills', import.meta.url))
 
 const GATE_PLUGIN_ID = 'embedded-workbench'
+
+/** Producer-owned message source kind declared in `MessageSourceMap` above. */
+const GATE_SOURCE_KIND: 'plugin:embedded-workbench' = 'plugin:embedded-workbench'
 
 const DEFAULT_GATE_CONTENT = `<EXTREMELY_IMPORTANT>
 Plugin embedded-workbench is active. You have embedded C/C++ firmware development skills — names and "Use when" triggers are in your skill catalog; load them with the skill tool. No custom agents in dsh: use the native subagent tooling for parallel work.
@@ -87,7 +103,7 @@ function gateMessage(text: string): UserMessage {
   return createUserMessage({
     content: [{ type: 'text', text }],
     // `form` omitted — an undeclared context is the documented default.
-    source: { kind: 'plugin', plugin: GATE_PLUGIN_ID },
+    source: { kind: GATE_SOURCE_KIND },
   })
 }
 
@@ -231,6 +247,10 @@ function gateInHistory(session: Session): boolean {
   return readSessionEvents(session).some((event) => {
     if (event.type !== 'user/message') return false
     const source = event.data?.source as { kind?: string; plugin?: string } | undefined
-    return source?.kind === 'plugin' && source.plugin === GATE_PLUGIN_ID
+    if (source === undefined) return false
+    // The v4 producer-owned kind, plus the pre-v4 wrapper this bundle wrote
+    // before DSH 0.1.7-alpha.1 retired it.
+    return source.kind === GATE_SOURCE_KIND
+      || (source.kind === 'plugin' && source.plugin === GATE_PLUGIN_ID)
   })
 }
