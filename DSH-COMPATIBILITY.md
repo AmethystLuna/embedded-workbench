@@ -13,14 +13,14 @@ dsh bundle against the DSH releases listed in `dsh.compatibility.dshReleases`.
 | Node.js | v22.22.3 |
 | npm | 10.9.8 |
 | pnpm | 11.21.0 |
-| Test date | 2026-09-19 |
-| Package under test | `dsh-embedded-workbench` 0.8.11 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
+| Test date | 2026-09-22 |
+| Package under test | `dsh-embedded-workbench` 0.8.12 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
 
 ## Method (one disposable profile per version)
 
 Each DSH release was run from its own runtime (global CLI for
 0.1.0-rc.7 … 0.1.2-alpha.3; temporary npm install under an isolated prefix for
-0.1.2-alpha.4 through 0.1.6-alpha.2) against a fresh `DSH_HOME`, so no state
+0.1.2-alpha.4 through 0.1.7-alpha.1) against a fresh `DSH_HOME`, so no state
 leaked between versions. 0.1.3-alpha.1 predates its npm publish, so it ran from
 a local pnpm workspace build of git tag `dsh-v0.1.3-alpha.1`; every later row was
 installed from its published npm release. The `fs-ext` native dependency
@@ -59,7 +59,7 @@ as a `user/message` event with `data.source = {"kind":"plugin",
 its `Session` snapshot read resolved on the new release. The 0.1.5-alpha.1 row
 repeated that inspection against the v3 log (`session.v3.jsonl.zstd`, a
 multi-frame zstd stream): the gate is recorded the same way and the rendered
-prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc.1, 0.1.5-rc.2, 0.1.6-alpha.1 and 0.1.6-alpha.2 rows repeated the same v3 inspection with the same result.
+prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc.1, 0.1.5-rc.2, 0.1.6-alpha.1 and 0.1.6-alpha.2 rows repeated the same v3 inspection with the same result. The 0.1.7-alpha.1 row inspected the v4 log (`session.v4.jsonl.zstd`): the gate is recorded as a `user/message` whose source is now the producer-owned `{"kind":"plugin:embedded-workbench"}` (see Notes), and the rendered prompt still arrives as a `system/message` surface node.
 
 ## Results
 
@@ -82,6 +82,7 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
 | 0.1.5-rc.2 | pass | pass | pass (AUTH-only) | pass |
 | 0.1.6-alpha.1 | pass | pass | pass (AUTH-only) | pass |
 | 0.1.6-alpha.2 | pass | pass | pass (AUTH-only) | pass |
+| 0.1.7-alpha.1 | pass | pass | pass (AUTH-only) | pass |
 
 ## Declared compatibility (package.json)
 
@@ -90,7 +91,7 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
 "dsh": {
   "engines": { "dsh": ">=0.1.0-rc.7" },
   "compatibility": {
-    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1 || ^0.1.3-alpha.1 || ^0.1.3-alpha.2 || ^0.1.5-alpha.1 || ^0.1.5-rc.1 || ^0.1.5-alpha.2 || ^0.1.5-rc.2 || ^0.1.6-alpha.1 || ^0.1.6-alpha.2",
+    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1 || ^0.1.3-alpha.1 || ^0.1.3-alpha.2 || ^0.1.5-alpha.1 || ^0.1.5-rc.1 || ^0.1.5-alpha.2 || ^0.1.5-rc.2 || ^0.1.6-alpha.1 || ^0.1.6-alpha.2 || ^0.1.7-alpha.1",
     "dshReleases": {
       "0.1.0-rc.7": "compatible",
       "0.1.0-rc.8": "compatible",
@@ -108,7 +109,8 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
       "0.1.5-rc.1": "compatible",
       "0.1.5-rc.2": "compatible",
       "0.1.6-alpha.1": "compatible",
-      "0.1.6-alpha.2": "compatible"
+      "0.1.6-alpha.2": "compatible",
+      "0.1.7-alpha.1": "compatible"
     },
     "profiles": ["headless"]
   }
@@ -215,6 +217,24 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
   `web`, so the documented commands keep working. Verified with the
   disposable-profile matrix plus the v3 session-log gate evidence (0.8.11 keeps
   0.1.0-rc.7 … 0.1.6-alpha.2 working).
+- DSH 0.1.7-alpha.1 (910 non-merge commits over alpha.2; session format
+  **v4**) is the first release that breaks this bundle, and 0.8.12 carries the
+  fix. V4 retires the shared `{ kind: 'plugin', plugin }` message-source
+  wrapper: native source admission refuses it in every declared durable message
+  slot, so the gate append failed with `format v4 message requires a
+  producer-owned source kind` and the headless boot aborted. This bundle now
+  declares its own kind through `MessageSourceMap` and writes
+  `{ kind: 'plugin:embedded-workbench' }` — the exact identity the official
+  V3→V4 migration derives for this producer — while the history guard still
+  accepts the pre-v4 wrapper, so sessions written by older builds keep their
+  once-per-session gate. `agent/pre-step`, `PreStepDecision`,
+  `ctx.skills`/provider registration, `systemPrompt.context`,
+  `Session.snapshotEvents()` and `ctx.get('cordisInspect')` are otherwise
+  unchanged; `known-event-types.ts` only adds `developer/message`, and
+  `ContextFormed` still allows an undeclared form. Verified with the
+  disposable-profile matrix against 0.1.7-alpha.1 plus regression passes on
+  0.1.6-alpha.2 and 0.1.5-rc.2, and by type-checking the sources against the
+  0.1.7-alpha.1 declarations (0.8.12 keeps 0.1.0-rc.7 … 0.1.7-alpha.1 working).
 - 0.8.2 is deprecated on npm with a warning pointing to 0.8.3 (npmjs blocks
   `npm unpublish` for automation tokens under its 2FA write policy): its
   `dsh.compatibility.dsh` range (`^0.1.2-alpha.3`) admitted 0.1.2-alpha.4
