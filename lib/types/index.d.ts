@@ -41,11 +41,11 @@ export interface Config {
     enabled: boolean;
     gateContent: string;
 }
-export declare const Config: z<Schemastery.ObjectS<{
-    enabled: z<boolean, boolean>;
-    gateContent: z<string, string>;
-}>, Schemastery.ObjectT<{
-    enabled: z<boolean, boolean>;
-    gateContent: z<string, string>;
-}>>;
+export declare const Config: z<Schemastery.ObjectS<NoInfer<{
+    enabled: z<boolean, boolean, "defined">;
+    gateContent: z<string, string, "defined">;
+}>>, Schemastery.ObjectT<NoInfer<{
+    enabled: z<boolean, boolean, "defined">;
+    gateContent: z<string, string, "defined">;
+}>>, "plain">;
 export declare function apply(ctx: Context, config: Config): void;
