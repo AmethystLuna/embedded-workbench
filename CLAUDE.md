@@ -20,6 +20,14 @@ This plugin's agent-compliance architecture (1% Rule, Red Flags, `<SUBAGENT-STOP
 ## Before Submitting
 
 - Run `markdownlint` on all changed files.
+- Run the offline checks:
+  - `node tests/dsh-gate-injection.test.mjs` — drives the committed `lib/` output
+    against a stub context and asserts the gate enters a session exactly once.
+    Self-contained, so CI runs it too; if you change the injection or its history
+    guard, this is the test that has to move with you.
+  - `node tests/dsh-skills-registration.test.mjs` — mounts the real
+    `SkillRegistry` and checks the shipped catalog. It imports the `logicprobe`
+    checkout as a sibling directory, so it is local-only and CI does not run it.
 - Verify `plugin.json` passes `claude plugin validate`.
 - Test the plugin locally by installing to `~/.claude/plugins/dev/`.
 - Bump the version with the release tool: `npm run bump -- <new-version>`
@@ -30,10 +38,11 @@ This plugin's agent-compliance architecture (1% Rule, Red Flags, `<SUBAGENT-STOP
 ## CI Workflows (GitHub Actions)
 
 - `dsh-bundle` — on push/PR touching `src/`, `lib/`, `skills/`, `agents/`,
-  `hooks/`, `.dsh/`, `cordis.patch.yml`, `package.json`, `package-lock.json`,
-  `tsconfig.json`, the READMEs, or the workflow itself:
+  `hooks/`, `tests/`, `.dsh/`, `cordis.patch.yml`, `package.json`,
+  `package-lock.json`, `tsconfig.json`, the READMEs, or the workflow itself:
   `npm ci --legacy-peer-deps`, typecheck, build, committed-`lib/` drift guard,
-  and repo-wide markdownlint (`npx markdownlint-cli --ignore "**/node_modules/**" .`).
+  the offline gate-injection checks, and repo-wide markdownlint
+  (`npx markdownlint-cli --ignore "**/node_modules/**" .`).
 - `Plugin Security Scan` — on every push/PR: `hashgraph-online/ai-plugin-scanner-action`
   on the repo root; fails on high-severity findings.
 
