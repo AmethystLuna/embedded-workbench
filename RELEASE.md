@@ -45,7 +45,7 @@ deliberate instead of habitual.
 
 ## 1. Push to GitHub
 
-- [ ] `git push embedded-workbench master`
+- [ ] `git push origin master`
 - [ ] CI (`dsh-bundle` workflow) green: typecheck, build, committed-lib drift guard, markdownlint
 - [ ] Remote install works (skills layer + bundle row):
 
