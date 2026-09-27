@@ -19,6 +19,14 @@ npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 
 This installs under the package name `dsh-embedded-workbench`. If you manage the profile's `package.json` manually, use `dsh-embedded-workbench` for both the dependency key and the `dsh.profile.bundles` entry.
 
+That bare-name install has one gotcha on **pnpm 11 and newer**: it holds back versions published less than a day ago (`minimumReleaseAge`, default 1440 minutes) and, because pnpm's built-in default is non-strict, it **silently resolves to an older version instead of failing**. For roughly 24 hours after a release, `add dsh-embedded-workbench` therefore installs the previous one, and the profile looks like the release never happened. Pin the version to get it immediately:
+
+```bash
+dsh plugin --profile web add dsh-embedded-workbench@<version>   # e.g. @0.9.0
+```
+
+Pinning also makes pnpm record a `minimumReleaseAgeExclude` entry for that version in the profile's `pnpm-workspace.yaml`, which is its documented escape hatch.
+
 Restart the target profile. This mounts a native cordis plugin that registers the 8 skills in the package's `skills/` directory into dsh's `ctx.skills` registry via the standard filesystem provider, so they appear in the session skill catalog with no manual copy step. It also folds a **trimmed** gate (the Plan Verification Gate plus a context-budget rule, roughly 400 tokens) into the first model step — the dsh-native counterpart of the Claude Code `SessionStart` hook. The 1% Rule and the Red Flags table deliberately stay out of that payload (see the README's "Design trade-offs and feedback"); set `enabled: false` to drop the injection entirely.
 
 To disable the gate, or to change its text, override the row by id in your profile's `cordis.patch.yml` (the row's `config` is replaced wholesale, not deep-merged):
