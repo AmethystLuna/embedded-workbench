@@ -74,6 +74,23 @@ source. All six runtimes re-verified in this round (0.1.5-rc.3,
 plugins) passed 12/12, recording session format v3 on 0.1.5-rc.3 and
 0.1.6-alpha.2 and v4 on the four 0.1.7 releases.
 
+0.9.0 carried no DSH-facing change, so the matrix was **not** re-run. Its bundle
+differs from 0.8.13 (tag `v0.8.13`) only in non-executable text: the injected
+gate string, the JSDoc around it, and the inspect-provider description. Strip the
+`DEFAULT_GATE_CONTENT` block and every comment line from both revisions and the
+remaining 129-line body differs in exactly one line — that description string;
+`lib/index.js` follows it verbatim, so no branch, guard, event name, or registry
+call changed. `lib/types/index.d.ts` additionally picks up the declaration shape
+emitted by the newer devDependency `@deepseek-ai/schemastery`, which is
+type-only. Every row above therefore stands for 0.9.0 as well. If a store review
+requires fresh per-version evidence rather than an equivalence argument, the
+four-step procedure above applies unchanged to 0.9.0.
+
+The release-time mount check was re-run on 0.9.0 against a fresh isolated
+`DSH_HOME`: `dsh plugin --profile scratch add "file:<repo>"` succeeded, and
+`--dump-config` reports `id: embedded-workbench` with `enabled: true`, with no
+`disabling profile plugin`, `incompatible`, or `skipping profile bundle` line.
+
 For the 0.1.3-alpha.2 row the boot was additionally inspected at the session-log
 level: the persisted v2 log (`session.v2.jsonl.zstd`) records the injected gate
 as a `user/message` event with `data.source = {"kind":"plugin",
