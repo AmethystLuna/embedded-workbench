@@ -95,7 +95,10 @@
         "url": "https://github.com/AmethystLuna"
     },
     "license": "MIT",
-    "repository": "https://github.com/AmethystLuna/embedded-workbench",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/AmethystLuna/embedded-workbench.git"
+    },
     "keywords": [
         "embedded",
         "firmware",
