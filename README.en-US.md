@@ -85,7 +85,7 @@ Then enable in `~/.claude/settings.json`:
 Native dsh support ships as a cordis plugin bundle at the repository root (the root `package.json` declares `dsh.bundle`):
 
 - The skills are discovered as-is by dsh's `skill-filesystem` provider (Agent Skills open standard) — zero code.
-- The bundle can inject the first-model-step gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. Injection is **opt-in** (`enabled`, off by default); the model-visible catalog entry (`cordis_inspect`) is registered either way.
+- The bundle folds a **trimmed** first-model-step gate (the Plan Verification Gate plus a context-budget rule) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook — and always registers the model-visible catalog entry (`cordis_inspect`). For why the 1% Rule and the Red Flags table left the payload, see [Design trade-offs and feedback](#design-trade-offs-and-feedback).
 - The 4 custom agents are intentionally not ported — dsh's native subagent tooling covers parallel multi-agent work.
 
 Install (native bundle, recommended):
@@ -99,20 +99,37 @@ dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
 npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 ```
 
-Restart the profile, then run `dsh --profile web --dump-config`: the `id: embedded-workbench` row must appear with `enabled: false` — the skills are live at that point, because gate injection is optional; set it to `true` to turn the first-step gate on. More options (plain skill copy, project-level, ...) are in [`.dsh/INSTALL.md`](.dsh/INSTALL.md).
+Restart the profile, then run `dsh --profile web --dump-config`: the `id: embedded-workbench` row must appear with `enabled: true`. More options (plain skill copy, project-level, ...) are in [`.dsh/INSTALL.md`](.dsh/INSTALL.md).
 
 > DSH install note: the package name is `dsh-embedded-workbench`. In the web profile's `package.json`, both the dependency key and the `dsh.profile.bundles` entry must use the same name; a mismatch causes the dsh loader to fail with `ERR_MODULE_NOT_FOUND`.
 
 ## Usage
 
-Skills load on demand and need no injection:
+Skills load on demand and do not depend on injection:
 
 - Invoke `Skill("embedded-workbench")` for the workflow and engineering policies — it picks a light or full path by risk, and does not force fixed stages
 - Domain skills activate automatically when their `Use when` description matches your task — NOT clauses prevent false triggers (e.g., formatting-only won't load c-cpp-dev)
 - The agent proactively suggests verification, adversarial probing, and parallel subagents when it detects state machines, behavioral claims, or multi-module tasks
 - No manual CLAUDE.md configuration required
 
-With `enabled: true` the plugin additionally injects a capability notification (1% Rule, Red Flags, Plan Verification Gate) into the first model step. It is off by default: for models that already schedule their own workflow, that injection does not always earn its context budget.
+The plugin also folds a **trimmed** gate (about 400 tokens) into the first model step, carrying just two things: the Plan Verification Gate, and a context-budget rule (never guess a readout you cannot see; when a large step shows no signal, ask the user to decide). Set `enabled: false` to drop it entirely.
+
+## Design trade-offs and feedback
+
+This revision walks back an earlier decision on the evidence, and the reasoning is below — challenge it.
+
+**Background.** We checked the official documentation for all 8 supported harnesses one by one (and read the source for Codex CLI). One assumption did not survive: **7 of the 8 expose no context-budget readout to the model at all** (Claude Code, Copilot CLI, Cursor, OpenCode, Kimi CLI, ZCode and dsh show token figures only in the user's interface; only Codex has a `get_context_remaining` tool, and it is off by default). Asking the model to judge "do I have budget to delegate?" therefore had nothing to stand on.
+
+**So we changed two things.**
+
+1. **Cost is now managed by trimming, not by switching injection off.** The first-step gate carries only two things: the **Plan Verification Gate** (verify, or tell the user you did not) and a **context-budget rule** (never guess a readout; when a large step shows no signal, ask the user to decide). The payload went from ~1,400 tokens to ~400 (Claude side −72%, dsh side −58%, measured) and it is on by default.
+2. **The verification gate stays; the enforcement scaffolding goes.** The 1% Rule and the 9-row Red Flags table left the **injected payload** because they are enforcement, and reported experience shows capable models follow that kind of prompt pressure literally — producing rigid phases, unnecessary questions, and six or seven agents on a five-line task at 10–15× overhead (see [obra/superpowers#1120](https://github.com/obra/superpowers/issues/1120), [openai/codex#22005](https://github.com/openai/codex/issues/22005), [#20366](https://github.com/openai/codex/issues/20366)). The full table still lives in `Skill("embedded-workbench")`: the discipline is available on request rather than applied to everyone by default. Workflow selection likewise moved from a fixed agent chain to **risk-proportional** paths.
+
+**Deliberately kept.** The Plan Verification Gate is intact (logicprobe → the built-in `fact-check` when it is not installed → tell the user if you used neither). Following [Superpowers Lite](https://github.com/BB-84C/superpowers-lite), safety, permission and **verification** gates are the kind to keep; process ceremony is the kind to scale back.
+
+**Known uncertainty.** These budget interfaces change fast and we checked once, on 2026-09-25. Every cell a vendor does not document is marked `UNVERIFIED` in [`platform-tool-mapping.md`](skills/embedded-workbench/references/platform-tool-mapping.md) rather than filled in by analogy.
+
+**Disagree?** These are judgement calls, not settled facts — especially "the Red Flags table leaves the payload" and "the gate is on by default". Open an [issue](https://github.com/AmethystLuna/embedded-workbench/issues) with the model tier, harness and counter-example you are working with; we would rather adjust on evidence.
 
 ## Codex CLI
 
@@ -200,10 +217,10 @@ In DeepSeek Harness, the bundle accepts a small configuration object:
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `enabled` | boolean | `false` | Set to `true` to enable the first-step gate injection; skill registration is unaffected. |
+| `enabled` | boolean | `true` | Set to `false` to drop the first-step gate injection entirely; skill registration is unaffected. |
 | `gateContent` | string | built-in gate text | Override the text injected into the first model step. |
 
-To change it, override the row by id in your profile's `cordis.patch.yml` (the example below **enables** the gate):
+To change it, override the row by id in your profile's `cordis.patch.yml` (the example below customises the gate text):
 
 ```yaml
 - insert:

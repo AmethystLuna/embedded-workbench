@@ -3,11 +3,8 @@
  * Workbench toolbox. The 8 skills ship in this package's `skills/` directory
  * and are registered at apply time into dsh's `ctx.skills` registry through
  * the standard filesystem provider, so they appear in every session catalog
- * without a manual copy step. Gate injection into the first model step is
- * opt-in — `enabled` defaults to false — because a fresh install should not
- * pay context budget for discipline it did not ask for; when it is on, the
- * gate text (1% Rule, Red Flags, Plan Verification Gate) folds into the first
- * model step of every agent session, mirroring the SessionStart hook the
+ * without a manual copy step. The plugin also folds a short gate text into the
+ * first model step of every agent session, mirroring the SessionStart hook the
  * Claude Code plugin installs.
  *
  * Injection listens on agent/pre-step and appends the gate to the FIRST
@@ -19,11 +16,14 @@
  * reminders (skill catalog, AGENTS.md, gate plugins) simply defer this message
  * to the first step after their promotion, and the history guard re-injects it
  * there. The default gate text is the dsh-native adaptation of
- * `hooks/session-start-content.md`: behavior rules
- * (1% Rule / Red Flags / Plan Verification Gate) stay in sync, while
- * presentation is adapted to dsh's native skill catalog — no roster table
- * (the model sees skills in its catalog) and no install instructions (those
- * live in `.dsh/INSTALL.md`). Deployments override via Config.
+ * `hooks/session-start-content.md`: the behavior rules stay in sync (the Plan
+ * Verification Gate and the context-budget rule), while presentation is adapted
+ * to dsh's native skill catalog — no roster table (the model sees skills in its
+ * catalog) and no install instructions (those live in `.dsh/INSTALL.md`). The
+ * payload is deliberately small: it carries the verification gate and the
+ * budget rule, not the 1% Rule / Red Flags enforcement scaffolding, which
+ * measurably pushes capable models into rigid phases and unnecessary fan-out.
+ * Deployments override via Config.
  *
  * @module embedded-workbench-dsh
  */
@@ -66,31 +66,13 @@ const GATE_PLUGIN_ID = 'embedded-workbench'
 const GATE_SOURCE_KIND: 'plugin:embedded-workbench' = 'plugin:embedded-workbench'
 
 const DEFAULT_GATE_CONTENT = `<EXTREMELY_IMPORTANT>
-Plugin embedded-workbench is active. You have embedded C/C++ firmware development skills — names and "Use when" triggers are in your skill catalog; load them with the skill tool. No custom agents in dsh: use the native subagent tooling for parallel work.
+Plugin embedded-workbench is active: embedded C/C++ firmware development skills are in your skill catalog. Load the one whose "Use when" matches before substantial work, with the skill tool.
 
-**1% Rule**: If there is even a 1% chance a skill applies to your task, invoke it before responding. If the skill turns out to be wrong for the situation, discard it and move on. The cost of loading a skill is trivial compared to the cost of a preventable mistake.
+**Plan Verification Gate**: before calling exit_plan_mode (or presenting a plan for approval), load the logicprobe skill — or the built-in fact-check skill when logicprobe is not installed — and append a "## Plan Verification" block to the plan. If you verify with neither, tell the user the plan is unverified before asking for approval; a silent skip is not an option. "This change is too small to check" and "I already read the code, the paths are right" are the two rationalizations this gate exists to catch.
 
-**Red Flags** — if you think any of these, STOP. You are rationalizing:
+**Context budget**: no token meter is visible to you, so never guess one. Act on what you can see — a pruned or spilled tool result means stop pulling it in whole, and a compaction checkpoint means move durable state into files. When a large step (many sources, a long sweep, several independent areas) shows no such signal, ask the user what to spend context on rather than deciding silently. If nobody can answer, take the reversible option and say so. When you do delegate, prefer \`subagent_fork\` over \`subagent\` if the sub-agent needs context you already built — its summary still lands here.
 
-| You think | Reality |
-|-----------|---------|
-| "This is just a quick fix" | Quick fixes break things. A 3-line design check costs 30 seconds. |
-| "I already understand this code" | You are looking at one file. The blast radius may span 5 modules. |
-| "The skill is overkill for this" | Simple things become complex. Check for skills. |
-| "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
-| "I can just read the file directly" | Skills have patterns and pitfalls you will not discover by reading. |
-| "I remember this skill content" | Skills evolve. Always load the current version. |
-| "I've explored enough, time to exit plan mode" | The exit_plan_mode tool is the verification gate. Have you loaded the logicprobe skill — or, if it is not installed, the built-in fallback fact-check skill? Every plan must pass this gate before exit. |
-| "This plan is too simple for logicprobe" | logicprobe auto-classifies depth; the fallback fact-check verifies every claim regardless. You don't decide. |
-| "I already read the code, I know the file paths are correct" | Load the logicprobe skill or the fallback fact-check skill, verify each claim, append the "## Plan Verification" block. |
-
-**Plan Verification Gate**: Before calling exit_plan_mode (or presenting a plan for approval), load the logicprobe skill (a separate plugin) — or, if it is missing from your skill catalog, load the built-in fallback fact-check skill for claim-by-claim verification, tell the user that behavioral/model claims degrade to manual confirmation, and recommend installing logicprobe. If neither is loaded, inform the user "此计划未经核查，是否需要我先做事实核查？" Silent skip is not an option.
-
-To load workflows and engineering policies: load the embedded-workbench skill.
-
-**Context budget**: no token meter is visible to you, so never guess a percentage. Act on what you can see — a pruned or spilled tool result means stop pulling it in whole; a compaction checkpoint means you already crossed the threshold once, so move durable state into files. When a step is large (many sources, a long sweep, several independent areas) and no signal says otherwise, **ask the user**: state what you are about to consume, that you cannot see the remaining budget, and the options with their costs, then follow their choice. If nobody can answer, take the reversible option and say so. When you do delegate, reach for \`subagent_fork\` rather than \`subagent\` if the sub-agent needs context you already built — and its summary still lands here.
-
-**Proactive features**: When you see state machines, protocol refactoring, behavioral claims ("always"/"never"), or multi-module tasks — suggest verification (logicprobe, or the built-in fact-check fallback if logicprobe is not installed), adversarial probing, or parallel subagents BEFORE the user asks. Most users do not know these exist.
+To load the workflows and engineering policies behind these skills: load the embedded-workbench skill.
 </EXTREMELY_IMPORTANT>`
 
 export interface Config {
@@ -99,10 +81,10 @@ export interface Config {
 }
 
 export const Config = z.object({
-  // Off by default: the skills are the product, and a first-step gate is only
-  // worth its context budget on deployments that want the discipline enforced
-  // (weaker/local models, or teams that require the verification gate).
-  enabled: z.boolean().default(false),
+  // On by default, but deliberately small: the payload carries the verification
+  // gate and the context-budget rule only, so leaving it on costs a few hundred
+  // tokens once per session rather than the ~900 of the previous payload.
+  enabled: z.boolean().default(true),
   gateContent: z.string().default(DEFAULT_GATE_CONTENT),
 })
 
@@ -150,7 +132,7 @@ function inspectProvider(config: Config): HostCordisInspectProviderRegistration 
   return {
     manifest: {
       id: 'embedded-workbench',
-      description: 'Session-start gate injection for the Embedded Workbench toolbox — folds the 1% Rule / Red Flags / Plan Verification Gate text into the first model step of every agent session.',
+      description: 'Session-start gate injection for the Embedded Workbench toolbox — folds the Plan Verification Gate and the context-budget rule into the first model step of every agent session.',
       methods: [
         {
           name: 'status',

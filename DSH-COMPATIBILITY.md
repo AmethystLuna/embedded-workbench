@@ -35,8 +35,8 @@ row installed exactly as published.
 # 1) install: fresh profile, plugin added as a file: dependency
 dsh plugin --profile headless add "file:<this-repo>"      # pnpm add succeeds
 
-# 2) mount check: composed tree contains the plugin row (gate off by default)
-dsh --profile headless --dump-config                       # id: embedded-workbench / enabled: false
+# 2) mount check: composed tree contains the plugin row, enabled
+dsh --profile headless --dump-config                       # id: embedded-workbench / enabled: true
 
 # 3) start: headless boot with a deliberately invalid API key.
 #    Expected: tree mounts and the app reaches the model-provider stage,
@@ -66,10 +66,10 @@ Since 0.8.13 each row is further inspected at the session-log level with a
 format-agnostic scanner (`seam-scan.mjs`) that decompresses every zstd frame and
 asserts two seams at once: the injected gate landed as a `user/message` carrying
 this producer's message source, and an `embedded-workbench` entry reached the
-session skill catalog. Because the shipped default is now `enabled: false`, the disposable profile
-enables the row (`enabled: true`) for these rows: the gate seam can only be
-observed with injection turned on, while the skill-catalog seam holds either way.
-The 0.8.13 run needed no override, since that patch still shipped `enabled: true`. All six runtimes re-verified in this round (0.1.5-rc.3,
+session skill catalog. The gate payload was later trimmed to the Plan Verification
+Gate plus the context-budget rule, with the 1% Rule and the Red Flags table moved
+into the skill body — this scan does not depend on the wording, only on the message
+source. All six runtimes re-verified in this round (0.1.5-rc.3,
 0.1.6-alpha.2, 0.1.7-alpha.1, 0.1.7-alpha.2, 0.1.7-rc.1, 0.1.7-rc.2 × both
 plugins) passed 12/12, recording session format v3 on 0.1.5-rc.3 and
 0.1.6-alpha.2 and v4 on the four 0.1.7 releases.

@@ -1,49 +1,9 @@
 <EXTREMELY_IMPORTANT>
-Plugin embedded-workbench is active. You have access to custom agents and skills for embedded C/C++ firmware development.
+Plugin embedded-workbench is active: embedded C/C++ firmware development skills are in your catalog. Load the one whose "Use when" matches before substantial work.
 
-**Agents**: architecture-steward, design-reviewer, execution-worker, quality-coordinator
+**Plan Verification Gate**: before `ExitPlanMode`, load `Skill("logicprobe")` — or the built-in `Skill("fact-check")` when logicprobe is not installed — and append a `## Plan Verification` block to the plan. If you verify with neither, tell the user the plan is unverified before asking for approval; a silent skip is not an option. "This change is too small to check" and "I already read the code, the paths are right" are the two rationalizations this gate exists to catch.
 
-**Skills** — invoke with Skill("name") when the task matches:
+**Context budget**: no token meter is visible to you, so never guess one. Act on what you can see — a result truncated, pruned, or spilled to a file means stop pulling it in whole, and a compaction checkpoint means move durable state into files. When a large step (many sources, a long sweep, several independent areas) shows no such signal, ask the user what to spend context on rather than deciding silently. If nobody can answer, take the reversible option and say so. When you do delegate, prefer a forked sub-agent over a fresh one if the sub-agent needs context you already built — its summary still lands here.
 
-| Skill | Use when | NOT for |
-|-------|----------|---------|
-| debug-methodology | Debugging crashes, HardFault, logs, or sensor anomalies | Fault-register triage (use hardfault-triage) |
-| c-cpp-dev | Writing or refactoring embedded C/C++ code on ARM targets | Formatting-only, simple reads, C# or non-embedded |
-| embedded-firmware-dev | FreeRTOS, ISR, NVM storage, async lifecycle, boundary analysis | Documentation-only RTOS references |
-| keil-mdk-build | Keil MDK/ARMCLANG builds, .map analysis, build diagnostics | Non-Keil builds (Makefile, CMake, IAR, GCC-only) |
-| state-machine-design | Async protocols, retries, ACK/NACK, timeout logic in embedded firmware | Generic network protocol design (TCP/HTTP/MQTT) |
-| hardfault-triage | Processor exception triage, fault registers, stack frames, PC-to-source | — |
-| fact-check | Claim-by-claim verification of docs/plans against the codebase — built-in fallback when logicprobe is not installed | State machines / behavioral claims needing model verification (use logicprobe) |
-
-> **⚠️ logicprobe 已拆分为独立插件 / moved to a standalone plugin** (v0.6.0):
-> The full claim-verification skill with executable model verification (logic-primitive verification, adversarial probing, refactoring regression detection) now lives in its own plugin: <https://github.com/AmethystLuna/logicprobe>
-> This plugin ships a built-in simplified fallback — `Skill("fact-check")` — for claim-by-claim verification when logicprobe is not installed. Install logicprobe with `claude plugin install logicprobe@logicprobe` (or clone to `~/.claude/plugins/dev/logicprobe`). Without it, behavioral/model claims degrade to manual confirmation mode.
-
-**1% Rule**: If there is even a 1% chance a skill applies to your task, invoke it before responding. If the skill turns out to be wrong for the situation, discard it and move on. The cost of loading a skill is trivial compared to the cost of a preventable mistake.
-
-**Red Flags** — if you think any of these, STOP. You are rationalizing:
-
-| You think | Reality |
-|-----------|---------|
-| "This is just a quick fix" | Quick fixes break things. A 3-line design check costs 30 seconds. |
-| "I already understand this code" | You are looking at one file. The blast radius may span 5 modules. |
-| "The skill is overkill for this" | Simple things become complex. Check for skills. |
-| "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
-| "I can just read the file directly" | Skills have patterns and pitfalls you will not discover by reading. |
-| "I remember this skill content" | Skills evolve. Always load the current version. |
-| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("logicprobe")` or, if it is not installed, the built-in fallback `Skill("fact-check")`? Every plan must pass this gate before exit. |
-| "This plan is too simple for logicprobe" | logicprobe auto-classifies depth; the fallback fact-check verifies every claim regardless. You don't decide. |
-| "I already read the code, I know the file paths are correct" | Load `Skill("logicprobe")` or the fallback `Skill("fact-check")`, verify each claim, append the `## Plan Verification` block. |
-
-**Plan Verification Gate**: Before `ExitPlanMode`, exactly one of:
-
-1. Load `Skill("logicprobe")` (standalone plugin) — full verification, including executable model checks for behavioral claims; OR
-2. If logicprobe is not installed, load the built-in fallback `Skill("fact-check")` (claim-by-claim verification with evidence), tell the user that behavioral/model claims degrade to manual confirmation, and recommend installing logicprobe.
-If neither is loaded, inform the user "此计划未经核查，是否需要我先做事实核查？（This plan has not been fact-verified. Would you like me to verify before approving?）" Silent skip is not an option.
-
-To load workflows and engineering policies: Skill("embedded-workbench")
-
-**Context budget**: no token meter is visible to you, so never guess a percentage. Act on what you can see — a truncated, pruned, or spilled tool result means stop pulling it in whole; a compaction checkpoint means you already crossed the threshold once, so move durable state into files. When a step is large (many sources, a long sweep, several independent areas) and no signal says otherwise, **ask the user**: state what you are about to consume, that you cannot see the remaining budget, and the options with their costs, then follow their choice. If nobody can answer, take the reversible option and say so. When you do delegate, prefer a forked sub-agent over a fresh one if the sub-agent needs context you already built — and its summary still lands here.
-
-**Proactive features**: When you see state machines, protocol refactoring, behavioral claims ("always"/"never"), or multi-module tasks — suggest verification (logicprobe, or the built-in fact-check fallback if logicprobe is not installed), adversarial probing, or parallel subagents BEFORE the user asks. Most users do not know these exist.
+Skills: embedded-workbench (bootstrap — workflows and engineering policies), debug-methodology, hardfault-triage, embedded-firmware-dev, state-machine-design, keil-mdk-build, c-cpp-dev, fact-check.
 </EXTREMELY_IMPORTANT>

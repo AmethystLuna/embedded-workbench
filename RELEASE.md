@@ -37,7 +37,7 @@ deliberate instead of habitual.
 
   ```bash
   dsh plugin --profile scratch add "file:$PWD"
-  dsh --profile scratch --dump-config    # expect: id: embedded-workbench / enabled: false
+  dsh --profile scratch --dump-config    # expect: id: embedded-workbench / enabled: true
   rm -rf ~/.dsh/profiles/scratch
   ```
 
@@ -66,10 +66,10 @@ deliberate instead of habitual.
 - [ ] `dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"` (or `dsh plugin --profile web add dsh-embedded-workbench`)
 - [ ] Restart the web profile
 - [ ] Confirm all three:
-  - `dsh --profile web --dump-config` contains the `embedded-workbench` row (`enabled: false` on the shipped default)
-  - with the row set to `enabled: true`, the session-start gate text (1% Rule / Red Flags / Plan Verification Gate) appears in the model context of the **first step** of a new session
-  - `cordis_inspect_list` shows the `embedded-workbench` provider; `cordis_inspect_query` `status` returns the configured `enabled`
-- [ ] Opt the gate in (and override its text if needed) in the profile's `cordis.patch.yml` by row id
+  - `dsh --profile web --dump-config` contains the `embedded-workbench` row (`enabled: true` on the shipped default)
+  - the first-step gate text (Plan Verification Gate + context-budget rule) appears in the model context of the **first step** of a new session
+  - `cordis_inspect_list` shows the `embedded-workbench` provider; `cordis_inspect_query` `status` returns `enabled: true`
+- [ ] Optional: override `gateContent` (or set `enabled: false`) in the profile's `cordis.patch.yml` by row id
 
 ## 4. Housekeeping
 

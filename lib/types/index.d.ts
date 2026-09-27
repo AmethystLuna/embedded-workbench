@@ -3,11 +3,8 @@
  * Workbench toolbox. The 8 skills ship in this package's `skills/` directory
  * and are registered at apply time into dsh's `ctx.skills` registry through
  * the standard filesystem provider, so they appear in every session catalog
- * without a manual copy step. Gate injection into the first model step is
- * opt-in — `enabled` defaults to false — because a fresh install should not
- * pay context budget for discipline it did not ask for; when it is on, the
- * gate text (1% Rule, Red Flags, Plan Verification Gate) folds into the first
- * model step of every agent session, mirroring the SessionStart hook the
+ * without a manual copy step. The plugin also folds a short gate text into the
+ * first model step of every agent session, mirroring the SessionStart hook the
  * Claude Code plugin installs.
  *
  * Injection listens on agent/pre-step and appends the gate to the FIRST
@@ -19,11 +16,14 @@
  * reminders (skill catalog, AGENTS.md, gate plugins) simply defer this message
  * to the first step after their promotion, and the history guard re-injects it
  * there. The default gate text is the dsh-native adaptation of
- * `hooks/session-start-content.md`: behavior rules
- * (1% Rule / Red Flags / Plan Verification Gate) stay in sync, while
- * presentation is adapted to dsh's native skill catalog — no roster table
- * (the model sees skills in its catalog) and no install instructions (those
- * live in `.dsh/INSTALL.md`). Deployments override via Config.
+ * `hooks/session-start-content.md`: the behavior rules stay in sync (the Plan
+ * Verification Gate and the context-budget rule), while presentation is adapted
+ * to dsh's native skill catalog — no roster table (the model sees skills in its
+ * catalog) and no install instructions (those live in `.dsh/INSTALL.md`). The
+ * payload is deliberately small: it carries the verification gate and the
+ * budget rule, not the 1% Rule / Red Flags enforcement scaffolding, which
+ * measurably pushes capable models into rigid phases and unnecessary fan-out.
+ * Deployments override via Config.
  *
  * @module embedded-workbench-dsh
  */

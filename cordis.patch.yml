@@ -4,13 +4,12 @@
 # profile cordis.patch.yml, $DSH_HOME/cordis.patch.yml, --patch overlays)
 # override a row by id, replacing the whole `config` (no deep merge).
 #
-# The first-model-step gate is OFF by default so a fresh install pays no
-# context budget for it: the shipped skills are the product, and the gate is
-# there for deployments that want the discipline enforced. Opt in per profile
-# by overriding this row with `config: { enabled: true }`.
+# The first-model-step gate is ON by default and deliberately small — it carries
+# the Plan Verification Gate and the context-budget rule, not the 1% Rule /
+# Red Flags enforcement scaffolding. Set `enabled: false` per profile to drop it.
 
 - insert:
     - id: embedded-workbench
       name: 'dsh-embedded-workbench'
       config:
-        enabled: false
+        enabled: true
