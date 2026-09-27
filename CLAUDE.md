@@ -25,6 +25,11 @@ This plugin's agent-compliance architecture (1% Rule, Red Flags, `<SUBAGENT-STOP
     against a stub context and asserts the gate enters a session exactly once.
     Self-contained, so CI runs it too; if you change the injection or its history
     guard, this is the test that has to move with you.
+  - `node tests/claude-session-start-hook.test.mjs` — runs the SessionStart hook
+    over control-character, CRLF and Unicode payloads and asserts the emitted
+    JSON is valid and byte-exact. Also self-contained, and it is the guard for
+    the escaper: run it after touching `hooks/`. CI runs it on Linux, whose
+    GNU sed/awk differ from the Git Bash tools on Windows.
   - `node tests/dsh-skills-registration.test.mjs` — mounts the real
     `SkillRegistry` and checks the shipped catalog. It imports the `logicprobe`
     checkout as a sibling directory, so it is local-only and CI does not run it.
@@ -41,8 +46,8 @@ This plugin's agent-compliance architecture (1% Rule, Red Flags, `<SUBAGENT-STOP
   `hooks/`, `tests/`, `.dsh/`, `cordis.patch.yml`, `package.json`,
   `package-lock.json`, `tsconfig.json`, the READMEs, or the workflow itself:
   `npm ci --legacy-peer-deps`, typecheck, build, committed-`lib/` drift guard,
-  the offline gate-injection checks, and repo-wide markdownlint
-  (`npx markdownlint-cli --ignore "**/node_modules/**" .`).
+  the offline plugin checks (gate injection, SessionStart hook payload), and
+  repo-wide markdownlint (`npx markdownlint-cli --ignore "**/node_modules/**" .`).
 - `Plugin Security Scan` — on every push/PR: `hashgraph-online/ai-plugin-scanner-action`
   on the repo root; fails on high-severity findings.
 

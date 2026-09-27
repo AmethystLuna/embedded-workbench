@@ -51,8 +51,10 @@ jobs:
         run: npm run build
       - name: Committed build artifact is current
         run: git diff --exit-code -- lib
-      - name: Offline gate-injection checks
-        run: node tests/dsh-gate-injection.test.mjs
+      - name: Offline plugin checks
+        run: |
+          node tests/dsh-gate-injection.test.mjs
+          node tests/claude-session-start-hook.test.mjs
 
   markdownlint:
     runs-on: ubuntu-latest
