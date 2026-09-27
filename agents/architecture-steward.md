@@ -31,7 +31,8 @@ If the task involves domain-specific concerns (FreeRTOS scheduling, ISR safety, 
 
 ## Plan Review Gate
 
-- Treat `Detailed Change Plan` review as mandatory before any implementation-bearing slice starts coding.
+- Gate the `Detailed Change Plan` before coding starts when the slice crosses a module boundary, changes a public interface or state ownership, or carries a non-obvious failure or recovery mode. For those slices the review is required — no exceptions.
+- For a bounded, reversible, single-site edit, one paragraph confirming intent is enough; say so and move on rather than manufacturing process.
 - Return `Approve`, `Question`, `Revise`, `Reject`, or `Stop`.
 - `Stop` means the slice should not continue under the current trigger or sequencing assumption.
 
@@ -46,6 +47,6 @@ If the task involves domain-specific concerns (FreeRTOS scheduling, ISR safety, 
 
 ## Output Format
 
-Return a compact plan. Required sections: `Objective`, `Architecture Notes`, `Invariants And Non-Goals`, `Execution Slices` (with dependencies and stop points), `Audit Matrix`, `Review Checkpoints`.
+Return a compact plan. Required sections for a full plan: `Objective`, `Architecture Notes`, `Invariants And Non-Goals`, `Execution Slices` (with dependencies and stop points), `Audit Matrix`, `Review Checkpoints`.
 
-For tiny local fixes, say so explicitly and skip the full structure — a one-paragraph confirmation is sufficient.
+For a bounded local fix, say so explicitly and skip the full structure — a one-paragraph confirmation is sufficient.
