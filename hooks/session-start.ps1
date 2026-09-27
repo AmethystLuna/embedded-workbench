@@ -1,6 +1,14 @@
-# SessionStart hook for embedded-workbench
+# SessionStart hook for embedded-workbench — PowerShell variant.
 # Reads session-start-content.md, wraps in JSON, outputs via stdout.
 # All content lives in the .md file — no encoding-vulnerable inline strings.
+#
+# NOT WIRED: hooks.json invokes the bash variant (`hooks/session-start`) only.
+# This file is kept as a tested reference: run manually it produces output that
+# is byte-identical to the bash hook, so it is the drop-in starting point if a
+# Windows host without Git Bash ever needs a PowerShell entry point (the Claude
+# Code default shell is PowerShell exactly in that case, and `bash <path>` is
+# then not resolvable). Wiring it needs a single dispatching entry point rather
+# than a second handler, which would double-inject.
 param()
 $ErrorActionPreference = "Stop"
 
