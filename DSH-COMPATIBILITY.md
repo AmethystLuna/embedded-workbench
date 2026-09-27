@@ -14,7 +14,7 @@ dsh bundle against the DSH releases listed in `dsh.compatibility.dshReleases`.
 | npm | 11.13.0 |
 | pnpm | 11.21.0 |
 | Test date | 2026-09-25 |
-| Package under test | `dsh-embedded-workbench` 0.8.13 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
+| Package under test | `dsh-embedded-workbench` 0.9.0 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
 
 ## Method (one disposable profile per version)
 
