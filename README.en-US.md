@@ -277,7 +277,7 @@ To report a security vulnerability, do **not** open a public issue. Use the priv
 
 | Plugin | Description |
 |--------|-------------|
-| [logicprobe](https://github.com/AmethystLuna/logicprobe) | Claim-verification skill: checks every verifiable claim in design docs, architecture specs, and refactoring plans against the codebase, escalating behavioral claims to executable-model verification. Split out of this plugin; the Plan Verification Gate prefers it and falls back to the built-in `fact-check` skill when it is not installed. |
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | Claim-verification skill: checks every verifiable claim in design docs, architecture specs, and refactoring plans against the codebase, escalating behavioral claims to executable-model verification. Split out of this plugin; the Plan Verification Gate prefers it and falls back to the built-in `fact-check` skill when it is not installed. Install with `claude plugin install logicprobe@logicprobe` (on dsh: `dsh plugin --profile <name> add dsh-logicprobe`). |
 | [superpowers](https://github.com/obra/superpowers) | The original agent discipline engine — skill loading enforcement, Red Flags, subagent-driven development. Many of this plugin's agent-compliance patterns (1% Rule, Red Flags, `<SUBAGENT-STOP>`, instruction priority) were adapted from Superpowers. |
 
 ## Acknowledgments

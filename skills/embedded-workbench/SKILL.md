@@ -68,25 +68,11 @@ You have crossed into a heavier path when the change spans more than one module,
 
 ## Context Budget
 
-Complexity decides **how much process**; the context budget decides **whether to split the window**. They are separate decisions: a one-line change can still deserve a sub-agent when finding it means sweeping a log, and a cross-module design is often better kept in one conversation.
+Complexity decides **how much process**; the budget decides **whether to split the window**. Split it for discovery whose detail you will not cite again — a suite, a log sweep, docs, several independent areas. Keep it for phases that share context (plan → implement → test), or when the change is quick and latency matters.
 
-Split the window when the work is discovery whose detail you will not cite again — running a suite, sweeping logs, fetching documentation, searching several independent areas. Keep it in the main conversation when the phases share context (plan → implement → test), when you need to iterate back and forth, or when the change is quick and latency matters.
+**You cannot see your budget**: most harnesses show a token count to the user's interface, not to you, so never guess one. Act on what you do see — a result truncated, pruned, or spilled to a file, or a compaction / checkpoint summary. When a large step shows no signal at all, **ask the user** what to spend context on rather than deciding silently; if nobody can answer (headless run), take the reversible option and say so.
 
-**You usually cannot see your budget.** Most harnesses expose a token count to the user's interface and not to you (`references/platform-tool-mapping.md` has the per-harness detail). So never invent a percentage, and never silently guess. Two cases:
-
-**A signal you can actually observe** — a result truncated, pruned, or spilled to a file, or a compaction / checkpoint summary:
-
-| You observe | Do |
-| --- | --- |
-| A tool result was truncated, pruned, or spilled to a file | Stop pulling the whole thing in. Read the file selectively, or hand the sweep to a read-only sub-agent — and say which you did. |
-| A compaction or checkpoint summary appeared | You have already crossed the threshold once. Move durable state into files and prefer file references over pasted content. |
-| A truncation flag, or a result list capped at N | Narrow the query before re-running it. |
-
-**No signal, but the work is clearly large** — many sources, a long sweep, several independent areas, or phases that will not share context: **ask the user.** Say what you are about to consume, that this harness gives you no budget readout, and the options with their costs, then do what they choose. One question per task, not running commentary:
-
-> This next step pulls ~20 files and a test log into the conversation. I can't see how much context is left here. Options: (a) delegate the sweep to a read-only sub-agent and keep only its summary, (b) read selectively and write findings to a file I reference by path, (c) read it all here. (a) and (b) cost less context but lose detail, and (a) also spends the sub-agent's own tokens.
-
-If no user can answer (headless or non-interactive run), take the reversible option — read selectively, prefer paths over pasted content — and state that you assumed it.
+Delegation is not free: the sub-agent spends its own tokens and its summary still lands here. When it needs context you already built, inherit it (dsh `subagent_fork`; Codex `fork_turns`, default `all`; Claude Code fork mode; Kimi `/btw`) instead of rebuilding it in a prompt. Per-harness markers and tool names: `references/platform-tool-mapping.md`.
 
 Delegation is not free: the sub-agent spends its own tokens, its summary still lands in this context, and its window is sized by *its* model, not this one. If the returns would be verbose, ask before delegating. Prefer read-only delegation when the point is to discard detail. When the delegated work needs the context you have already built, inherit it (dsh `subagent_fork`; Codex `fork_turns`, which defaults to `all`; Claude Code forked subagent; Kimi `/btw`) rather than rebuilding it inside a prompt (dsh `subagent`, Claude Code fresh subagent).
 
@@ -127,17 +113,15 @@ Claude Code's built-in `EnterPlanMode` / `ExitPlanMode` maps to the **plan phase
 
 ### Plan Verification Gate
 
-> **⚠️ logicprobe 已拆分为独立插件 / moved to a standalone plugin** (v0.6.0): the full verification skill (executable model checks, adversarial probing) now ships in its own plugin — <https://github.com/AmethystLuna/logicprobe>. Install it with `claude plugin install logicprobe@logicprobe` (or clone to `~/.claude/plugins/dev/logicprobe`); on dsh, `dsh plugin --profile <name> add dsh-logicprobe`. This plugin ships a built-in simplified fallback — `Skill("fact-check")` — for claim-by-claim verification when logicprobe is not installed; behavioral/model claims then degrade to manual confirmation.
+> **⚠️ logicprobe 已拆分为独立插件 / moved to a standalone plugin** (v0.6.0): the full verification skill (executable model checks, adversarial probing) now ships in its own plugin — <https://github.com/AmethystLuna/logicprobe> (install commands are in the README's "Other Plugins"). This plugin ships a built-in simplified fallback — `Skill("fact-check")` — for claim-by-claim verification when logicprobe is not installed; behavioral/model claims then degrade to manual confirmation.
 
 **Before calling `ExitPlanMode`**, exactly one of the following must happen:
 
-1. **Load `Skill("logicprobe")`** (standalone plugin — install separately if missing) — the skill classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED), runs verification (including executable model checks), and appends a `## Plan Verification` summary block to the plan file.
-2. **Load `Skill("fact-check")`** (built-in fallback, only when logicprobe is not installed) — verifies every verifiable claim against the codebase with evidence, appends a `## Plan Verification` block marked `fact-check (fallback)`, and tells the user that state-machine/behavioral claims degrade to manual confirmation — recommend installing logicprobe.
-3. **Inform the user** — if you choose not to load either skill, you MUST say: *"此计划未经核查。是否需要我在审批前运行事实核查？（This plan has not been fact-verified. Would you like me to run verification before approving?）"* The user must have the option to request verification before approving.
+1. **Load `Skill("logicprobe")`** (standalone plugin) — it classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED), runs the verification including executable model checks, and appends a `## Plan Verification` summary block to the plan.
+2. **Load `Skill("fact-check")`** (built-in fallback, only when logicprobe is not installed) — verifies every verifiable claim against the codebase with evidence, appends a `## Plan Verification` block marked `fact-check (fallback)`, and tells the user that state-machine/behavioral claims degrade to manual confirmation.
+3. **Inform the user** — if you load neither, say: *"此计划未经核查。是否需要我在审批前运行事实核查？（This plan has not been fact-verified. Would you like me to run verification before approving?）"*
 
-Silent skip is not an option. Either verify, or tell the user you didn't.
-
-Plan mode permits `Read`, `Glob`, `Grep`, and `Skill` calls — all verification executes within plan mode before exit.
+Silent skip is not an option. Plan mode permits `Read`, `Glob`, `Grep`, and `Skill` calls, so all of this executes before exit.
 
 ---
 
@@ -210,7 +194,7 @@ When multiple skills could apply, use this order:
 "Add retry logic" → state-machine-design first, then c-cpp-dev for implementation.
 "Review this design" → logicprobe first (or the built-in fact-check fallback if logicprobe is not installed), then escalate findings to design-reviewer agent.
 
-**Cross-domain links**: load secondary skills ONLY when the primary skill's findings indicate they are needed. Don't pre-load. `hardfault-triage` ↔ `keil-mdk-build` (.map file bridge — load keil-mdk-build only if .map analysis is needed). `hardfault-triage` ↔ `debug-methodology` (root-cause analysis — load debug-methodology only if the fault cause is complex). `embedded-firmware-dev` ↔ `state-machine-design` (state transitions — load state-machine-design only if state logic is involved). `embedded-firmware-dev` ↔ `debug-methodology` (debugging process). `logicprobe` ↔ `design-reviewer` agent (design doc review, logic verification). `logicprobe` ↔ `state-machine-design` (behavioral claim probing). `logicprobe` ↔ `fact-check` (built-in fallback when the logicprobe plugin is not installed).
+**Cross-domain links**: load a secondary skill only when the primary skill's findings call for it — don't pre-load. Each skill's own `Use when` and NOT clauses already tell you when it applies.
 
 ## Domain Skills
 
@@ -229,45 +213,15 @@ Design doc review, claim verification, logic primitive + adversarial probing →
 
 ## Templates & References
 
-This skill's `references/` directory contains document templates and platform references. Use `Read` with the skill's reference path to load the relevant file when needed:
+The `references/` directory holds the workflow document templates plus three notes. Read the file you need by name:
 
-### Platform
-
-- `platform-tool-mapping.md` — Claude Code → Codex/Cursor/Kimi/OpenCode/ZCode/Copilot/dsh tool name equivalents. **Load this immediately if you are NOT on Claude Code.**
-
-### Workflow Templates
-
-- `detailed-change-plan.md` — Pre-edit implementation plan
-- `task-charter.md` — Task scope and slice roadmap
-- `iteration-notes.md` — Per-slice execution notes
-- `steward-memo.md` — Pre-execution architecture framing
-- `result-note.md` — Post-edit closure evidence
-- `final-qc.md` — Formal review verdict
-- `decision-log.md` — Approved decisions with rationale
-- `audit-ledger.md` — Recurring audit tracking (Framework path)
-- `contract-matrix.md` — Contract-to-sentinel mapping (Framework path)
-- `durable-requirement-notes.md` — Long-lived business invariants
+- `platform-tool-mapping.md` — tool-name equivalents for Codex/Cursor/Kimi/OpenCode/ZCode/Copilot/dsh, and the per-harness context-budget table. **Read this immediately if you are not on Claude Code.**
+- `proactive-suggestions.md` — ready-to-use phrasings for the suggestions below.
+- `INDEX.md` — the working-memory index template.
+- Workflow templates: `detailed-change-plan.md`, `task-charter.md`, `iteration-notes.md`, `steward-memo.md`, `result-note.md`, `final-qc.md`, `decision-log.md`, `audit-ledger.md`, `contract-matrix.md`, `durable-requirement-notes.md`.
 
 ---
 
 ## Proactive Suggestions
 
-When you observe any of these patterns in the user's task, **suggest the relevant feature before the user asks**. Most users don't know these capabilities exist.
-
-| Pattern You Observe | Suggest |
-|---------------------|--------|
-| User describes refactoring a state machine (splitting/merging states, changing transitions) | "Before you start, would you like me to run logic-primitive verification on the refactoring? I can extract the current state machine from code, compare it against your plan, and flag any regressions, deadlocks, or behavioral deltas before you change a single line." |
-| User describes a new state machine or protocol with ≥3 states | "I can run an adversarial verification on this design — 22 automated checks (8 structural S1–S8 plus 14 adversarial A1–A14) for deadlocks, unreachable states, race conditions, guard completeness, and invariant violations. Want me to do that before we implement?" |
-| User pastes or writes a state enum + switch-case dispatcher | "I notice a state machine here. Would you like me to model it and run completeness checks? I can find missing transitions, detect absorbing error loops, and verify that every state is reachable." |
-| User says "always" / "never" / "guaranteed" about behavior | "That's a behavioral invariant. I can model this and try to find a counter-example — the shortest event sequence that would violate 'X always happens before Y'. Want me to check?" |
-| User reviews a PR or diff that touches a state machine file | "This PR changes state machine logic. Would you like me to extract the before/after models and verify no regressions were introduced?" |
-| User debugs a crash or lockup in a stateful module | "This might be a state machine completeness issue. I can model the state machine from the code and check for deadlocks, unreachable states, or event ordering problems that could cause the lockup." |
-| Task would benefit from parallel execution (multiple independent modules, files, or dimensions) | "These are independent. I can dispatch parallel subagents to handle each module concurrently and synthesize the results. Want me to do that?" |
-| User writes a Detailed Change Plan without design review | "Before implementing, would you like the design-reviewer agent to fact-check this plan against the codebase? It catches API mismatches, missing modules, and mechanism feasibility issues before you write code." |
-
-### Suggestion Rules
-
-- **Suggest once per task**, not repeatedly. If the user declines, don't push.
-- **Be specific about what the feature does** — don't just name-drop. Say "I can find deadlocks and missing transitions" not "I can run logicprobe." If logicprobe is not installed, offer the built-in fact-check skill: "I can check every claim in the plan against the codebase."
-- **Estimate cost**: for lightweight checks, say "this takes ~30 seconds." For Python harness runs, say "this will generate and run a verification script."
-- **Respect the user's decision**: if they decline, move on. The features are tools, not requirements.
+Suggest a capability when it clearly applies and the user is unlikely to know it exists — state-machine verification for a state machine, a protocol, or an "always"/"never" claim; parallel sub-agents for genuinely independent modules; a design fact-check for a plan that had no review. Suggest **once per task**, say what the check finds rather than which tool runs it, and drop it if the user declines. Ready-to-use phrasings: `references/proactive-suggestions.md`.

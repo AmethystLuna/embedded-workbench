@@ -274,7 +274,7 @@ bash tests/skill-triggering/run-all.sh
 
 | 插件 | 简介 |
 |------|------|
-| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 声称核查技能：逐条核验设计文档、架构规格、重构计划中的可验证声称与代码库是否一致，行为类声称升级为可执行模型验证。自本插件拆分；Plan Verification Gate 优先使用它，未安装时回退到内置 `fact-check` 技能。 |
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 声称核查技能：逐条核验设计文档、架构规格、重构计划中的可验证声称与代码库是否一致，行为类声称升级为可执行模型验证。自本插件拆分；Plan Verification Gate 优先使用它，未安装时回退到内置 `fact-check` 技能。安装：`claude plugin install logicprobe@logicprobe`（dsh：`dsh plugin --profile <name> add dsh-logicprobe`）。 |
 | [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎——技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
 
 ## 致谢
