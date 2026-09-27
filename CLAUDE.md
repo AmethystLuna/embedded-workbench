@@ -29,10 +29,11 @@ This plugin's agent-compliance architecture (1% Rule, Red Flags, `<SUBAGENT-STOP
 
 ## CI Workflows (GitHub Actions)
 
-- `dsh-bundle` — on push/PR touching `src/`, `lib/`, `cordis.patch.yml`,
-  `package.json`, `package-lock.json`, docs, or the workflow itself:
+- `dsh-bundle` — on push/PR touching `src/`, `lib/`, `skills/`, `agents/`,
+  `hooks/`, `.dsh/`, `cordis.patch.yml`, `package.json`, `package-lock.json`,
+  `tsconfig.json`, the READMEs, or the workflow itself:
   `npm ci --legacy-peer-deps`, typecheck, build, committed-`lib/` drift guard,
-  and markdownlint on `.dsh/**/*.md`, READMEs, and `RELEASE.md`.
+  and repo-wide markdownlint (`npx markdownlint-cli --ignore "**/node_modules/**" .`).
 - `Plugin Security Scan` — on every push/PR: `hashgraph-online/ai-plugin-scanner-action`
   on the repo root; fails on high-severity findings.
 

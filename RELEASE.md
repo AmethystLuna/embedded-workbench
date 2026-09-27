@@ -37,7 +37,7 @@ deliberate instead of habitual.
 
   ```bash
   dsh plugin --profile scratch add "file:$PWD"
-  dsh --profile scratch --dump-config    # expect: id: embedded-workbench / enabled: true
+  dsh --profile scratch --dump-config    # expect: id: embedded-workbench / enabled: false
   rm -rf ~/.dsh/profiles/scratch
   ```
 
@@ -66,14 +66,14 @@ deliberate instead of habitual.
 - [ ] `dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"` (or `dsh plugin --profile web add dsh-embedded-workbench`)
 - [ ] Restart the web profile
 - [ ] Confirm all three:
-  - `dsh --profile web --dump-config` contains the `embedded-workbench` row
-  - the session-start gate text (1% Rule / Red Flags / Plan Verification Gate) appears in the model context of the **first step** of a new session
-  - `cordis_inspect_list` shows the `embedded-workbench` provider; `cordis_inspect_query` `status` returns `enabled: true`
-- [ ] Optional: override `gateContent` (and `enabled`) in the profile's `cordis.patch.yml` by row id
+  - `dsh --profile web --dump-config` contains the `embedded-workbench` row (`enabled: false` on the shipped default)
+  - with the row set to `enabled: true`, the session-start gate text (1% Rule / Red Flags / Plan Verification Gate) appears in the model context of the **first step** of a new session
+  - `cordis_inspect_list` shows the `embedded-workbench` provider; `cordis_inspect_query` `status` returns the configured `enabled`
+- [ ] Opt the gate in (and override its text if needed) in the profile's `cordis.patch.yml` by row id
 
 ## 4. Housekeeping
 
 - [ ] Tag the release (`git tag vX.Y.Z && git push --tags`)
 - [ ] Keep `.dsh/INSTALL.md` install options in sync with what is actually published
-- [ ] Keep the "Version pinning" note in `.dsh/INSTALL.md` in sync with the dsh release actually verified
+- [ ] Keep the "Pin your `dsh` version" note in `.dsh/INSTALL.md` (Notes) in sync with the dsh release actually verified
 - [ ] Decide the next version per the Version policy; bump it at the start of the next cycle with `node scripts/bump-version.mjs <new-version>`

@@ -36,11 +36,14 @@ Plugin embedded-workbench is active. You have access to custom agents and skills
 | "I already read the code, I know the file paths are correct" | Load `Skill("logicprobe")` or the fallback `Skill("fact-check")`, verify each claim, append the `## Plan Verification` block. |
 
 **Plan Verification Gate**: Before `ExitPlanMode`, exactly one of:
+
 1. Load `Skill("logicprobe")` (standalone plugin) — full verification, including executable model checks for behavioral claims; OR
 2. If logicprobe is not installed, load the built-in fallback `Skill("fact-check")` (claim-by-claim verification with evidence), tell the user that behavioral/model claims degrade to manual confirmation, and recommend installing logicprobe.
 If neither is loaded, inform the user "此计划未经核查，是否需要我先做事实核查？（This plan has not been fact-verified. Would you like me to verify before approving?）" Silent skip is not an option.
 
 To load workflows and engineering policies: Skill("embedded-workbench")
+
+**Context budget**: no token meter is visible to you, so never guess a percentage. Act on what you can see — a truncated, pruned, or spilled tool result means stop pulling it in whole; a compaction checkpoint means you already crossed the threshold once, so move durable state into files. When a step is large (many sources, a long sweep, several independent areas) and no signal says otherwise, **ask the user**: state what you are about to consume, that you cannot see the remaining budget, and the options with their costs, then follow their choice. If nobody can answer, take the reversible option and say so. When you do delegate, prefer a forked sub-agent over a fresh one if the sub-agent needs context you already built — and its summary still lands here.
 
 **Proactive features**: When you see state machines, protocol refactoring, behavioral claims ("always"/"never"), or multi-module tasks — suggest verification (logicprobe, or the built-in fact-check fallback if logicprobe is not installed), adversarial probing, or parallel subagents BEFORE the user asks. Most users do not know these exist.
 </EXTREMELY_IMPORTANT>

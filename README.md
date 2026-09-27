@@ -5,7 +5,7 @@
 嵌入式 C/C++ 固件开发工具箱 — 4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil
 MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱。
 
-**跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
+**跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode、DeepSeek Harness (dsh)。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
 
 ## 组件
 
@@ -29,8 +29,9 @@ MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL
 | `c-cpp-dev` | C/C++ 代码生成、风格、内存布局、重构 |
 | `state-machine-design` | 状态模型、重试、超时、转换门控、实现模式 |
 | `hardfault-triage` | 处理器异常分类 — 故障寄存器、栈帧、PC 定位源码、根因分类 |
+| `fact-check` | 声称核查回退：逐条对照代码库核实 API 名、文件路径、枚举值、数量与机制可行性；logicprobe 未安装时由 Plan Verification Gate 使用 |
 
-`logicprobe`（文档与计划声称核查技能）**已拆分为独立插件** — 见下方[其他插件推荐](#其他插件推荐)。
+`logicprobe`（文档与计划声称核查技能）**已拆分为独立插件** — 见下方[其他插件推荐](#其他插件推荐)。未安装时，Plan Verification Gate 回退到本插件自带的 `fact-check` 技能，只有行为/模型类声称降级为人工确认。
 
 > 技能内容大多来自作者个人嵌入式/固件开发工作经验和代码洁癖，按实际工程踩坑与约束沉淀，而非泛泛的模型生成内容。
 
@@ -81,7 +82,7 @@ git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugi
 原生 dsh 支持以 cordis 插件 bundle 的形式提供，位于**仓库根**（根 `package.json` 声明了 `dsh.bundle`）：
 
 - 技能遵循 Agent Skills 开放标准，被 dsh 的 `skill-filesystem` provider 原样发现——零代码。
-- bundle 将首步门禁（1% Rule / Red Flags / Plan Verification Gate）注入每个 agent 会话的第一个模型步骤——是 Claude `SessionStart` hook 在 dsh 的原生对应物，并注册了模型可见的目录条目（`cordis_inspect`）。
+- bundle 可以按需把首步门禁（1% Rule / Red Flags / Plan Verification Gate）注入每个 agent 会话的第一个模型步骤（`enabled`，**默认关闭**）——是 Claude `SessionStart` hook 在 dsh 的原生对应物；模型可见的目录条目（`cordis_inspect`）无论开关都会注册。
 - 4 个自定义 agent 有意不移植——dsh 原生 subagent 工具已覆盖并行多 agent 工作。
 
 安装（原生 bundle，推荐）：
@@ -95,18 +96,20 @@ dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
 npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 ```
 
-安装后重启 profile，运行 `dsh --profile web --dump-config` 应看到 `id: embedded-workbench` 且 `enabled: true`。更多方式（纯技能拷贝、项目级等）见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)。
+安装后重启 profile，运行 `dsh --profile web --dump-config` 应看到 `id: embedded-workbench` 且 `enabled: false`——技能此时已可用，因为 gate 注入是可选项；要启用首步 Gate 就把它改成 `true`。更多方式（纯技能拷贝、项目级等）见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)。
 
 > DSH 安装注意：npm 包名为 `dsh-embedded-workbench`（无 scope）。在 web profile 的 `package.json` 中，依赖键与 `dsh.profile.bundles` 必须写 `dsh-embedded-workbench`；否则 dsh 加载器会因找不到 `node_modules/dsh-embedded-workbench` 而启动失败。
 
 ## 使用
 
-插件在会话首个模型步骤自动注入能力通知（含技能表、1% Rule、Red Flags 强化）。技能按需加载：
+技能按需加载，不依赖任何注入：
 
-- 说"用 Multi-Agent Workflow"或调用 `Skill("embedded-workbench")` 加载完整工作流系统
+- 调用 `Skill("embedded-workbench")` 加载工作流与工程策略——技能内部按风险比例选择轻量或完整路径，不强制固定阶段
 - 领域技能在任务匹配其 `Use when` 描述时自动激活——NOT 子句防止误触发（如纯格式化不会加载 c-cpp-dev）
 - Agent 在检测到状态机、行为声称或多模块任务时，主动建议验证、对抗探测和并行子代理
 - 无需手动配置 CLAUDE.md
+
+把 `enabled` 设为 `true` 时，插件额外在会话首个模型步骤注入一段能力通知（1% Rule、Red Flags、Plan Verification Gate）。默认关闭：对已经能自行调度工作流的模型，这段注入不一定值它的上下文预算。
 
 ## Codex CLI
 
@@ -185,7 +188,7 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 ## 依赖
 
 - Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
-- DeepSeek Harness (dsh): dev preview — 已实测 mainline 2026-08-14（gate bundle 加载并注入会话成功）
+- DeepSeek Harness (dsh): dev preview — 已逐版本实测至 0.1.7-rc.2（2026-09-25，install / mount / start / uninstall 与会话日志证据见 [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md)）
 - 无外部依赖
 
 ## 配置
@@ -194,10 +197,10 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 
 | 键 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
-| `enabled` | boolean | `true` | 设为 `false` 可关闭首步 Gate 注入。 |
+| `enabled` | boolean | `false` | 设为 `true` 才启用首步 Gate 注入；技能注册不受影响。 |
 | `gateContent` | string | 内置 gate 文本 | 覆盖注入到首轮模型上下文中的文本。 |
 
-在 profile 的 `cordis.patch.yml` 中按 row id 覆盖：
+在 profile 的 `cordis.patch.yml` 中按 row id 覆盖（下面的例子是**启用**首步 Gate）：
 
 ```yaml
 - insert:
@@ -254,7 +257,7 @@ bash tests/skill-triggering/run-all.sh
 
 | 插件 | 简介 |
 |------|------|
-| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 声称核查技能：逐条核验设计文档、架构规格、重构计划中的可验证声称与代码库是否一致，行为类声称升级为可执行模型验证。自本插件拆分；Plan Verification Gate 依赖它。 |
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 声称核查技能：逐条核验设计文档、架构规格、重构计划中的可验证声称与代码库是否一致，行为类声称升级为可执行模型验证。自本插件拆分；Plan Verification Gate 优先使用它，未安装时回退到内置 `fact-check` 技能。 |
 | [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎——技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
 
 ## 致谢

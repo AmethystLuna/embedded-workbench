@@ -8,7 +8,7 @@ Embedded C/C++ firmware toolbox — 4 agents, 8 skills covering FreeRTOS, ISR, N
 storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines,
 architecture principles, LVGL patterns, and claim fact-checking.
 
-**Cross-platform** — works with Claude Code, Codex CLI, Cursor, Kimi CLI, OpenCode, and ZCode. Built on the [Agent Skills](https://agentskills.io) open standard.
+**Cross-platform** — works with Claude Code, Codex CLI, Cursor, Kimi CLI, OpenCode, ZCode, and DeepSeek Harness (dsh). Built on the [Agent Skills](https://agentskills.io) open standard.
 
 ## Components
 
@@ -32,8 +32,9 @@ architecture principles, LVGL patterns, and claim fact-checking.
 | `c-cpp-dev` | Code generation, style, memory layout, refactoring for C/C++ |
 | `state-machine-design` | State models, retries, timeouts, transition gates, implementation patterns |
 | `hardfault-triage` | Processor exception triage — fault registers, stack frames, PC-to-source, root-cause classification |
+| `fact-check` | Claim-check fallback: verifies API names, file paths, enum values, counts, and mechanism feasibility against the codebase; used by the Plan Verification Gate when logicprobe is not installed |
 
-`logicprobe` (design-doc & plan claim verification) was **split out into its own plugin** — see [Other Plugins Recommended](#other-plugins-recommended).
+`logicprobe` (design-doc & plan claim verification) was **split out into its own plugin** — see [Other Plugins Recommended](#other-plugins-recommended). When it is not installed, the Plan Verification Gate falls back to this plugin's built-in `fact-check` skill; only behavioral/model claims degrade to manual confirmation.
 
 > The skill content is mostly distilled from the author's personal embedded/firmware engineering experience and code-cleanliness discipline, based on real-world pitfalls and engineering constraints.
 
@@ -84,7 +85,7 @@ Then enable in `~/.claude/settings.json`:
 Native dsh support ships as a cordis plugin bundle at the repository root (the root `package.json` declares `dsh.bundle`):
 
 - The skills are discovered as-is by dsh's `skill-filesystem` provider (Agent Skills open standard) — zero code.
-- The bundle injects the first-model-step gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. It also registers a model-visible catalog entry (`cordis_inspect`).
+- The bundle can inject the first-model-step gate (1% Rule / Red Flags / Plan Verification Gate) into the first model step of every agent session — the dsh-native counterpart of the Claude `SessionStart` hook. Injection is **opt-in** (`enabled`, off by default); the model-visible catalog entry (`cordis_inspect`) is registered either way.
 - The 4 custom agents are intentionally not ported — dsh's native subagent tooling covers parallel multi-agent work.
 
 Install (native bundle, recommended):
@@ -98,18 +99,20 @@ dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
 npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 ```
 
-Restart the profile, then run `dsh --profile web --dump-config`: the `id: embedded-workbench` row must appear with `enabled: true`. More options (plain skill copy, project-level, ...) are in [`.dsh/INSTALL.md`](.dsh/INSTALL.md).
+Restart the profile, then run `dsh --profile web --dump-config`: the `id: embedded-workbench` row must appear with `enabled: false` — the skills are live at that point, because gate injection is optional; set it to `true` to turn the first-step gate on. More options (plain skill copy, project-level, ...) are in [`.dsh/INSTALL.md`](.dsh/INSTALL.md).
 
 > DSH install note: the package name is `dsh-embedded-workbench`. In the web profile's `package.json`, both the dependency key and the `dsh.profile.bundles` entry must use the same name; a mismatch causes the dsh loader to fail with `ERR_MODULE_NOT_FOUND`.
 
 ## Usage
 
-The plugin auto-injects a capability notification into the first model step with a skill table, 1% Rule, and Red Flags reinforcement. Skills are loaded on demand:
+Skills load on demand and need no injection:
 
-- Say "use Multi-Agent Workflow" or invoke `Skill("embedded-workbench")` for the full workflow system
+- Invoke `Skill("embedded-workbench")` for the workflow and engineering policies — it picks a light or full path by risk, and does not force fixed stages
 - Domain skills activate automatically when their `Use when` description matches your task — NOT clauses prevent false triggers (e.g., formatting-only won't load c-cpp-dev)
 - The agent proactively suggests verification, adversarial probing, and parallel subagents when it detects state machines, behavioral claims, or multi-module tasks
 - No manual CLAUDE.md configuration required
+
+With `enabled: true` the plugin additionally injects a capability notification (1% Rule, Red Flags, Plan Verification Gate) into the first model step. It is off by default: for models that already schedule their own workflow, that injection does not always earn its context budget.
 
 ## Codex CLI
 
@@ -188,7 +191,7 @@ Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/s
 ## Requirements
 
 - Claude Code v2.1+ / Codex CLI latest / Cursor 2.5+ / Kimi CLI latest / OpenCode latest / ZCode 3.0+
-- DeepSeek Harness (dsh): dev preview — verified on mainline 2026-08-14 (gate bundle loaded and injected in-session)
+- DeepSeek Harness (dsh): dev preview — verified per release through 0.1.7-rc.2 (2026-09-25; install / mount / start / uninstall and session-log evidence in [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md))
 - No external dependencies
 
 ## Configuration
@@ -197,10 +200,10 @@ In DeepSeek Harness, the bundle accepts a small configuration object:
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `enabled` | boolean | `true` | Set to `false` to disable the session-start gate injection. |
+| `enabled` | boolean | `false` | Set to `true` to enable the first-step gate injection; skill registration is unaffected. |
 | `gateContent` | string | built-in gate text | Override the text injected into the first model step. |
 
-To change it, override the row by id in your profile's `cordis.patch.yml`:
+To change it, override the row by id in your profile's `cordis.patch.yml` (the example below **enables** the gate):
 
 ```yaml
 - insert:
@@ -257,7 +260,7 @@ To report a security vulnerability, do **not** open a public issue. Use the priv
 
 | Plugin | Description |
 |--------|-------------|
-| [logicprobe](https://github.com/AmethystLuna/logicprobe) | Claim-verification skill: checks every verifiable claim in design docs, architecture specs, and refactoring plans against the codebase, escalating behavioral claims to executable-model verification. Split out of this plugin; the Plan Verification Gate requires it. |
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | Claim-verification skill: checks every verifiable claim in design docs, architecture specs, and refactoring plans against the codebase, escalating behavioral claims to executable-model verification. Split out of this plugin; the Plan Verification Gate prefers it and falls back to the built-in `fact-check` skill when it is not installed. |
 | [superpowers](https://github.com/obra/superpowers) | The original agent discipline engine — skill loading enforcement, Red Flags, subagent-driven development. Many of this plugin's agent-compliance patterns (1% Rule, Red Flags, `<SUBAGENT-STOP>`, instruction priority) were adapted from Superpowers. |
 
 ## Acknowledgments

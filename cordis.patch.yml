@@ -3,9 +3,14 @@
 # Row ids are stable identity in the config tree; later layers (the user's
 # profile cordis.patch.yml, $DSH_HOME/cordis.patch.yml, --patch overlays)
 # override a row by id, replacing the whole `config` (no deep merge).
+#
+# The first-model-step gate is OFF by default so a fresh install pays no
+# context budget for it: the shipped skills are the product, and the gate is
+# there for deployments that want the discipline enforced. Opt in per profile
+# by overriding this row with `config: { enabled: true }`.
 
 - insert:
     - id: embedded-workbench
       name: 'dsh-embedded-workbench'
       config:
-        enabled: true
+        enabled: false

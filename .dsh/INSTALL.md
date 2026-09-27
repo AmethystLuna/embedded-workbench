@@ -19,9 +19,9 @@ npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 
 This installs under the package name `dsh-embedded-workbench`. If you manage the profile's `package.json` manually, use `dsh-embedded-workbench` for both the dependency key and the `dsh.profile.bundles` entry.
 
-Restart the target profile. This mounts a native cordis plugin that folds the gate text (1% Rule / Red Flags / Plan Verification Gate) into the first model step — the dsh-native counterpart of the Claude Code `SessionStart` hook — and registers the 8 skills in the package's `skills/` directory into dsh's `ctx.skills` registry via the standard filesystem provider, so they appear in the session skill catalog with no manual copy step.
+Restart the target profile. This mounts a native cordis plugin that registers the 8 skills in the package's `skills/` directory into dsh's `ctx.skills` registry via the standard filesystem provider, so they appear in the session skill catalog with no manual copy step. It can also fold the gate text (1% Rule / Red Flags / Plan Verification Gate) into the first model step — the dsh-native counterpart of the Claude Code `SessionStart` hook — but that is **off by default** (`enabled: false`), because a skill-only install should not pay a context budget it did not ask for.
 
-To change the gate text or disable injection, override the row by id in your profile's `cordis.patch.yml` (the row's `config` is replaced wholesale, not deep-merged):
+To turn the gate on, or to change its text, override the row by id in your profile's `cordis.patch.yml` (the row's `config` is replaced wholesale, not deep-merged):
 
 ```yaml
 - insert:
@@ -60,9 +60,9 @@ If your `dsh` configuration supports `customSkillDirs` (rank 300), point it at t
 
 ## Verify
 
-- `dsh --profile <scratch> --dump-config` shows the `embedded-workbench` row with `enabled: true` (create a scratch profile with `dsh plugin --profile <scratch> add ...` first).
+- `dsh --profile <scratch> --dump-config` shows the `embedded-workbench` row with `enabled: false` (create a scratch profile with `dsh plugin --profile <scratch> add ...` first). The skills are registered either way.
 - Start a session and check the gate text appears in the model context of the first step.
-- `cordis_inspect_list` shows the `embedded-workbench` provider; `cordis_inspect_query` with method `status` returns `enabled: true`.
+- `cordis_inspect_list` shows the `embedded-workbench` provider; `cordis_inspect_query` with method `status` returns `enabled: false` unless you opted in.
 - Ask in a `dsh` session: "What embedded firmware skills do you have available?"
 
 ## Notes
@@ -71,8 +71,8 @@ If your `dsh` configuration supports `customSkillDirs` (rank 300), point it at t
 - DSH is in v0.1 developer preview; breaking changes are expected. Pin your `dsh` version.
 - DSH has no plugin marketplace for this repo — install the native bundle via npm (`dsh-embedded-workbench`) or GitHub; the skill-copy options above are fallbacks.
 - The first-model-step gate injection is provided natively by the root bundle (Option A). The 4 custom agents (`architecture-steward`, `design-reviewer`, `execution-worker`, `quality-coordinator`) are intentionally **not** ported — dsh's native subagent tooling covers parallel multi-agent work, and the main model takes the steward/reviewer roles directly.
-- The Plan Verification Gate references the `logicprobe` skill — a **separate plugin** (same author). Install it too; without it the gate degrades to manual confirmation mode.
-- **Gate injection semantics**: the gate is appended to the first model step that runs via `agent/pre-step`, once per session, guarded by the session's durable history. This is resilient to blank-session preset switches that clear the agent inbox before the first step; anchored/bootstrap presets may strip first-step Gate messages and the plugin re-injects after promotion. The gate text is the dsh-native adaptation of `hooks/session-start-content.md` — behavior rules synced, presentation adapted to the dsh skill catalog (no roster table, no install instructions); review it per deployment and override via `gateContent`.
+- The Plan Verification Gate prefers the `logicprobe` skill — a **separate plugin** (same author). Install it too; without it the gate falls back to the built-in `fact-check` skill (claim-by-claim verification against the codebase), and only state-machine/behavioral claims degrade to manual confirmation.
+- **Gate injection semantics**: with `enabled: true`, the gate is appended to the first model step that runs via `agent/pre-step`, once per session, guarded by the session's durable history. This is resilient to blank-session preset switches that clear the agent inbox before the first step; anchored/bootstrap presets may strip first-step Gate messages and the plugin re-injects after promotion. The gate text is the dsh-native adaptation of `hooks/session-start-content.md` — behavior rules synced, presentation adapted to the dsh skill catalog (no roster table, no install instructions); review it per deployment and override via `gateContent`.
 
 ## Tool Mapping
 
@@ -82,7 +82,7 @@ When skills reference Claude Code tools:
 |---|---|
 | `Skill("name")` | Skills are model-invocable by default; the model loads them through the skills catalog (`ctx.skills`) |
 | `Read` / `Write` / `Edit` / `Bash` | Native dsh tools (`ctx.tools` registry) |
-| `Agent("architecture-steward")` etc. | Not ported — use dsh's native `subagent` / `subagent_fork` tools for parallel work; the main model takes the role directly |
+| `Agent("architecture-steward")` etc. | Not ported — use `subagent` (fresh context, returns only the result) for read-only discovery, or `subagent_fork` (seeded with this conversation) when the sub-task needs context you already built; the main model takes the role directly |
 | `ExitPlanMode` / plan-mode gates | dsh-native: `@deepseek-ai/dsh-plan-mode` (`exit_plan_mode` tool); the bundle's gate text carries the Plan Verification Gate |
 
 ## Getting Help

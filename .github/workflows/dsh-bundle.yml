@@ -12,6 +12,9 @@ on:
       - 'tsconfig.json'
       - 'README.md'
       - 'README.en-US.md'
+      - 'skills/**'
+      - 'agents/**'
+      - 'hooks/**'
       - '.github/workflows/dsh-bundle.yml'
   pull_request:
     paths:
@@ -24,6 +27,9 @@ on:
       - 'tsconfig.json'
       - 'README.md'
       - 'README.en-US.md'
+      - 'skills/**'
+      - 'agents/**'
+      - 'hooks/**'
 
 jobs:
   build:
@@ -48,5 +54,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Lint dsh docs
-        run: npx --yes markdownlint-cli@0.42.0 ".dsh/**/*.md" "README.md" "README.en-US.md" "RELEASE.md"
+      - name: Lint markdown
+        run: npx --yes markdownlint-cli@0.42.0 --ignore "**/node_modules/**" .

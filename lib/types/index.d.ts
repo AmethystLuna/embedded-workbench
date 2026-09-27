@@ -1,12 +1,14 @@
 /**
  * embedded-workbench — DeepSeek Harness native plugin for the Embedded
- * Workbench toolbox. Injects the session-start gate text (1% Rule, Red
- * Flags, Plan Verification Gate, skills roster) into the first model step
- * of every agent session, mirroring the SessionStart hook the Claude Code
- * plugin installs. The 8 skills ship in this package's `skills/` directory
+ * Workbench toolbox. The 8 skills ship in this package's `skills/` directory
  * and are registered at apply time into dsh's `ctx.skills` registry through
  * the standard filesystem provider, so they appear in every session catalog
- * without a manual copy step.
+ * without a manual copy step. Gate injection into the first model step is
+ * opt-in — `enabled` defaults to false — because a fresh install should not
+ * pay context budget for discipline it did not ask for; when it is on, the
+ * gate text (1% Rule, Red Flags, Plan Verification Gate) folds into the first
+ * model step of every agent session, mirroring the SessionStart hook the
+ * Claude Code plugin installs.
  *
  * Injection listens on agent/pre-step and appends the gate to the FIRST
  * model step that runs, once per session (guarded by the session's durable
