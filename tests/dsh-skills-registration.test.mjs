@@ -7,8 +7,8 @@
 //   node tests/dsh-skills-registration.test.mjs
 import { Context } from '@deepseek-ai/cordis'
 import SkillRegistry from '@deepseek-ai/dsh-skill'
-import { apply as ewbApply, name as ewbName } from '../lib/index.js'
-import { apply as lpApply, name as lpName } from '../../logicprobe/lib/index.js'
+import { apply as ewbApply, name as ewbName, Config as ewbConfig } from '../lib/index.js'
+import { apply as lpApply, name as lpName, Config as lpConfig } from '../../logicprobe/lib/index.js'
 
 const expected = {
   'embedded-workbench': [
@@ -26,8 +26,11 @@ const expected = {
 
 const app = new Context()
 new SkillRegistry(app)
-await app.plugin({ name: ewbName, apply: ewbApply }, { enabled: true })
-await app.plugin({ name: lpName, apply: lpApply }, { enabled: true })
+// Each plugin's `Config` is applied by `ctx.plugin` exactly as the Loader applies
+// it, so `enabled` reaches `apply` as the volatile reference it reads with `.get()`
+// rather than as the plain boolean written here.
+await app.plugin({ name: ewbName, Config: ewbConfig, apply: ewbApply }, { enabled: true })
+await app.plugin({ name: lpName, Config: lpConfig, apply: lpApply }, { enabled: true })
 
 try {
   const cwd = process.cwd()

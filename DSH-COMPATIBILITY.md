@@ -13,14 +13,14 @@ dsh bundle against the DSH releases listed in `dsh.compatibility.dshReleases`.
 | Node.js | v24.17.0 |
 | npm | 11.13.0 |
 | pnpm | 11.21.0 |
-| Test date | 2026-09-25 |
-| Package under test | `dsh-embedded-workbench` 0.9.0 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
+| Test date | 2026-09-25 (headless rounds) · 2026-09-29 (live-field round) |
+| Package under test | `dsh-embedded-workbench` 0.9.1 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
 
 ## Method (one disposable profile per version)
 
 Each DSH release was run from its own runtime (global CLI for
 0.1.0-rc.7 … 0.1.2-alpha.3; temporary npm install under an isolated prefix for
-0.1.2-alpha.4 through 0.1.7-rc.2) against a fresh `DSH_HOME`, so no state
+0.1.2-alpha.4 through 0.2.0-rc.2) against a fresh `DSH_HOME`, so no state
 leaked between versions. 0.1.3-alpha.1 predates its npm publish, so it ran from
 a local pnpm workspace build of git tag `dsh-v0.1.3-alpha.1`; every later row was
 installed from its published npm release. The `fs-ext` native dependency
@@ -52,15 +52,37 @@ The headless `AUTH` rejection proves the profile booted with the plugin applied
 (any bundle apply error would surface before the provider call). End-to-end
 model calls were not exercised (no real provider key used).
 
+The live-field round (2026-09-29) used a different procedure, because the
+capability it measures lives in the Web client rather than the headless path:
+each release was installed with `npm install --prefix <dir>
+@deepseek-ai/dsh@<version>`, given a fresh `DSH_HOME`, and booted as
+`dsh --from-default-profile web --profile compat` followed by
+`dsh --profile compat --port 0 --no-open` on an OS-assigned port (`--port 0`),
+never a fixed one. Both plugins were added with `dsh plugin --profile compat add
+"file:<this-repo>"`. Evidence was read from three surfaces rather than a
+headless boot: the injected `window.__DSH_BOOT__` client graph (are this
+package's client bundles supplied?), `POST /api/pluginManager/listPlugins`
+(fiber phase of each plugin row), and `POST /api/settings/describe` (is the
+namespace served, and does its schema hold exactly one `enabled` boolean?).
+Uninstall was re-run for every release in this round, through the same profile:
+row present → `dsh plugin --profile compat remove <package>` → row gone from
+`--dump-config` → re-add → row restored.
+
+One measurement caveat belongs here: on the newest releases the namespace schema
+must be read through the root node, `refs[schema.uid]` — the root's `.dict` maps
+`enabled` to a ref id and `schema.dict` itself is undefined — and those ref ids are
+regenerated on every call, so a naive `schema.dict` read reports an empty schema.
+
 Every row re-run in this round also asserts that the install and the boot were
 **not** refused by the plugin-compatibility preflight that DSH 0.1.7-rc.1
 introduced (see Notes): `dsh plugin add` must not report the named package as
 incompatible, `--dump-config` must not contain a `disabling profile plugin`
 line, and the boot must not contain `incompatible` or `skipping profile bundle`.
-The preflight only exists on 0.1.7-rc.1 and later, so the 0.1.7-rc.1 and
-0.1.7-rc.2 rows are the ones that actually exercise it; on the older rows the
-same assertions only confirm the refusal wording is absent. The pre-install check
-is evaluated from this package's `peerDependencies`.
+The preflight only exists on 0.1.7-rc.1 and later, so the 0.1.7-rc.1,
+0.1.7-rc.2 and 0.2.0-rc.2 rows are the ones that actually exercise it; on the
+older rows the same assertions only confirm the refusal wording is absent. The
+pre-install check is evaluated from this package's `peerDependencies`, never
+from `dsh.compatibility.dshReleases`.
 
 Since 0.8.13 each row is further inspected at the session-log level with a
 format-agnostic scanner (`seam-scan.mjs`) that decompresses every zstd frame and
@@ -82,9 +104,15 @@ remaining 129-line body differs in exactly one line — that description string;
 `lib/index.js` follows it verbatim, so no branch, guard, event name, or registry
 call changed. `lib/types/index.d.ts` additionally picks up the declaration shape
 emitted by the newer devDependency `@deepseek-ai/schemastery`, which is
-type-only. Every row above therefore stands for 0.9.0 as well. If a store review
-requires fresh per-version evidence rather than an equivalence argument, the
-four-step procedure above applies unchanged to 0.9.0.
+type-only. Every historical row above therefore stands for 0.9.0 as well, and on
+a host that cannot carry a live field it still describes what 0.9.1 does there,
+because the guarded `Config` falls back to exactly the ordinary boolean those
+rows were measured against. What 0.9.1 adds is the browser half, and its switch
+needs a settings service that projects live fields (dsh ≥ 0.1.7-alpha.1), so the
+historical rows say nothing about the switch — see the degradation note in Notes
+and the re-measured table above. If a store review requires fresh per-version
+evidence rather than an equivalence argument, the four-step procedure above
+applies unchanged to 0.9.0.
 
 The release-time mount check was re-run on 0.9.0 against a fresh isolated
 `DSH_HOME`: `dsh plugin --profile scratch add "file:<repo>"` succeeded, and
@@ -102,39 +130,109 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
 
 ## Results
 
-| dsh release | install | dump-config row | start (headless boot) | uninstall |
-|---|---:|---:|---:|---:|
-| 0.1.0-rc.7 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.0-rc.8 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.1-rc.1 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.1-rc.2 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.2-alpha.2 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.2-alpha.3 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.2-alpha.4 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.2-alpha.5 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.2-rc.1 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.3-alpha.1 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.3-alpha.2 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.5-alpha.1 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.5-alpha.2 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.5-rc.1 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.5-rc.2 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.5-rc.3 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.6-alpha.1 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.6-alpha.2 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.7-alpha.1 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.7-alpha.2 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.7-rc.1 | pass | pass | pass (AUTH-only) | pass |
-| 0.1.7-rc.2 | pass | pass | pass (AUTH-only) | pass |
+Two categories, kept apart on purpose: rows re-measured this round against the
+0.9.1 build, and rows carried over from earlier rounds. A carried-over row is
+still declared compatible, but it was produced by an earlier round's procedure and
+was not re-run against this build; presenting it as newly verified would overstate
+the evidence.
+
+### Re-measured this round against `0.9.1`
+
+| dsh release | install | host boot | uninstall | rows active | client bundles in `__DSH_BOOT__` | settings namespace served | Web switch |
+|---|---|---:|---:|---|---:|---:|---|
+| 0.1.5-rc.3 | pass | pass ×2 | pass | active ×2 (`pluginInventory/list`; `pluginManager/listPlugins` is 404 here) | not probed | no — expected: nothing sits under a `.volatile()` node | absent, silently (degraded path) |
+| 0.1.5-rc.2 | pass (pnpm's advisory peer WARN only, although the bundle declares `schemastery: ^3.18.4` while this release ships 3.18.2) | pass | pass | active ×2 (`pluginInventory/list`; `pluginManager/listPlugins` is 404 here too) | yes ×2 (HTTP 200, ~9030 / ~9158 chars) | no — expected: schemastery 3.18.2 holds 0 occurrences of `volatile`, so `Schema.volatile` and an instance's `.volatile` are both undefined | absent, silently (degraded path) |
+| 0.1.6-alpha.2 | pass | pass | pass | active ×2 | yes ×2 (HTTP 200) | no | absent, silently |
+| 0.1.7-alpha.1 | pass | pass | pass | active ×2 | yes ×2 | yes ×2 — one `enabled` boolean, `default: true`, `applies: "live"` | **works** |
+| 0.1.7-alpha.2 | pass | pass | pass | active ×2 | yes ×2 | yes ×2 | **works** |
+| 0.1.7-rc.1 | pass | pass | pass | active ×2 | yes ×2 | yes ×2 | **works** |
+| 0.1.7-rc.2 | pass | pass | pass | active ×2 | yes ×2 | yes ×2 | **works** |
+| 0.2.0-rc.1 | pass | pass | pass | active ×2 | not probed | yes ×2 — one `enabled` boolean, `default: true`, `value: true`, `applies: "live"` | **works** |
+| 0.2.0-rc.2 | pass | pass | pass | active ×2 | yes ×2 (HTTP 200) | yes ×2 — `value: {"enabled": true}`, `applies: "live"` | **works** |
+
+Uninstall was re-run on every re-measured release — 9 releases × 2 plugins = 18/18
+pass, each: row present → `plugin remove` → row gone → re-add → row restored.
+
+`0.1.5-rc.3` is the row that justifies the degradation guard. Before it, adding
+either plugin made that host **fail to boot** with
+`z.boolean(...).default(...).volatile is not a function` at
+`dsh-embedded-workbench/lib/index.js:65`; after it, each boot log is 83 bytes containing
+only the `dsh web: http://127.0.0.1:<port>/?token=…` line, with zero occurrences
+of `volatile is not a function`, `plugin tree failed to load`, or `Error`, and
+both plugin rows report `fiberPhase: "active"`. `settings/describe` returns 14
+namespaces with neither plugin namespace present — the correct degraded outcome
+for a host with no live field, not a failure.
+
+`0.1.5-rc.2` was measured for the same reason and behaves identically: the
+pre-guard boot failure is the same one, and with the guard the host boots with no
+error output and both rows `active`. It adds one observation the 0.1.5-rc.3 row
+could not make — **both client bundles serve HTTP 200 and both client entries
+appear in `window.__DSH_BOOT__`**, so the browser half really is delivered and
+executed on these hosts. That is what makes the `whileServed` check in
+`src/client.js` load-bearing rather than defensive: without it, this plugin's own
+client activation would throw on a host whose settings service has no
+`whileServed`.
+
+`0.2.0-rc.2` still serves both namespaces, which is what shows the guard did not
+disable the live field on a modern host: a namespace is served only when
+`meta.volatile` is set. It installs only after the peer ranges were widened with
+`|| ^0.2.0-rc.1`; before that widening this release's install preflight refused
+both plugins as incompatible and `dsh plugin add` never reached pnpm. `0.2.0-rc.1`
+was measured afterwards and clears the preflight the same way, serving both
+namespaces with one `enabled` boolean, so that added range branch now has a row of
+its own rather than only its `rc.2` sibling; it ships schemastery 3.18.4, whose
+`lib/index.cjs` defines `Schema.prototype.volatile` at line 235. On
+`0.1.7-alpha.1` a live write was round-tripped end to end: `enabled` set to
+`false` at revision 1, then unset at revision 2, leaving the value back at the
+schema default.
+
+### Carried over from earlier rounds
+
+These rows were verified by an earlier round's headless procedure and remain
+declared compatible for this release, but were **not** re-measured against the
+0.9.1 build. The 0.1.5.x rows previously carried an explicit expectation that the
+guard would restore them; the two that were then tested (0.1.5-rc.2 and
+0.1.5-rc.3) are now measured and live in the table above, and the rest stay
+unverified.
+
+| dsh release | earlier result | note |
+|---|---|---|
+| 0.1.0-rc.7 | pass (AUTH-only) | not re-measured |
+| 0.1.0-rc.8 | pass (AUTH-only) | untestable this round — no `--from-default-profile`, and its web profile already hard-crashes on a stock plugin-free boot: `@deepseek-ai/dsh-web-app/cordis.patch.yml` disables the `hmr` row while `runProfile`/`watchUserPatches` requires the HMR service |
+| 0.1.1-rc.1 | pass (AUTH-only) | not re-measured |
+| 0.1.1-rc.2 | pass (AUTH-only) | not re-measured |
+| 0.1.2-alpha.2 | pass (AUTH-only) | not re-measured |
+| 0.1.2-alpha.3 | pass (AUTH-only) | not re-measured |
+| 0.1.2-alpha.4 | pass (AUTH-only) | not re-measured |
+| 0.1.2-alpha.5 | pass (AUTH-only) | not re-measured |
+| 0.1.2-rc.1 | pass (AUTH-only) | not re-measured |
+| 0.1.3-alpha.1 | pass (AUTH-only) | not re-measured |
+| 0.1.3-alpha.2 | pass (AUTH-only) | not re-measured |
+| 0.1.5-alpha.1 | pass (AUTH-only) | not re-measured |
+| 0.1.5-alpha.2 | pass (AUTH-only) | not re-measured |
+| 0.1.5-rc.1 | pass (AUTH-only) | not re-measured |
+| 0.1.6-alpha.1 | pass (AUTH-only) | untestable — the published CLI is itself broken: `@deepseek-ai/dsh-app-boot` does not export `watchUserPatches`, because its caret range `^0.1.6-alpha.1` resolved the whole `@deepseek-ai/*` family to alpha.2, so every dsh subcommand dies at module load |
 
 ## Declared compatibility (package.json)
 
+Quoted from the manifest of 0.9.1. The `peerDependencies` block is included
+because it, not `dshReleases`, is what the install preflight evaluates
+(`@deepseek-ai/dsh-app-boot/lib/index.js:289-293`).
+
 ```json
 "engines": { "node": ">=20" },
+"peerDependencies": {
+  "@deepseek-ai/cordis": "^4.0.4",
+  "@deepseek-ai/dsh-agent": "^0.1.0-rc.6 || ^0.2.0-rc.1",
+  "@deepseek-ai/dsh-llm": "^0.1.0-rc.6 || ^0.2.0-rc.1",
+  "@deepseek-ai/dsh-session": "^0.1.0-rc.6 || ^0.2.0-rc.1",
+  "@deepseek-ai/dsh-skill-filesystem": "^0.1.0-rc.8 || ^0.2.0-rc.1",
+  "@deepseek-ai/schemastery": "^3.18.4"
+},
 "dsh": {
   "engines": { "dsh": ">=0.1.0-rc.7" },
   "compatibility": {
-    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1 || ^0.1.3-alpha.1 || ^0.1.3-alpha.2 || ^0.1.5-alpha.1 || ^0.1.5-rc.1 || ^0.1.5-alpha.2 || ^0.1.5-rc.2 || ^0.1.5-rc.3 || ^0.1.6-alpha.1 || ^0.1.6-alpha.2 || ^0.1.7-alpha.1 || ^0.1.7-alpha.2 || ^0.1.7-rc.1 || ^0.1.7-rc.2",
+    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1 || ^0.1.3-alpha.1 || ^0.1.3-alpha.2 || ^0.1.5-alpha.1 || ^0.1.5-rc.1 || ^0.1.5-alpha.2 || ^0.1.5-rc.2 || ^0.1.5-rc.3 || ^0.1.6-alpha.1 || ^0.1.6-alpha.2 || ^0.1.7-alpha.1 || ^0.1.7-alpha.2 || ^0.1.7-rc.1 || ^0.1.7-rc.2 || ^0.2.0-rc.1",
     "dshReleases": {
       "0.1.0-rc.7": "compatible",
       "0.1.0-rc.8": "compatible",
@@ -157,15 +255,72 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
       "0.1.7-alpha.1": "compatible",
       "0.1.7-alpha.2": "compatible",
       "0.1.7-rc.1": "compatible",
-      "0.1.7-rc.2": "compatible"
+      "0.1.7-rc.2": "compatible",
+      "0.2.0-rc.1": "compatible",
+      "0.2.0-rc.2": "compatible"
     },
-    "profiles": ["headless"]
+    "profiles": ["headless", "web"]
   }
 }
 ```
 
+`@deepseek-ai/schemastery` stays at `^3.18.4` rather than being relaxed to the
+3.18.3 that first shipped `.volatile()`. The guard is what makes a host without
+the method usable, and the hosts it targets (≤ 0.1.6-alpha.2) have no install
+preflight to enforce a peer range anyway. From 0.1.7-rc.1 on, the preflight does
+enforce it, so an install there is refused unless the host really provides the
+schemastery this package was tested against — the guard lowers the failure mode,
+it does not licence a support claim that was never measured.
+
 ## Notes
 
+These bullets are grouped by the round that produced them. The first governs
+0.9.1; several later ones describe what an **older** plugin version was verified
+against, so where one reads "keeps 0.1.0-rc.7 … X working" it means that round's
+plugin version, not this one. The Results tables above are the authoritative
+statement for 0.9.1.
+
+- **The Web switch needs a live field; the plugin no longer needs one in order to
+  load.** 0.9.1 declares `enabled` live so the dsh Web GUI can edit the
+  gate-injection switch in place. Declaring it is guarded: `live<T>(field)` probes
+  `typeof field.volatile === 'function'` and calls `.volatile()` only where the
+  host's schemastery provides it, returning the field unchanged otherwise, and
+  `Config.enabled` is typed `Volatile<boolean> | boolean`. `injectionEnabled(config)`
+  reads either shape, and both the `agent/pre-step` hook and the inspect provider
+  go through it. A host that cannot carry a live field therefore still loads, still
+  injects the gate, and still registers skills and tools — it simply has no switch.
+  - **Two independent reasons the switch is absent on an older host, and neither
+    one errors.** (a) schemastery older than 3.18.3 leaves `enabled` an ordinary
+    boolean, so nothing sits under a `.volatile()` node for the settings service to
+    project. (b) A settings service without `whileServed` makes the client half
+    return early and register nothing — it is checked rather than called, because
+    calling it would throw inside the plugin's own client activation, which the Web
+    boot audit reports as a failed client entry. Measured: dsh 0.1.6-alpha.2 boots
+    with both rows `active` and both client bundles serving, yet
+    `settings/describe` returns 15 namespaces without this package's; dsh
+    0.1.5-rc.3 returns 14 without it. Nothing logs an error, which is what makes
+    this case quiet rather than broken.
+  - **Measured.** On `0.1.5-rc.3` (schemastery 3.18.2), adding either plugin made
+    the host fail to boot with `z.boolean(...).default(...).volatile is not a
+    function` **before** the guard; after it, the host boots cleanly on two
+    OS-assigned ports with both rows `active` and a boot log free of errors. On
+    `0.2.0-rc.2`, both namespaces are still served with
+    `value: {"enabled": true}` and `applies: "live"`, which is what shows the guard
+    did not disable the live field on a modern host. The switch itself works from
+    `0.1.7-alpha.1`, also measured on 0.1.7-alpha.2, 0.1.7-rc.1, 0.1.7-rc.2,
+    0.2.0-rc.1 and 0.2.0-rc.2.
+  - **Executable evidence, not a claim.** `tests/dsh-volatile-fallback.test.mjs`
+    removes `.volatile` from the real schemastery prototype before importing the
+    built artifact, so the degradation branch is exercised in CI rather than only
+    on a user's machine; `tests/dsh-client-half.test.mjs` covers the missing
+    `whileServed` path. Without those two, this degradation story would describe
+    code that never runs in this repository.
+  - **The declared `schemastery` peer stays `^3.18.4`.** The guard is what makes an
+    ungated host work, and the hosts it targets (≤ 0.1.6-alpha.2) have no install
+    preflight to enforce a peer range anyway. From 0.1.7-rc.1 on the preflight does
+    enforce it, so an install there is refused unless the host really provides the
+    schemastery this package was tested against: the guard lowers the failure mode,
+    it does not licence a support claim that was never measured.
 - DSH 0.1.2-alpha.4 removed the `Session.events` getter and replaced it with
   on-demand reads (`seq` / `eventAt()` / `snapshotEvents()`). 0.8.5 reads
   session history through a version-adaptive helper (`readSessionEvents`) that
@@ -337,10 +492,13 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
   `evaluatePluginCompatibility`, which checks each `peerDependencies` entry named
   `@deepseek-ai/dsh` or `@deepseek-ai/dsh-*` with `semver.satisfies(runtime,
   range, { includePrerelease: true })` and otherwise requires an exact
-  `package@version` + DSH-version exemption. This bundle declares `^0.1.0-rc.6`
-  (and `^0.1.0-rc.8` for `dsh-skill-filesystem`), which under
-  `includePrerelease: true` admits every 0.1.x, so no exemption is needed. The
-  check reads `peerDependencies`, **not** `dsh.compatibility`. Verified
+  `package@version` + DSH-version exemption. This bundle declares
+  `^0.1.0-rc.6 || ^0.2.0-rc.1` (and `^0.1.0-rc.8 || ^0.2.0-rc.1` for
+  `dsh-skill-filesystem`); under `includePrerelease: true` the first branch still
+  admits every 0.1.x, so no exemption is needed on that line, while the second
+  branch is what pins the 0.2 boundary — this release's preflight refused the
+  bundle on 0.2.0-rc.2 until that branch was added. The check reads
+  `peerDependencies`, **not** `dsh.compatibility`. Verified
   empirically rather than by inspection alone: every row's install and boot was
   asserted free of the refusal wording, and the published
   `dsh-app-boot@0.1.7-rc.2` bundle was confirmed to ship the same
@@ -350,18 +508,21 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
   were also type-checked with `tsc --noEmit` against the 0.1.5-rc.3,
   0.1.7-alpha.2, 0.1.7-rc.1 and 0.1.7-rc.2 declarations (0.8.13 keeps
   0.1.0-rc.7 … 0.1.7-rc.2 working).
-- **Known limitation, accepted: the preflight cannot protect this package.**
-  Because the peer ranges above (`^0.1.0-rc.6`, and `^0.1.0-rc.8` for
-  `@deepseek-ai/dsh-skill-filesystem`) admit every 0.1.x under
-  `includePrerelease: true`, `evaluatePluginCompatibility` never returns an
-  issue for this bundle — including on a future 0.1.x release that has not been
-  verified here. The preflight added in 0.1.7-rc.1 is therefore a no-op for this
-  package, and `dsh.compatibility.dshReleases` (hand-maintained, one row per
-  release actually exercised) remains the authoritative compatibility
-  statement. This is deliberate: narrowing the peers to explicit `||` branches
-  would let a DSH patch release disable the plugin on every profile before this
-  repo re-verifies, which is worse for users than the status quo. A future round
-  that narrows the ranges should also confirm that
+- **Known limitation, accepted: the preflight still cannot protect the 0.1.x
+  line.** Because the first branch of each peer range (`^0.1.0-rc.6`, and
+  `^0.1.0-rc.8` for `@deepseek-ai/dsh-skill-filesystem`) admits every 0.1.x under
+  `includePrerelease: true`, `evaluatePluginCompatibility` returns no issue for
+  any 0.1.x host — including 0.1.5-rc.2 and 0.1.5-rc.3, whose schemastery
+  predates `.volatile()` (the degradation guard is what keeps those hosts loading;
+  see the degradation note above), and including a future 0.1.x release that has
+  not been verified here. 0.1.5-rc.2's install is the measurement for that: it was
+  not refused, even though this bundle declares `schemastery: ^3.18.4` while that
+  host ships 3.18.2. The preflight also never reads
+  `dsh.compatibility.dshReleases`, so narrowing the declared range is not enough
+  on its own; the `|| ^0.2.0-rc.1` branch does gate the 0.2 line. Narrowing the
+  0.1.x branch to the verified releases would let a DSH patch release disable the
+  plugin on every profile before this repo re-verifies, which is worse for users
+  than the status quo. A future round that narrows it should also confirm that
   `dsh plugin allow-version <pkg>@<version> --dsh-version <exact> --accept-risk`
   is documented for the users it would newly block.
 - 0.8.2 is deprecated on npm with a warning pointing to 0.8.3 (npmjs blocks

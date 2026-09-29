@@ -54,6 +54,8 @@ jobs:
       - name: Offline plugin checks
         run: |
           node tests/dsh-gate-injection.test.mjs
+          node tests/dsh-client-half.test.mjs
+          node tests/dsh-volatile-fallback.test.mjs
           node tests/claude-session-start-hook.test.mjs
 
   markdownlint:

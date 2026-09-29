@@ -25,6 +25,11 @@ This plugin's agent-compliance architecture (1% Rule, Red Flags, `<SUBAGENT-STOP
     against a stub context and asserts the gate enters a session exactly once.
     Self-contained, so CI runs it too; if you change the injection or its history
     guard, this is the test that has to move with you.
+  - `node tests/dsh-client-half.test.mjs` — loads the built `lib/client.js` through
+    a `window.__ModuleLoader__` stub and drives the Plugins-page switch with fake
+    React primitives, a fake settings form and a fake slot registry. `tsc` never
+    sees the hand-authored client bundle, so this is its only check. Self-contained,
+    and CI runs it.
   - `node tests/claude-session-start-hook.test.mjs` — runs the SessionStart hook
     over control-character, CRLF and Unicode payloads and asserts the emitted
     JSON is valid and byte-exact. Also self-contained, and it is the guard for
@@ -46,8 +51,8 @@ This plugin's agent-compliance architecture (1% Rule, Red Flags, `<SUBAGENT-STOP
   `hooks/`, `tests/`, `.dsh/`, `cordis.patch.yml`, `package.json`,
   `package-lock.json`, `tsconfig.json`, the READMEs, or the workflow itself:
   `npm ci --legacy-peer-deps`, typecheck, build, committed-`lib/` drift guard,
-  the offline plugin checks (gate injection, SessionStart hook payload), and
-  repo-wide markdownlint (`npx markdownlint-cli --ignore "**/node_modules/**" .`).
+  the offline plugin checks (gate injection, browser-half switch, SessionStart
+  hook payload), and repo-wide markdownlint (`npx markdownlint-cli --ignore "**/node_modules/**" .`).
 - `Plugin Security Scan` — on every push/PR: `hashgraph-online/ai-plugin-scanner-action`
   on the repo root; fails on high-severity findings.
 

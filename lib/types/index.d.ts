@@ -27,7 +27,7 @@
  *
  * @module embedded-workbench-dsh
  */
-import type { Context } from '@deepseek-ai/cordis';
+import type { Context, Volatile } from '@deepseek-ai/cordis';
 import z from '@deepseek-ai/schemastery';
 import type { ContextFormed } from '@deepseek-ai/dsh-llm';
 declare module '@deepseek-ai/dsh-llm' {
@@ -40,7 +40,13 @@ declare module '@deepseek-ai/dsh-llm' {
 export declare const name = "embedded-workbench";
 export declare const inject: string[];
 export interface Config {
-    enabled: boolean;
+    /**
+     * The injection switch the Web client's Plugins page edits live: a `Volatile`
+     * reference on a host whose schemastery supports one, an ordinary boolean on a
+     * host that predates `.volatile()`. Read it through {@link injectionEnabled},
+     * which accepts both shapes.
+     */
+    enabled: Volatile<boolean> | boolean;
     gateContent: string;
 }
 export declare const Config: z<Schemastery.ObjectS<NoInfer<{

@@ -2,6 +2,8 @@
 // enters a session exactly once, and that it is re-injected when the session's
 // first step never committed it (an inbox cleared by a blank-session preset
 // switch, or an anchored/bootstrap preset that strips first-step reminders).
+// The switch itself is volatile: it is re-read on every step, so the Web
+// Plugins page can turn the injection off and back on inside a running session.
 //
 // This test drives the real `apply()` from the committed lib/ output against a
 // stub context, so it depends on nothing but this repository — no dsh profile,
@@ -10,7 +12,8 @@
 // Run from the embedded-workbench dev directory:
 //   node tests/dsh-gate-injection.test.mjs
 import assert from 'node:assert/strict'
-import { apply } from '../lib/index.js'
+import { createVolatile, updateVolatile } from '@deepseek-ai/cosmokit'
+import { apply, Config } from '../lib/index.js'
 
 const GATE = 'GATE-TEXT-SENTINEL'
 const GATE_KIND = 'plugin:embedded-workbench'
@@ -26,6 +29,15 @@ function makeApp() {
     on: (event, handler) => { listeners[event] = handler },
   }
   return { ctx, listeners, skillProviderCount: () => skillProviders }
+}
+
+/**
+ * Build the config through the real schema, as the Loader builds it: `enabled`
+ * is declared `.volatile()`, so `apply` receives a live reference the Web
+ * Plugins page writes into, not a copied boolean.
+ */
+function makeConfig(overrides) {
+  return new Config({ enabled: true, gateContent: GATE, ...overrides })
 }
 
 /** One session event with a source, as the durable log records them. */
@@ -56,7 +68,7 @@ function check(label, fn) {
 // -- fresh session: inject once, verbatim ----------------------------------
 {
   const { ctx, listeners, skillProviderCount } = makeApp()
-  apply(ctx, { enabled: true, gateContent: GATE })
+  apply(ctx, makeConfig())
   const decision = await runPreStep(listeners, [])
   check('a fresh session appends the gate to the first step', () => {
     assert.equal(decision.kind, 'enter')
@@ -83,7 +95,7 @@ function check(label, fn) {
 // -- already in history: never inject twice --------------------------------
 {
   const { ctx, listeners } = makeApp()
-  apply(ctx, { enabled: true, gateContent: GATE })
+  apply(ctx, makeConfig())
   const decision = await runPreStep(listeners, sourcedEvent('user/message', { kind: GATE_KIND }))
   check('a v4 history row suppresses re-injection', () => {
     assert.equal(decision.messages.length, 1)
@@ -93,7 +105,7 @@ function check(label, fn) {
 
 {
   const { ctx, listeners } = makeApp()
-  apply(ctx, { enabled: true, gateContent: GATE })
+  apply(ctx, makeConfig())
   const decision = await runPreStep(
     listeners,
     sourcedEvent('user/message', { kind: 'plugin', plugin: 'embedded-workbench' }),
@@ -107,7 +119,7 @@ function check(label, fn) {
 
 {
   const { ctx, listeners } = makeApp()
-  apply(ctx, { enabled: true, gateContent: GATE })
+  apply(ctx, makeConfig())
   const decision = await runPreStep(
     listeners,
     sourcedEvent('user/message', { kind: 'plugin', plugin: 'some-other-plugin' }),
@@ -119,7 +131,7 @@ function check(label, fn) {
 
 {
   const { ctx, listeners } = makeApp()
-  apply(ctx, { enabled: true, gateContent: GATE })
+  apply(ctx, makeConfig())
   const decision = await runPreStep(
     listeners,
     sourcedEvent('assistant/message', { kind: GATE_KIND }),
@@ -132,7 +144,7 @@ function check(label, fn) {
 // -- read paths and degenerate sessions ------------------------------------
 {
   const { ctx, listeners } = makeApp()
-  apply(ctx, { enabled: true, gateContent: GATE })
+  apply(ctx, makeConfig())
   const session = { snapshotEvents: () => sourcedEvent('user/message', { kind: GATE_KIND }) }
   const decision = await listeners['agent/pre-step'](
     { agent: { session } },
@@ -145,29 +157,60 @@ function check(label, fn) {
 
 {
   const { ctx, listeners } = makeApp()
-  apply(ctx, { enabled: true, gateContent: GATE })
+  apply(ctx, makeConfig())
   const decision = await runPreStep(listeners, undefined)
   check('a session without an event accessor neither throws nor skips the gate', () => {
     assert.ok(carriesGate(decision))
   })
 }
 
-// -- config and decision pass-through --------------------------------------
+// -- the injection switch and decision pass-through ------------------------
 {
   const { ctx, listeners, skillProviderCount } = makeApp()
-  apply(ctx, { enabled: false, gateContent: GATE })
-  check('enabled: false registers no pre-step listener', () => {
-    assert.equal(listeners['agent/pre-step'], undefined)
+  apply(ctx, makeConfig({ enabled: false }))
+  check('the pre-step listener is registered even while the switch is off', () => {
+    // The switch is volatile and `apply` runs once, so a listener installed
+    // only for a true value could never observe a later turn-on from the Web
+    // Plugins page without a profile restart.
+    assert.equal(typeof listeners['agent/pre-step'], 'function')
   })
-  check('enabled: false still registers the skills provider', () => {
+  const decision = await runPreStep(listeners, [])
+  check('enabled: false injects no gate, but the skills provider is still registered', () => {
     // The gate is optional; the catalog is not.
+    assert.equal(decision.messages.length, 1)
+    assert.ok(!carriesGate(decision))
     assert.equal(skillProviderCount(), 1)
   })
 }
 
 {
+  const { ctx, listeners, skillProviderCount } = makeApp()
+  const config = makeConfig()
+  apply(ctx, config)
+  check('enabled is a volatile reference, not a copied boolean', () => {
+    // dsh's settings service projects only `.volatile()` fields, so dropping
+    // `.volatile()` would leave the Plugins page with nothing to render.
+    assert.equal(typeof config.enabled?.get, 'function')
+    assert.equal(config.enabled.get(), true)
+  })
+  updateVolatile(config.enabled, createVolatile(false))
+  const off = await runPreStep(listeners, [])
+  check('turning the live switch off stops the injection inside the same mount', () => {
+    assert.equal(off.messages.length, 1)
+    assert.ok(!carriesGate(off))
+    assert.equal(skillProviderCount(), 1, 'the skills stay registered while the gate is off')
+  })
+  updateVolatile(config.enabled, createVolatile(true))
+  const on = await runPreStep(listeners, [])
+  check('turning it back on injects again, with no profile restart', () => {
+    assert.equal(on.messages.length, 2)
+    assert.ok(carriesGate(on))
+  })
+}
+
+{
   const { ctx, listeners } = makeApp()
-  apply(ctx, { enabled: true, gateContent: GATE })
+  apply(ctx, makeConfig())
   const rejected = { kind: 'reject', reason: 'blocked upstream' }
   const decision = await runPreStep(listeners, [], rejected)
   check('a rejected decision passes through untouched', () => {

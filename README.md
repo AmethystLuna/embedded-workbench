@@ -205,7 +205,8 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 ## 依赖
 
 - Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
-- DeepSeek Harness (dsh): dev preview — 已逐版本实测至 0.1.7-rc.2（2026-09-25，install / mount / start / uninstall 与会话日志证据见 [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md)）
+- DeepSeek Harness (dsh): dev preview — 支持 `>= 0.1.0-rc.7`（沿用既有声明；本轮实测覆盖 0.1.5-rc.2 / 0.1.5-rc.3 / 0.1.6-alpha.2 / 0.1.7-alpha.1 / 0.1.7-alpha.2 / 0.1.7-rc.1 / 0.1.7-rc.2 / 0.2.0-rc.1 / 0.2.0-rc.2，逐版本证据见 [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md)）
+- Web 端的「Gate 注入」开关需要 **dsh ≥ 0.1.7-alpha.1**（设置服务必须能投影即时字段）。更早的 dsh 上插件与 8 个 skill 照常加载、照常注入，只是开关不出现、**也不报错**：schemastery 早于 3.18.3 时该字段退化为普通布尔值；设置服务没有 `whileServed` 时客户端半侧不注册任何东西。
 - 无外部依赖
 
 ## 配置
@@ -216,6 +217,8 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 |---|---|---|---|
 | `enabled` | boolean | `true` | 设为 `false` 可完全关闭首步 Gate 注入；技能注册不受影响。 |
 | `gateContent` | string | 内置 gate 文本 | 覆盖注入到首轮模型上下文中的文本。 |
+
+在 dsh Web GUI 里可以直接改这个开关：侧边栏 **插件** → 本插件卡片 → 「Gate 注入」。它实时生效，不必重启 profile，而且只管注入的那段文本——关掉后 8 个技能照常注册。同一张卡片上还有一个更粗粒度的行开关：关掉它会整行卸载插件（技能和这个开关一起消失）。要持久化覆盖，仍按下面的 profile patch 写。
 
 在 profile 的 `cordis.patch.yml` 中按 row id 覆盖（下面的例子自定义 Gate 文本）：
 

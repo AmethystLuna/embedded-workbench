@@ -208,7 +208,8 @@ Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/s
 ## Requirements
 
 - Claude Code v2.1+ / Codex CLI latest / Cursor 2.5+ / Kimi CLI latest / OpenCode latest / ZCode 3.0+
-- DeepSeek Harness (dsh): dev preview — verified per release through 0.1.7-rc.2 (2026-09-25; install / mount / start / uninstall and session-log evidence in [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md))
+- DeepSeek Harness (dsh): dev preview — supports `>= 0.1.0-rc.7` (the standing declaration; this round re-measured 0.1.5-rc.2 / 0.1.5-rc.3 / 0.1.6-alpha.2 / 0.1.7-alpha.1 / 0.1.7-alpha.2 / 0.1.7-rc.1 / 0.1.7-rc.2 / 0.2.0-rc.1 / 0.2.0-rc.2 — per-release evidence in [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md))
+- The Web Plugins-page "Gate injection" switch requires **dsh ≥ 0.1.7-alpha.1** — its settings service must project live fields. On older dsh the plugin and its 8 skills still load and still inject, with the switch simply absent and **no error**: below schemastery 3.18.3 the field degrades to an ordinary boolean, and a settings service without `whileServed` makes the client half register nothing.
 - No external dependencies
 
 ## Configuration
@@ -219,6 +220,8 @@ In DeepSeek Harness, the bundle accepts a small configuration object:
 |---|---|---|---|
 | `enabled` | boolean | `true` | Set to `false` to drop the first-step gate injection entirely; skill registration is unaffected. |
 | `gateContent` | string | built-in gate text | Override the text injected into the first model step. |
+
+The switch is editable live in the dsh Web GUI: sidebar **Plugins** → this plugin's card → "Gate injection". It takes effect without a profile restart and controls only the injected text — turning it off leaves all eight skills registered. The same card also carries a coarser row switch: turning that off unmounts the whole row (the skills and this switch go with it). Persistent overrides still go through the profile patch below.
 
 To change it, override the row by id in your profile's `cordis.patch.yml` (the example below customises the gate text):
 
