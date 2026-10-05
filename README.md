@@ -2,10 +2,9 @@
 
 <p align="center"><a href="README.en-US.md">English</a> · <strong>中文</strong></p>
 
-嵌入式 C/C++ 固件开发工具箱 — 4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil
-MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL 陷阱。
+嵌入式 C/C++ 固件开发工具箱：4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则与 LVGL 陷阱。
 
-**跨平台** — 支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode、DeepSeek Harness (dsh)。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
+**跨平台**：支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode、DeepSeek Harness (dsh)。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
 
 ## 组件
 
@@ -28,16 +27,16 @@ MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则、LVGL
 | `keil-mdk-build` | UV4 CLI、ARM Compiler 5/6、.map 分析、合并打包、构建诊断 |
 | `c-cpp-dev` | C/C++ 代码生成、风格、内存布局、重构 |
 | `state-machine-design` | 状态模型、重试、超时、转换门控、实现模式 |
-| `hardfault-triage` | 处理器异常分类 — 故障寄存器、栈帧、PC 定位源码、根因分类 |
-| `fact-check` | 声称核查回退：逐条对照代码库核实 API 名、文件路径、枚举值、数量与机制可行性；logicprobe 未安装时由 Plan Verification Gate 使用 |
+| `hardfault-triage` | 处理器异常分类：故障寄存器、栈帧、PC 定位源码、根因分类 |
+| `fact-check` | 声称核查回退：逐条对照代码库核实 API 名、文件路径、枚举值、数量与机制可行性。logicprobe 未安装时由 Plan Verification Gate 使用 |
 
-`logicprobe`（文档与计划声称核查技能）**已拆分为独立插件** — 见下方[其他插件推荐](#其他插件推荐)。未安装时，Plan Verification Gate 回退到本插件自带的 `fact-check` 技能，只有行为/模型类声称降级为人工确认。
+`logicprobe`（文档与计划声称核查技能）**已拆分为独立插件**，见下方[其他插件推荐](#其他插件推荐)。未安装时，Plan Verification Gate 回退到本插件自带的 `fact-check` 技能。只有行为与模型类声称会降级为人工确认。
 
-> 技能内容大多来自作者个人嵌入式/固件开发工作经验和代码洁癖，按实际工程踩坑与约束沉淀，而非泛泛的模型生成内容。
+> 技能内容大多来自作者个人嵌入式与固件开发的工作经验，按实际工程踩坑与约束沉淀，而非泛泛的模型生成内容。
 
 ### 深度参考
 
-`embedded-firmware-dev`、`debug-methodology`、`state-machine-design`、`c-cpp-dev` 包含深度参考或代码示例。亮点：12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱、7 轮迭代调试案例研究、状态机实现模式、嵌入式 C 专项（volatile MMIO、链接器段、ISR 安全路径）。
+`embedded-firmware-dev`、`debug-methodology`、`state-machine-design`、`c-cpp-dev` 包含深度参考或代码示例。内容包括 12 条架构原则、嵌入式模式（GIF 定时器安全、状态锁存、异步生命周期）、LVGL 陷阱、7 轮迭代调试案例研究、状态机实现模式，以及嵌入式 C 专项（volatile MMIO、链接器段、ISR 安全路径）。
 
 ## 安装
 
@@ -79,11 +78,13 @@ git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.claude/plugi
 
 ## DeepSeek Harness (dsh)
 
-原生 dsh 支持以 cordis 插件 bundle 的形式提供，位于**仓库根**（根 `package.json` 声明了 `dsh.bundle`）：
+原生 dsh 支持以 cordis 插件 bundle 的形式提供，位于**仓库根**，由根 `package.json` 声明。
 
-- 技能遵循 Agent Skills 开放标准，被 dsh 的 `skill-filesystem` provider 原样发现——零代码。
-- bundle 把一段**精简后**的首步门禁（Plan Verification Gate + 上下文预算规则）注入每个 agent 会话的第一个模型步骤（`enabled`，默认开启）——是 Claude `SessionStart` hook 在 dsh 的原生对应物；模型可见的目录条目（`cordis_inspect`）始终注册。为什么载荷里不再有 1% Rule / Red Flags，见[设计取舍与反馈](#设计取舍与反馈)。
-- 4 个自定义 agent 有意不移植——dsh 原生 subagent 工具已覆盖并行多 agent 工作。
+这个 bundle 做三件事：
+
+1. **注册技能。** 技能遵循 Agent Skills 开放标准，由 dsh 的 `skill-filesystem` provider 原样发现，不需要额外代码。
+2. **注入门禁。** 每个 agent 会话的第一个模型步骤会收到一段**精简后**的首步门禁，内容是 Plan Verification Gate 加上下文预算规则。它由 `enabled` 控制，默认开启。这是 Claude `SessionStart` hook 在 dsh 上的对应物。载荷里为什么不再有 1% Rule 和 Red Flags，见[设计取舍与反馈](#设计取舍与反馈)。
+3. **注册目录条目。** 模型可见的目录条目（`cordis_inspect`）始终注册。4 个自定义 agent 有意不移植，因为 dsh 原生的 subagent 工具已经覆盖并行多 agent 工作。
 
 安装（原生 bundle，推荐）：
 
@@ -96,37 +97,37 @@ dsh plugin --profile web add "github:AmethystLuna/embedded-workbench"
 npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 ```
 
-安装后重启 profile，运行 `dsh --profile web --dump-config` 应看到 `id: embedded-workbench` 且 `enabled: true`。更多方式（纯技能拷贝、项目级等）见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)。
+装完重启 profile。运行 `dsh --profile web --dump-config` 应看到 `id: embedded-workbench` 且 `enabled: true`。更多方式（纯技能拷贝、项目级等）见 [`.dsh/INSTALL.md`](.dsh/INSTALL.md)。
 
-> DSH 安装注意：npm 包名为 `dsh-embedded-workbench`（无 scope）。在 web profile 的 `package.json` 中，依赖键与 `dsh.profile.bundles` 必须写 `dsh-embedded-workbench`；否则 dsh 加载器会因找不到 `node_modules/dsh-embedded-workbench` 而启动失败。
+> DSH 安装注意：npm 包名为 `dsh-embedded-workbench`，没有 scope。在 web profile 的 `package.json` 中，依赖键与 `dsh.profile.bundles` 必须都写 `dsh-embedded-workbench`。写错时 dsh 加载器找不到 `node_modules/dsh-embedded-workbench`，启动会失败。
 
 ## 使用
 
 技能按需加载，不依赖注入：
 
-- 调用 `Skill("embedded-workbench")` 加载工作流与工程策略——技能内部按风险比例选择轻量或完整路径，不强制固定阶段
-- 领域技能在任务匹配其 `Use when` 描述时自动激活——NOT 子句防止误触发（如纯格式化不会加载 c-cpp-dev）
-- Agent 在检测到状态机、行为声称或多模块任务时，主动建议验证、对抗探测和并行子代理
-- 无需手动配置 CLAUDE.md
+- 调用 `Skill("embedded-workbench")` 加载工作流与工程策略。技能内部按风险比例选择轻量或完整路径，不强制固定阶段。
+- 领域技能在任务匹配其 `Use when` 描述时自动激活。描述里的 NOT 子句用于防止误触发，例如纯格式化不会加载 `c-cpp-dev`。
+- Agent 在检测到状态机、行为声称或多模块任务时，主动建议验证、对抗探测和并行子代理。
+- 无需手动配置 `CLAUDE.md`。
 
-插件还会在会话首个模型步骤注入一段**精简**门禁（约 400 token），只含两件事：Plan Verification Gate，以及上下文预算规则（看不到读数就不要猜；工作量大且无信号时问用户，由用户决断）。设 `enabled: false` 可完全关闭。
+插件还会在会话首个模型步骤注入一段**精简**门禁，约 400 token。它只含两件事。第一件是 Plan Verification Gate。第二件是上下文预算规则：看不到读数就不要猜；工作量大且无信号时问用户，由用户决断。设 `enabled: false` 可完全关闭。
 
 ## 设计取舍与反馈
 
-这一版做了一次**基于证据的回退**，理由写在下面，欢迎质疑。
+这一版做了一次**基于证据的回退**。理由写在下面，欢迎质疑。
 
-**背景**：我们逐个核对了 8 个受支持 harness 的官方文档（Codex 还对照了源码），发现一个此前想当然的前提是错的——**8 家里有 7 家根本不向模型暴露任何上下文预算读数**（Claude Code、Copilot CLI、Cursor、OpenCode、Kimi CLI、ZCode、dsh 都只把 token 数给用户界面；只有 Codex 有一个 `get_context_remaining` 工具，且默认关闭）。也就是说，让模型"按预算自行判断要不要委派/切窗口"，本身没有依据。
+**背景**：我们逐个核对了 8 个受支持 harness 的官方文档，Codex 还对照了源码。这次核对推翻了一个此前想当然的前提：**8 家里有 7 家根本不向模型暴露任何上下文预算读数**。这 7 家是 Claude Code、Copilot CLI、Cursor、OpenCode、Kimi CLI、ZCode 和 dsh，它们只把 token 数给用户界面。只有 Codex 提供一个 `get_context_remaining` 工具，而且默认关闭。也就是说，"让模型按预算自行判断要不要委派或切窗口"这件事本身没有依据。
 
 **因此分两步处理**：
 
-1. **不再用"关掉注入"控制成本，改为"瘦身"**。首步门禁现在只保留两块：**Plan Verification Gate**（未核查就必须告诉用户，不许静默跳过）和**上下文预算规则**（看不到读数就不要猜；工作量大且无信号时问用户）。载荷从约 1,400 token 降到约 400 token（Claude 侧 −72%，dsh 侧 −58%，实测值），并且默认开启。
-2. **验证门禁保留，强制执行脚手架退场**。原来的 1% Rule 与 9 行 Red Flags 表从**注入载荷**中移除：它们属于"强制纪律"，而社区实证显示这类提示会被能力较强的模型字面执行，产生僵硬阶段、多余提问，以及五行任务拉起六七个 agent 的 10–15× 开销（见 [obra/superpowers#1120](https://github.com/obra/superpowers/issues/1120)、[openai/codex#22005](https://github.com/openai/codex/issues/22005)、[#20366](https://github.com/openai/codex/issues/20366)）。完整表格仍保留在 `Skill("embedded-workbench")` 正文里——需要纪律时纪律还在，只是不再对所有人默认施压。工作流选择也从固定 agent 串场改为**按风险比例**。
+1. **不再用"关掉注入"控制成本，改为"瘦身"。** 首步门禁现在只保留两块。第一块是 **Plan Verification Gate**：未核查就必须告诉用户，不许静默跳过。第二块是**上下文预算规则**：看不到读数就不要猜；工作量大且无信号时问用户。载荷从约 1,400 token 降到约 400 token，实测 Claude 侧降 72%，dsh 侧降 58%。它现在默认开启。
+2. **验证门禁保留，强制执行脚手架退场。** 原来的 1% Rule 与 9 行 Red Flags 表从**注入载荷**中移除。它们属于"强制纪律"，而社区实证显示这类提示会被能力较强的模型字面执行，产生僵硬阶段、多余提问，以及五行任务拉起六七个 agent 的 10–15× 开销。相关反馈见 [obra/superpowers#1120](https://github.com/obra/superpowers/issues/1120)、[openai/codex#22005](https://github.com/openai/codex/issues/22005)、[#20366](https://github.com/openai/codex/issues/20366)。完整表格仍保留在 `Skill("embedded-workbench")` 正文里：需要纪律时纪律还在，只是不再对所有人默认施压。工作流选择也从固定 agent 串场改为**按风险比例**。
 
-**有意保留的**：Plan Verification Gate 的语义没有削弱（logicprobe → 未安装则内置 `fact-check` → 两者都没用就必须告知用户）。按 [Superpowers Lite](https://github.com/BB-84C/superpowers-lite) 的原则，安全、权限与**验证**门禁是应当保留的一类，按比例裁掉的应该是流程仪式。
+**有意保留的**：Plan Verification Gate 的语义没有削弱。它的回退链是 logicprobe → 未安装则用内置 `fact-check` → 两者都没用就必须告知用户。按 [Superpowers Lite](https://github.com/BB-84C/superpowers-lite) 的原则，安全、权限与**验证**门禁属于应当保留的一类，按比例裁掉的应该是流程仪式。
 
-**已知的不确定**：各 harness 的预算接口变动很快，我们只在 2026-09-25 核对过一次；[`platform-tool-mapping.md`](skills/embedded-workbench/references/platform-tool-mapping.md) 里凡厂商未公开的格子都明确标为 `UNVERIFIED`，没有靠类比填空。
+**已知的不确定**：各 harness 的预算接口变动很快，我们只在 2026-09-25 核对过一次。[`platform-tool-mapping.md`](skills/embedded-workbench/references/platform-tool-mapping.md) 里凡厂商未公开的格子都明确标为 `UNVERIFIED`，没有靠类比填空。
 
-**有不同意见？** 这些取舍（尤其"Red Flags 从载荷退场"和"门禁默认开"）是可讨论的判断，不是定论。欢迎到 [Issues](https://github.com/AmethystLuna/embedded-workbench/issues) 提出——写清你用的模型档位、harness 和反例，我们倾向按证据调整。
+**有不同意见？** 这些取舍是可讨论的判断，不是定论，尤其是"Red Flags 从载荷退场"和"门禁默认开"两条。欢迎到 [Issues](https://github.com/AmethystLuna/embedded-workbench/issues) 提出。写清你用的模型档位、harness 和反例，我们倾向按证据调整。
 
 ## Codex CLI
 
@@ -193,7 +194,7 @@ git clone https://github.com/AmethystLuna/embedded-workbench.git ~/.kimi/plugins
 
 ## ZCode（智谱 Z.AI）
 
-ZCode 3.0+ 遵循 Agent Skills 标准。无插件商店，手动复制技能到 `.zcode/skills/`：
+ZCode 3.0+ 遵循 Agent Skills 标准。它没有插件商店，手动复制技能到 `.zcode/skills/`：
 
 ```bash
 git clone https://github.com/AmethystLuna/embedded-workbench.git
@@ -204,10 +205,10 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 
 ## 依赖
 
-- Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
-- DeepSeek Harness (dsh): dev preview — 支持 `>= 0.1.0-rc.7`（沿用既有声明；本轮实测覆盖 0.1.5-rc.2 / 0.1.5-rc.3 / 0.1.6-alpha.2 / 0.1.7-alpha.1 / 0.1.7-alpha.2 / 0.1.7-rc.1 / 0.1.7-rc.2 / 0.2.0-rc.1 / 0.2.0-rc.2，逐版本证据见 [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md)）
-- Web 端的「Gate 注入」开关需要 **dsh ≥ 0.1.7-alpha.1**（设置服务必须能投影即时字段）。更早的 dsh 上插件与 8 个 skill 照常加载、照常注入，只是开关不出现、**也不报错**：schemastery 早于 3.18.3 时该字段退化为普通布尔值；设置服务没有 `whileServed` 时客户端半侧不注册任何东西。
-- 无外部依赖
+- 宿主：Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
+- DeepSeek Harness (dsh)：dev preview，声明支持 `>= 0.1.0-rc.7`。最新一轮在 0.2.1-alpha.1 上实测了安装、挂载、启动与卸载；更早一轮实测覆盖 0.1.5-rc.2 到 0.2.0-rc.2。逐版本证据见 [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md)。
+- Web 端的「Gate 注入」开关需要 **dsh ≥ 0.1.7-alpha.1**，因为设置服务必须能投影即时字段。更早的 dsh 上插件与 8 个技能照常加载、照常注入，只是开关不出现，也不报错。
+- 无外部依赖。
 
 ## 配置
 
@@ -218,7 +219,7 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 | `enabled` | boolean | `true` | 设为 `false` 可完全关闭首步 Gate 注入；技能注册不受影响。 |
 | `gateContent` | string | 内置 gate 文本 | 覆盖注入到首轮模型上下文中的文本。 |
 
-在 dsh Web GUI 里可以直接改这个开关：侧边栏 **插件** → 本插件卡片 → 「Gate 注入」。它实时生效，不必重启 profile，而且只管注入的那段文本——关掉后 8 个技能照常注册。同一张卡片上还有一个更粗粒度的行开关：关掉它会整行卸载插件（技能和这个开关一起消失）。要持久化覆盖，仍按下面的 profile patch 写。
+在 dsh Web GUI 里可以直接改这个开关：侧边栏 **插件** → 本插件卡片 → 「Gate 注入」。它实时生效，不必重启 profile。它只管注入的那段文本：关掉后 8 个技能照常注册。同一张卡片上还有一个更粗粒度的行开关，关掉它会整行卸载插件，技能和这个开关一起消失。要持久化覆盖，仍按下面的 profile patch 写。
 
 在 profile 的 `cordis.patch.yml` 中按 row id 覆盖（下面的例子自定义 Gate 文本）：
 
@@ -234,20 +235,20 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 
 ## 卸载
 
-- 如果通过 DSH 插件管理器安装，请使用同一管理器从目标 profile 中移除 `embedded-workbench`。
-- 如果手动复制过 `skills/*`，请删除复制到 `~/.agents/skills/` 或项目 `.dsh/skills/` 下的对应目录。
-- 如果通过 `cordis.patch.yml` 添加，请删除 profile patch 中 `id: embedded-workbench` 对应的行，并重启 DSH。
+- 通过 DSH 插件管理器安装的，用同一管理器从目标 profile 中移除 `embedded-workbench`。
+- 手动复制过 `skills/*` 的，删除 `~/.agents/skills/` 或项目 `.dsh/skills/` 下的对应目录。
+- 通过 `cordis.patch.yml` 添加的，删除 profile patch 中 `id: embedded-workbench` 的行，并重启 DSH。
 
 ## 权限与数据
 
 - 插件运行时只读取包内自带的 `skills/` 目录，用于通过 DSH 标准 filesystem skill provider 注册技能。
 - 它会在会话首轮向模型上下文注入配置好的 gate 文本。
-- 它不读取凭据、不发起网络连接，也不会访问 DSH 会话上下文之外的用户数据。
+- 它不读取凭据，不发起网络连接，也不访问 DSH 会话上下文之外的用户数据。
 - 实际使用技能时，模型会像使用其他编码技能一样，按用户指示读取项目文件。
 
 ## 故障排查
 
-- 技能在 DSH 中不可见：确认 DSH 版本支持 `ctx.skills` / Agent Skills 发现，并在安装后重启 profile。
+- 技能在 DSH 中不可见：确认 DSH 版本支持 `ctx.skills` 与 Agent Skills 发现，并在安装后重启 profile。
 - Gate 未注入：检查 `enabled` 是否为 `false`，以及 profile patch 中是否存在 `id: embedded-workbench` 的行。
 - 插件管理器拒绝安装：确认 `@deepseek-ai/*` 包声明在 `peerDependencies` 中，而不是 `dependencies`。
 - 手动复制后 DSH 仍看不到技能：改用原生 bundle 安装（`dsh plugin add "github:AmethystLuna/embedded-workbench"`）。
@@ -277,19 +278,19 @@ bash tests/skill-triggering/run-all.sh
 
 | 插件 | 简介 |
 |------|------|
-| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 声称核查技能：逐条核验设计文档、架构规格、重构计划中的可验证声称与代码库是否一致，行为类声称升级为可执行模型验证。自本插件拆分；Plan Verification Gate 优先使用它，未安装时回退到内置 `fact-check` 技能。安装：`claude plugin install logicprobe@logicprobe`（dsh：`dsh plugin --profile <name> add dsh-logicprobe`）。 |
-| [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎——技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
+| [logicprobe](https://github.com/AmethystLuna/logicprobe) | 声称核查技能：逐条核验设计文档、架构规格、重构计划中的可验证声称与代码库是否一致，行为类声称升级为可执行模型验证。它自本插件拆分而来。Plan Verification Gate 优先使用它，未安装时回退到内置 `fact-check` 技能。安装：Claude 侧 `claude plugin install logicprobe@logicprobe`；dsh 侧 `dsh plugin --profile <name> add dsh-logicprobe`。 |
+| [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎：技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
 
 ## 致谢
 
-本插件的 agent 合规架构借鉴自 Jesse Vincent 的 [Superpowers](https://github.com/obra/superpowers)（MIT License）。特别感谢以下设计模式的启发：
+本插件的 agent 合规架构借鉴自 Jesse Vincent 的 [Superpowers](https://github.com/obra/superpowers)（MIT License）。以下设计模式尤其有启发：
 
-- **1% Rule** — agent 会抗拒加载技能，需要极端语言突破偏见的关键洞察
-- **Red Flags 表** — 枚举 agent 的合理化借口以预先阻断
-- **`<SUBAGENT-STOP>`** — 阻止子代理重复加载引导上下文
-- **指令优先级** — 用户 > 技能 > 系统提示的分层架构
-- **技能类型** — Rigid vs Flexible 分类体系
-- **会话启动注入模式** — 在会话启动时注入能力上下文的 hook 机制
-- **触发测试框架** — `tests/skill-triggering/` 的结构和方法论
+- **1% Rule**：agent 会抗拒加载技能，需要极端语言突破这种偏见
+- **Red Flags 表**：枚举 agent 的合理化借口，以预先阻断
+- **`<SUBAGENT-STOP>`**：阻止子代理重复加载引导上下文
+- **指令优先级**：用户 > 技能 > 系统提示的分层架构
+- **技能类型**：Rigid 与 Flexible 的分类体系
+- **会话启动注入模式**：在会话启动时注入能力上下文的 hook 机制
+- **触发测试框架**：`tests/skill-triggering/` 的结构和方法论
 
-Superpowers 是通用开发插件。Embedded Workbench 将相同的纪律模式应用到嵌入式 C/C++ 领域。
+Superpowers 是通用开发插件。Embedded Workbench 把相同的纪律模式应用到嵌入式 C/C++ 领域。

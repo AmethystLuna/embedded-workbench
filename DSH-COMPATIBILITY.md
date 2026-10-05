@@ -130,12 +130,13 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
 
 ## Results
 
-Three categories, kept apart on purpose: the row re-measured in the 2026-10-05
-round against the 0.9.1 build (dsh 0.2.1-alpha.1), the rows re-measured in the
-2026-09-29 round against the same build, and the rows carried over from earlier
-rounds. A carried-over row is still declared compatible, but it was produced by an
-earlier round's procedure and was not re-run against this build; presenting it as
-newly verified would overstate the evidence.
+The results fall into three groups, kept apart on purpose. The first group is the row
+re-measured in the 2026-10-05 round against the 0.9.1 build, on dsh 0.2.1-alpha.1. The
+second group is the rows re-measured in the 2026-09-29 round against the same build.
+The third group is the rows carried over from earlier rounds. A carried-over row is
+still declared compatible. It was produced by an earlier round's procedure, though,
+and was not re-run against this build, so presenting it as newly verified would
+overstate the evidence.
 
 ### Re-measured this round against `0.9.1` (2026-10-05)
 
@@ -143,11 +144,13 @@ newly verified would overstate the evidence.
 |---|---|---:|---:|---|---:|---:|---|
 | 0.2.1-alpha.1 | pass (pnpm's advisory peer WARN intermittently, see below) | pass | pass | not probed (headless round) | not probed | not probed | not probed |
 
-The same four steps were run for this release's sibling plugin (`dsh-logicprobe`
-0.8.0) and for this one, each against its own fresh `DSH_HOME`. The round was run
-twice — at 22:02, then again at 22:33 after an internal fix to the sibling plugin's
-bundled UML module, so the quoted run is the frozen build and every step passed
-identically in both:
+The same four steps were run for this plugin and for its sibling `dsh-logicprobe`
+0.8.0, each against its own fresh `DSH_HOME`.
+
+The round ran twice. The first pass was at 22:02. The second pass was at 22:33, after
+an internal fix to the sibling plugin's bundled UML module. Every step passed
+identically in both, so the output below is quoted from the second pass, which
+measured the frozen build:
 
 ```text
 dsh plugin --profile headless add "file:<this-repo>"
@@ -160,26 +163,26 @@ dsh plugin --profile headless remove dsh-embedded-workbench  &&  dsh --profile h
   -> row gone
 ```
 
-The boot output is that one `AUTH` line and nothing else: no
+The boot output is that one `AUTH` line and nothing else. There is no
 `plugin tree failed to load`, no `volatile is not a function`, no
-`ERR_MODULE_NOT_FOUND`, no `Cannot find module`. That is the same clean-boot
-signature the 0.1.7 and 0.2.0 rows recorded, and it shows the bundle applied
-before the model-provider call rather than merely installing.
+`ERR_MODULE_NOT_FOUND` and no `Cannot find module`. The 0.1.7 and 0.2.0 rows recorded
+the same clean-boot signature. It shows the bundle applied before the model-provider
+call, rather than merely installing.
 
-The install printed pnpm's advisory
+The install printed pnpm's advisory warning
 `[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.`
-intermittently — for this package in the first pass and in the second, and for
-neither package in two ad-hoc repeat installs into fresh profiles on the same host.
-It is the advisory shape the 0.1.5-rc.2 row carries, and it is advisory in every
-case: the install exited 0 and the mount, boot and uninstall steps all passed.
+intermittently. It appeared for this package in the first pass and in the second, and
+for neither package in two ad-hoc repeat installs into fresh profiles on the same
+host. It is the advisory shape the 0.1.5-rc.2 row carries. The warning is advisory in
+every case: the install exited 0, and the mount, boot and uninstall steps all passed.
 
-**The peer-range widening is a declaration here, not a gate.** A copy of the
-sibling manifest with the pre-widening ranges (peers and `dsh.compatibility.dsh`
-both ending at `^0.2.0-rc.1`) was added to a fresh profile on 0.2.1-alpha.1 and
-installed cleanly (`exit 0`, 733 ms, pnpm reached, no preflight refusal) — unlike
-0.2.0-rc.2, where the same shape was refused before pnpm ran. `|| ^0.2.1-alpha.1`
-is added to the peer ranges and the `dsh` range because that is the release this
-round measured, not because the host would otherwise reject the package.
+**On this release the peer-range widening is a declaration, not a gate.** A copy of
+the sibling manifest was added to a fresh profile on 0.2.1-alpha.1, with the
+pre-widening ranges (peers and `dsh.compatibility.dsh` both ending at `^0.2.0-rc.1`).
+It installed cleanly: exit 0, 733 ms, pnpm reached, no preflight refusal. On
+0.2.0-rc.2 the same shape was refused before pnpm ran. The `|| ^0.2.1-alpha.1` branch
+is therefore added to the peer ranges and the `dsh` range because that is the release
+this round measured, not because the host would otherwise reject the package.
 
 ### Re-measured in the 2026-09-29 round against `0.9.1`
 
@@ -315,19 +318,30 @@ because it, not `dshReleases`, is what the install preflight evaluates
 the method usable, and the hosts it targets (≤ 0.1.6-alpha.2) have no install
 preflight to enforce a peer range anyway. From 0.1.7-rc.1 on, the preflight does
 enforce it, so an install there is refused unless the host really provides the
-schemastery this package was tested against — the guard lowers the failure mode,
-it does not licence a support claim that was never measured. On 0.2.1-alpha.1 the
-preflight did **not** refuse the pre-widening manifest (measured on the sibling
-plugin's copy), so the extra `|| ^0.2.1-alpha.1` branch records the release this
-package was actually run against rather than a gate the host imposes.
+schemastery this package was tested against. The guard lowers the failure mode; it
+does not licence a support claim that was never measured.
+
+On 0.2.1-alpha.1 the preflight did **not** refuse the pre-widening manifest. That was
+measured on the sibling plugin's copy, so it is a measurement rather than an
+assumption. The extra `|| ^0.2.1-alpha.1` branch therefore records the release this
+package was actually run against. It is not a gate the host imposes.
 
 ## Notes
 
 These bullets are grouped by the round that produced them. The first governs
-0.9.1; several later ones describe what an **older** plugin version was verified
+0.9.1. Several later ones describe what an **older** plugin version was verified
 against, so where one reads "keeps 0.1.0-rc.7 … X working" it means that round's
 plugin version, not this one. The Results tables above are the authoritative
 statement for 0.9.1.
+
+- **The 0.2.1-alpha.1 round measured four steps, not the Web half.** Install,
+  mount, headless boot and uninstall were re-run on 2026-10-05 for this plugin and
+  its sibling `dsh-logicprobe` 0.8.0. See the Results section. `rows active`,
+  `__DSH_BOOT__`, the settings namespace and the live Web switch were **not**
+  probed for that row, so its table cells read "not probed" instead of inheriting
+  the 0.2.0-rc.2 result. The row still establishes that the bundle applies on the
+  new release: the boot reached the model-provider stage with no plugin load error.
+  That cannot happen if a row failed to compose.
 
 - **The 0.2.1-alpha.1 round measured four steps, not the Web half.** Install,
   mount, headless boot and uninstall were re-run on 2026-10-05 for this plugin and
@@ -337,15 +351,15 @@ statement for 0.9.1.
   the 0.2.0-rc.2 result. What the row does establish is that the bundle applies on
   the new release: the boot reached the model-provider stage with no plugin load
   error, which cannot happen if a row failed to compose.
-- **The round's DSH tree came from a mirror after two registry resets.** The prefix
-  was installed with `npm install --prefix <dir> @deepseek-ai/dsh@0.2.1-alpha.1`;
-  `registry.npmjs.org` reset the connection twice while that tree downloaded (one
-  stall with no progress for 20 minutes, one hard `npm error network aborted`), so
-  the install was repeated against `registry.npmmirror.com` with
-  `--fetch-retries=8 --fetch-retry-maxtimeout=120000` and finished in about three
-  minutes. The packages are the published `0.2.1-alpha.1` tarballs — only the
-  transport changed — and the plugin installs inside that prefix resolved through
-  the same mirror.
+- **The round's DSH tree came from a mirror, after two registry resets.** The prefix
+  was installed with `npm install --prefix <dir> @deepseek-ai/dsh@0.2.1-alpha.1`.
+  `registry.npmjs.org` reset the connection twice while that tree was downloading.
+  The first reset was a stall with no progress for 20 minutes. The second was a hard
+  `npm error network aborted`. The install was therefore repeated against
+  `registry.npmmirror.com`, with `--fetch-retries=8 --fetch-retry-maxtimeout=120000`,
+  and it finished in about three minutes. The packages are the published
+  `0.2.1-alpha.1` tarballs, so only the transport changed. The plugin installs inside
+  that prefix resolved through the same mirror.
 
 - **The Web switch needs a live field; the plugin no longer needs one in order to
   load.** 0.9.1 declares `enabled` live so the dsh Web GUI can edit the
