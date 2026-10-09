@@ -23,13 +23,16 @@ This installs under the package name `dsh-embedded-workbench`. If you manage the
 
 When an **agent** installs it inside a profile, the sanctioned path is the Plugin Manager rather than the CLI above: `plugin_manager` with `action: install_bundle` and the absolute package directory as `target`. Do not write the profile's `package.json` or `cordis.patch.yml` by hand, do not create packages under `$DSH_HOME`, and do not run pnpm in the profile directory — `install_bundle` performs those steps, and every hand-made write outside the workspace needs its own approval. Its result decides whether the change is live: read the returned `application` state (`applied`, `failed`, `overridden`, `restart-required`) and the `warnings`, not terminal output. Replacing an already-installed package needs a restart to load a fresh JavaScript module generation.
 
-That bare-name install has one gotcha on **pnpm 11 and newer**. pnpm holds back versions published less than a day ago (`minimumReleaseAge`, default 1440 minutes). Its built-in default is non-strict, so it **silently resolves to an older version instead of failing**. For roughly 24 hours after a release, `add dsh-embedded-workbench` therefore installs the previous version, and the profile looks like the release never happened. Pin the version to get it immediately:
+That bare-name install has one gotcha on **pnpm 11 and newer**. pnpm holds back versions published less than a day ago (`minimumReleaseAge`, default 1440 minutes). Its built-in default is non-strict, so it **silently resolves to an older version instead of failing**. For roughly 24 hours after a release, `add dsh-embedded-workbench` therefore installs the previous version, and the profile looks like the release never happened.
 
-```bash
-dsh plugin --profile web add dsh-embedded-workbench@<version>   # e.g. @0.9.2
+Pinning the version does not get around the age gate — measured on the 0.9.2 release, minutes after publishing, the pinned form failed outright with `ERR_PNPM_NO_MATCHING_VERSION`. The escape hatch is pnpm's exclusion list, in the profile's `pnpm-workspace.yaml`:
+
+```yaml
+minimumReleaseAgeExclude:
+  - dsh-embedded-workbench@0.9.2
 ```
 
-Pinning also makes pnpm record a `minimumReleaseAgeExclude` entry for that version in the profile's `pnpm-workspace.yaml`. That entry is pnpm's documented escape hatch.
+With that entry in place the pinned install resolves immediately (verified for 0.9.2: exit 0, row present in `--dump-config`). Without it, wait out the age window or install from GitHub.
 
 Restart the target profile. The bundle mounts a native cordis plugin, and that plugin does two things.
 
