@@ -30,7 +30,61 @@ window.__ModuleLoader__.load({
   id: 'dsh-embedded-workbench',
   factory: (require) => {
     const React = require('react')
-    const { Button, Switch } = require('@deepseek-ai/dsh-client-ui-primitives')
+    // The host's Switch and Button, vendored. A plain-JS client bundle must not
+    // require a Harness Client package: it changes without notice, we get no type
+    // check, and a throw blanks this slot entry. Markup, classes, token usage and
+    // the aria behaviour follow the host primitive; classes carry our own prefix.
+    const CONTROLS_CSS = [
+      '.ew-switch { box-sizing: border-box; position: relative; flex: 0 0 auto; width: 36px; height: 20px; padding: 2px; border: 0; border-radius: 999px; corner-shape: round; background: var(--dsw-alias-border-l3); cursor: pointer; }',
+      ".ew-switch[aria-checked='true'] { background: var(--dsw-alias-brand-primary); }",
+      '.ew-switch:disabled { cursor: default; opacity: 0.5; }',
+      '.ew-switch:focus-visible { outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary)); outline-offset: 2px; }',
+      '.ew-switch-thumb { display: block; width: 16px; height: 16px; border-radius: 50%; corner-shape: round; background: var(--dsw-alias-label-primary-foreground); transition: transform 120ms ease; }',
+      ".ew-switch[aria-checked='false'] .ew-switch-thumb { background: var(--dsw-alias-switch-thumb); }",
+      ".ew-switch[aria-checked='true'] .ew-switch-thumb { transform: translateX(16px); }",
+      '.ew-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: none; border-radius: var(--dsw-radius-md); cursor: pointer; font-size: 14px; line-height: 22px; color: var(--dsw-alias-label-primary); background: transparent; padding: 0 14px; }',
+      '.ew-btn:disabled { cursor: not-allowed; opacity: 0.4; }',
+      '.ew-btn-sm { height: 28px; font-size: 12px; line-height: 18px; padding: 0 10px; border-radius: var(--dsw-radius-sm); }',
+      '.ew-btn-outline { border: 0.5px solid var(--dsw-alias-border-l3); background: transparent; }',
+      '.ew-btn-outline:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); }',
+    ].join('\n')
+
+    /** Rendered inside the component tree, so unmounting removes the styles. */
+    function Controls() {
+      return React.createElement('style', null, CONTROLS_CSS)
+    }
+
+    function Switch(props) {
+      return React.createElement(
+        'button',
+        {
+          type: 'button',
+          role: 'switch',
+          'aria-checked': props.checked === true,
+          'aria-label': props.label,
+          className: 'ew-switch',
+          disabled: props.disabled === true,
+          onClick: () => {
+            if (props.disabled !== true) props.onChange(!(props.checked === true))
+          },
+        },
+        React.createElement('span', { className: 'ew-switch-thumb' }),
+      )
+    }
+
+    Switch.displayName = 'dsh-embedded-workbench:Switch'
+    Button.displayName = 'dsh-embedded-workbench:Button'
+
+    function Button(props) {
+      const classes = ['ew-btn']
+      if (props.size === 'sm') classes.push('ew-btn-sm')
+      if (props.variant === 'outline') classes.push('ew-btn-outline')
+      return React.createElement(
+        'button',
+        { type: 'button', className: classes.join(' '), disabled: props.disabled === true, onClick: props.onClick },
+        props.children,
+      )
+    }
 
     /** Settings namespace: the Loader entry id this bundle's patch declares. */
     const NS = 'embedded-workbench'
@@ -122,6 +176,7 @@ window.__ModuleLoader__.load({
       const locked = state.writable !== true || pending
 
       const children = [
+        React.createElement(Controls, { key: 'styles' }),
         React.createElement('h4', { key: 'title', style: TITLE }, t('title')),
         React.createElement('div', { key: 'row', style: ROW }, [
           React.createElement('span', { key: 'label', style: LABEL }, t('label')),

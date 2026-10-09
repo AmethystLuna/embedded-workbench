@@ -12,13 +12,15 @@
         },
         "./cordis.patch.yml": "./cordis.patch.yml",
         "./client": "./lib/client.js",
-        "./package.json": "./package.json"
+        "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
     },
     "files": [
         "lib",
         "src",
         "skills",
-        "cordis.patch.yml"
+        "cordis.patch.yml",
+    "locale"
     ],
     "engines": {
         "node": ">=20"

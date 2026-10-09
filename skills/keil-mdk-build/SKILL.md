@@ -13,7 +13,7 @@ Patterns for building embedded firmware with Keil MDK. Covers both ARM Compiler 
 
 ## UV4 CLI Build (Authoritative)
 
-UV4.exe batch mode is the canonical build path. The Python CLI reimplementation is useful for CI but may miss include paths.
+UV4.exe batch mode is the canonical build path. A CI reimplementation is possible but may miss include paths.
 
 ```powershell
 <Keil>\UV4\UV4.exe -b project.uvprojx -t TargetName -j0 -o <log_path>
@@ -145,7 +145,7 @@ A full Keil build has 5 stages:
 4. **Post-build (fromelf)** — `fromelf --bin objects/app.axf → application.bin`
 5. **Post-build (merge)** — Merge application BIN + filesystem + bootloader into flash image
 
-If bypassing UV4 (CI build), all 5 stages must be replicated. The Python CLI build tool handles this internally.
+If bypassing UV4 (CI build), all 5 stages must be replicated explicitly.
 
 ## Merge / Packaging
 

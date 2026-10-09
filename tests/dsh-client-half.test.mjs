@@ -50,12 +50,12 @@ const React = {
   },
 }
 
-const Switch = (props) => ({ type: 'Switch', props })
-const Button = (props) => ({ type: 'Button', props })
 
 const requireShim = (specifier) => {
   if (specifier === 'react') return React
-  if (specifier === '@deepseek-ai/dsh-client-ui-primitives') return { Button, Switch }
+  if (specifier.startsWith('@deepseek-ai/')) {
+    throw new Error('the client half must not require a Harness Client package: ' + specifier)
+  }
   throw new Error('unexpected module request: ' + specifier)
 }
 
@@ -72,6 +72,10 @@ function find(node, predicate) {
   if (predicate(node)) return node
   return node.props === undefined ? undefined : find(node.props.children, predicate)
 }
+
+/** The vendored controls are identified by their displayName contract. */
+const findSwitch = (tree) => find(tree, (node) => node.type !== undefined && node.type !== null && node.type.displayName === 'dsh-embedded-workbench:Switch')
+const findButton = (tree) => find(tree, (node) => node.type !== undefined && node.type !== null && node.type.displayName === 'dsh-embedded-workbench:Button')
 
 // --- the artifact ------------------------------------------------------------
 
@@ -221,21 +225,21 @@ function render(t = (key) => key) {
 }
 
 await check('renders the switch on when the field is unset (schema default true)', () => {
-  const toggle = find(render(), (node) => node.type === Switch)
+  const toggle = findSwitch(render())
   if (toggle === undefined) throw new Error('no switch rendered')
   if (toggle.props.checked !== true) throw new Error('switch is not on')
 })
 
 await check('renders the switch off when the stored field is false', () => {
   snapshot = { ...snapshot, value: { enabled: false } }
-  const toggle = find(render(), (node) => node.type === Switch)
+  const toggle = findSwitch(render())
   if (toggle.props.checked !== false) throw new Error('switch is not off')
 })
 
 await check('a toggle writes the volatile field through the settings form', async () => {
   formCalls = []
   snapshot = { ...snapshot, value: { enabled: true } }
-  const toggle = find(render(), (node) => node.type === Switch)
+  const toggle = findSwitch(render())
   toggle.props.onChange(false)
   await new Promise((resolve) => setTimeout(resolve, 0))
   if (JSON.stringify(formCalls) !== JSON.stringify([['set', 'enabled', false]])) {
@@ -245,17 +249,17 @@ await check('a toggle writes the volatile field through the settings form', asyn
 
 await check('offers a reset only while the user layer carries the field', () => {
   snapshot = { ...snapshot, value: { enabled: false }, user: { enabled: false } }
-  const reset = find(render(), (node) => node.type === Button)
+  const reset = findButton(render())
   if (reset === undefined) throw new Error('no reset control for an overridden field')
   snapshot = { ...snapshot, user: undefined }
-  const absent = find(render(), (node) => node.type === Button)
+  const absent = findButton(render())
   if (absent !== undefined) throw new Error('a reset control rendered without an override')
 })
 
 await check('a reset clears the field so it re-inherits the default', async () => {
   formCalls = []
   snapshot = { ...snapshot, value: { enabled: false }, user: { enabled: false } }
-  const reset = find(render(), (node) => node.type === Button)
+  const reset = findButton(render())
   reset.props.onClick()
   await new Promise((resolve) => setTimeout(resolve, 0))
   if (JSON.stringify(formCalls) !== JSON.stringify([['unset', 'enabled']])) {
@@ -265,14 +269,14 @@ await check('a reset clears the field so it re-inherits the default', async () =
 
 await check('locks the switch while the deployment stores settings read-only', () => {
   snapshot = { ...snapshot, writable: false }
-  const toggle = find(render(), (node) => node.type === Switch)
+  const toggle = findSwitch(render())
   if (toggle.props.disabled !== true) throw new Error('the switch is not disabled on a read-only deployment')
 })
 
 await check('says why it cannot render while the namespace is not served', () => {
   snapshot = { status: 'unavailable', value: undefined, writable: false }
   const tree = render()
-  if (find(tree, (node) => node.type === Switch) !== undefined) {
+  if (findSwitch(tree) !== undefined) {
     throw new Error('a switch rendered for an unserved namespace')
   }
   if (find(tree, (node) => node.props?.children === 'unavailable') === undefined) {
