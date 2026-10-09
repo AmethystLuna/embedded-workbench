@@ -24,7 +24,7 @@ This installs under the package name `dsh-embedded-workbench`. If you manage the
 That bare-name install has one gotcha on **pnpm 11 and newer**. pnpm holds back versions published less than a day ago (`minimumReleaseAge`, default 1440 minutes). Its built-in default is non-strict, so it **silently resolves to an older version instead of failing**. For roughly 24 hours after a release, `add dsh-embedded-workbench` therefore installs the previous version, and the profile looks like the release never happened. Pin the version to get it immediately:
 
 ```bash
-dsh plugin --profile web add dsh-embedded-workbench@<version>   # e.g. @0.9.1
+dsh plugin --profile web add dsh-embedded-workbench@<version>   # e.g. @0.9.2
 ```
 
 Pinning also makes pnpm record a `minimumReleaseAgeExclude` entry for that version in the profile's `pnpm-workspace.yaml`. That entry is pnpm's documented escape hatch.
