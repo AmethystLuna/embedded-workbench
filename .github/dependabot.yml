@@ -6,6 +6,12 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # Only devDependencies are updated. The @deepseek-ai/* entries in
+    # `peerDependencies` are the compatibility claim this repository measures one
+    # DSH release at a time (see DSH-COMPATIBILITY.md): an automatic range bump
+    # there would declare support for a release nothing has verified.
+    allow:
+      - dependency-type: "development"
     groups:
       # One PR for all @deepseek-ai/* dev-dependency bumps (dsh API mirrors).
       dsh-ecosystem:
