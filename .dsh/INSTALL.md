@@ -21,6 +21,8 @@ npx -p @deepseek-ai/dsh dsh plugin --profile web add dsh-embedded-workbench
 
 This installs under the package name `dsh-embedded-workbench`. If you manage the profile's `package.json` by hand, use that same name for both the dependency key and the `dsh.profile.bundles` entry.
 
+When an **agent** installs it inside a profile, the sanctioned path is the Plugin Manager rather than the CLI above: `plugin_manager` with `action: install_bundle` and the absolute package directory as `target`. Do not write the profile's `package.json` or `cordis.patch.yml` by hand, do not create packages under `$DSH_HOME`, and do not run pnpm in the profile directory — `install_bundle` performs those steps, and every hand-made write outside the workspace needs its own approval. Its result decides whether the change is live: read the returned `application` state (`applied`, `failed`, `overridden`, `restart-required`) and the `warnings`, not terminal output. Replacing an already-installed package needs a restart to load a fresh JavaScript module generation.
+
 That bare-name install has one gotcha on **pnpm 11 and newer**. pnpm holds back versions published less than a day ago (`minimumReleaseAge`, default 1440 minutes). Its built-in default is non-strict, so it **silently resolves to an older version instead of failing**. For roughly 24 hours after a release, `add dsh-embedded-workbench` therefore installs the previous version, and the profile looks like the release never happened. Pin the version to get it immediately:
 
 ```bash
@@ -81,7 +83,7 @@ If your `dsh` configuration supports `customSkillDirs` (rank 300), point it at t
 ## Notes
 
 - Skill frontmatter already matches the DSH expectations. `name` is kebab-case and matches the directory name, and `description` is present. The policy keys `disable-model-invocation` and `user-invocable` are omitted, which defaults to model- and user-invocable. That is the intended behavior.
-- DSH is in v0.1 developer preview, so breaking changes are expected. Pin your `dsh` version.
+- DSH releases move quickly. This plugin declares only the releases it has measured (see `DSH-COMPATIBILITY.md`), so pin your `dsh` version and re-check that file before upgrading.
 - This repo has no plugin marketplace. Install the native bundle from npm (`dsh-embedded-workbench`) or from GitHub. The skill-copy options above are fallbacks.
 - The first-model-step gate injection comes from the root bundle (Option A). The 4 custom agents (`architecture-steward`, `design-reviewer`, `execution-worker`, `quality-coordinator`) are intentionally **not** ported. dsh's native subagent tooling covers parallel multi-agent work, and the main model takes the steward and reviewer roles directly.
 - The Plan Verification Gate prefers the `logicprobe` skill, which is a **separate plugin** by the same author. Install it too with `dsh plugin --profile <name> add dsh-logicprobe`. Without it, the gate falls back to the built-in `fact-check` skill, which verifies claims against the codebase one by one. Only state-machine and behavioral claims then degrade to manual confirmation.
