@@ -2,7 +2,7 @@
 
 DeepSeek Harness (`dsh`) discovers skills through the Agent Skills open standard (agentskills.io). The layout is the same `skill-name/SKILL.md` plus frontmatter that this plugin already uses.
 
-The recommended install is the native plugin bundle. It registers all 8 skills and folds the gate into the first model step in one step. The skill-copy options below remain for hosts that do not use the dsh plugin manager.
+The recommended install is the native plugin bundle. It registers the skills from the package's `skills/` directory and folds the gate into the first model step in one step. The skill-copy options below remain for hosts that do not use the dsh plugin manager.
 
 ## Install
 
@@ -36,7 +36,7 @@ With that entry in place the pinned install resolves immediately (verified for 0
 
 Restart the target profile. The bundle mounts a native cordis plugin, and that plugin does two things.
 
-1. It registers the 8 skills from the package's `skills/` directory into dsh's `ctx.skills` registry, through the standard filesystem provider. The skills then appear in the session skill catalog, with no manual copy step.
+1. It registers the skills from the package's `skills/` directory into dsh's `ctx.skills` registry, through the standard filesystem provider. The skills then appear in the session skill catalog, with no manual copy step.
 2. It folds a **trimmed** gate into the first model step. The gate carries the Plan Verification Gate plus the context-budget rule, about 400 tokens in total. This is the dsh counterpart of the Claude Code `SessionStart` hook. The 1% Rule and the Red Flags table deliberately stay out of that payload; see "Design trade-offs and feedback" in the README. Set `enabled: false` to drop the injection entirely.
 
 To disable the gate, or to change its text, override the row by id in your profile's `cordis.patch.yml`. The row's `config` is replaced wholesale, not deep-merged:

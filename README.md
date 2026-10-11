@@ -2,7 +2,7 @@
 
 <p align="center"><a href="README.en-US.md">English</a> · <strong>中文</strong></p>
 
-嵌入式 C/C++ 固件开发工具箱：4 个代理、8 个技能，覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则与 LVGL 陷阱。
+嵌入式 C/C++ 固件开发工具箱：覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则与 LVGL 陷阱。
 
 **跨平台**：支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode、DeepSeek Harness (dsh)。基于 [Agent Skills](https://agentskills.io) 开放标准构建。
 
@@ -207,7 +207,7 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 
 - 宿主：Claude Code v2.1+ / Codex CLI 最新版 / Cursor 2.5+ / Kimi CLI 最新版 / OpenCode 最新版 / ZCode 3.0+
 - DeepSeek Harness (dsh)：dev preview，声明支持 `>= 0.1.0-rc.7`。最新一轮在 0.2.1-alpha.1 上实测了安装、挂载、启动与卸载；更早一轮实测覆盖 0.1.5-rc.2 到 0.2.0-rc.2。逐版本证据见 [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md)。
-- Web 端的「Gate 注入」开关需要 **dsh ≥ 0.1.7-alpha.1**，因为设置服务必须能投影即时字段。更早的 dsh 上插件与 8 个技能照常加载、照常注入，只是开关不出现，也不报错。
+- Web 端的「Gate 注入」开关需要 **dsh ≥ 0.1.7-alpha.1**，因为设置服务必须能投影即时字段。更早的 dsh 上插件与技能照常加载、照常注入，只是开关不出现，也不报错。
 - 无外部依赖。
 
 ## 配置
@@ -219,7 +219,7 @@ cp -r embedded-workbench/skills/* .zcode/skills/
 | `enabled` | boolean | `true` | 设为 `false` 可完全关闭首步 Gate 注入；技能注册不受影响。 |
 | `gateContent` | string | 内置 gate 文本 | 覆盖注入到首轮模型上下文中的文本。 |
 
-在 dsh Web GUI 里可以直接改这个开关：侧边栏 **插件** → 本插件卡片 → 「Gate 注入」。它实时生效，不必重启 profile。它只管注入的那段文本：关掉后 8 个技能照常注册。同一张卡片上还有一个更粗粒度的行开关，关掉它会整行卸载插件，技能和这个开关一起消失。要持久化覆盖，仍按下面的 profile patch 写。
+在 dsh Web GUI 里可以直接改这个开关：侧边栏 **插件** → 本插件卡片 → 「Gate 注入」。它实时生效，不必重启 profile。它只管注入的那段文本：关掉后技能照常注册。同一张卡片上还有一个更粗粒度的行开关，关掉它会整行卸载插件，技能和这个开关一起消失。要持久化覆盖，仍按下面的 profile patch 写。
 
 在 profile 的 `cordis.patch.yml` 中按 row id 覆盖（下面的例子自定义 Gate 文本）：
 

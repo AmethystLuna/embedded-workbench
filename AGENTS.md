@@ -59,6 +59,26 @@ Superpowers' testing conventions.
   paths from its own location. `hooks.json` timeouts are in seconds, not
   milliseconds.
 
+## Host Alignment
+
+This plugin runs on Claude Code, Codex, Cursor, Kimi, OpenCode, ZCode and dsh. A
+feature is not done for one host only.
+
+- **Every host surface moves together.** A new skill or agent needs its routing
+  line in the bootstrap skill, its mention in the injected text, its row in the
+  README tables, and whatever the host manifests declare. A skill only dsh can
+  reach is a bug, not a shortcut.
+- **The injected text is one contract.** The dsh gate is the native adaptation of
+  `hooks/session-start-content.md`. Change the behaviour rules in both.
+- **No catalogue counts in shipped text.** "4 agents, 8 skills" is wrong the
+  moment a fifth agent lands. Name the capability instead. Manifest
+  descriptions, storefront copy and README summaries are all in this category.
+- **No host-specific paths in skill text.** Hosts disagree about where a plugin
+  lives. Resolve a path at runtime, from the script's own location.
+- **dsh is one host, not the only one.** A change that works only because dsh
+  supplies a service needs a Claude-side and a plain-file answer too, or it must
+  say plainly that the host has to supply that service.
+
 ## PR Requirements
 
 - All PRs must pass `markdownlint` with the project's `.markdownlint.json` config.

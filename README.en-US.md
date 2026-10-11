@@ -4,7 +4,7 @@
 
 [![HOL Guard Scanner](https://img.shields.io/badge/HOL%20Guard-passing-00a67e)](https://github.com/hashgraph-online/hol-guard)
 
-Embedded C/C++ firmware toolbox: 4 agents and 8 skills covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns.
+Embedded C/C++ firmware toolbox: covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns.
 
 **Cross-platform**: works with Claude Code, Codex CLI, Cursor, Kimi CLI, OpenCode, ZCode, and DeepSeek Harness (dsh). Built on the [Agent Skills](https://agentskills.io) open standard.
 
@@ -209,7 +209,7 @@ Skills are invoked with `$skill-name`. ZCode also auto-discovers from `.claude/s
 
 - Host: Claude Code v2.1+ / Codex CLI latest / Cursor 2.5+ / Kimi CLI latest / OpenCode latest / ZCode 3.0+
 - DeepSeek Harness (dsh): dev preview, declared support for `>= 0.1.0-rc.7`. The latest round measured install, mount, boot and uninstall on 0.2.1-alpha.1. The earlier round measured 0.1.5-rc.2 through 0.2.0-rc.2. Per-release evidence is in [DSH-COMPATIBILITY.md](DSH-COMPATIBILITY.md).
-- The Web Plugins-page "Gate injection" switch requires **dsh ≥ 0.1.7-alpha.1**, because its settings service must be able to project live fields. On older dsh the plugin and its 8 skills still load and still inject. The switch is simply absent, with no error.
+- The Web Plugins-page "Gate injection" switch requires **dsh ≥ 0.1.7-alpha.1**, because its settings service must be able to project live fields. On older dsh the plugin and its skills still load and still inject. The switch is simply absent, with no error.
 - No external dependencies.
 
 ## Configuration
