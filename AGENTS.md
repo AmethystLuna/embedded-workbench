@@ -27,9 +27,12 @@ text of a store entry. They come from the review that produced the current text.
   once per turn. Keep the top level lean and put detail behind a pointer.
 - **Say what it does not prove.** Every scope claim needs its non-goal beside it.
   A diagnostic that narrows a fault has not localized it, and the text must say so.
-- **The Red Flags and the 1% Rule stay.** In injected text they are not
-  documentation. They change how often the model reaches for a skill or a tool, so
-  they survive every trim.
+- **Injection carries the gate, not the enforcement scaffolding.** The payload is
+  the Plan Verification Gate plus the context-budget rule. The 1% Rule and the Red
+  Flags table live in the `embedded-workbench` skill body, where a model that
+  needs discipline can load them. They left the payload because capable models
+  follow enforcement prompts literally — rigid phases, extra questions and 10–15×
+  fan-out; the README links the reports. Do not put them back.
 - **Descriptions stay factual.** Store and manifest descriptions state what the
   plugin does. Slogans live in the README and the injected text, never in an entry
   description.
