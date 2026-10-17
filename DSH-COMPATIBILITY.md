@@ -13,7 +13,7 @@ dsh bundle against the DSH releases listed in `dsh.compatibility.dshReleases`.
 | Node.js | v24.17.0 |
 | npm | 11.13.0 |
 | pnpm | 11.21.0 |
-| Test date | 2026-09-25 (headless rounds) · 2026-09-29 (live-field round) · 2026-10-05 (headless round for 0.2.1-alpha.1) · 2026-10-09 (headless round for 0.9.2 on 0.2.1-alpha.2) |
+| Test date | 2026-09-25 (headless rounds) · 2026-09-29 (live-field round) · 2026-10-05 (headless round for 0.2.1-alpha.1) · 2026-10-09 (headless round for 0.9.2 on 0.2.1-alpha.2) · 2026-10-18 (headless gate round for 0.9.3 on 0.2.1-rc.1 and 0.2.1-rc.2) |
 | Package under test | `dsh-embedded-workbench` 0.9.3 (bundle patch `cordis.patch.yml`, entry id `embedded-workbench`) |
 
 ## Method (one disposable profile per version)
@@ -37,6 +37,17 @@ added both this package and its sibling `dsh-logicprobe` 1.0.0 to one disposable
 profile. `DSH_HOME` is set explicitly for every command and never inherited: this host's own
 `DSH_HOME` points at the real user home, which the round must not touch. Both packages were
 removed from the profile afterwards and the row was confirmed gone.
+
+The 2026-10-18 round (`0.9.3`) repeated that isolated shape for `0.2.1-rc.2` and `0.2.1-rc.1`:
+one `npm install --prefix <scratch>/<version> @deepseek-ai/dsh@<version>` tree per release, one
+fresh `DSH_HOME` per release under the same scratch root, and the plugin added from this
+checkout with `file:`. It also measured the gate, which the 2026-10-09 round could not: a local
+HTTP endpoint speaking the Messages SSE protocol stood in for the provider, because the round ran
+without a real provider key. One run opened a session and ran its first model step. A second run
+adopted that session with `--session-id` and ran the next turn. The persisted v4 log was
+decompressed with `zstd` and read as events, and the mock endpoint logged every request body, so
+the gate was counted in both the durable history and the bytes the model received. The reply text
+is fixed; the round measures the injection path, not model behaviour.
 
 ```bash
 # 1) install: fresh profile, plugin added as a file: dependency
@@ -137,13 +148,71 @@ prompt now lives in a `system/message` surface node. The 0.1.5-alpha.2, 0.1.5-rc
 
 ## Results
 
-The results fall into four groups, kept apart on purpose. The first group is the row measured
-for 0.9.2 on dsh 0.2.1-alpha.2. The second group is the row re-measured in the 2026-10-05 round
-against the 0.9.1 build, on dsh 0.2.1-alpha.1. The third group is the rows re-measured in the
-2026-09-29 round against the same build. The last group is the rows carried over from earlier
-rounds. A carried-over row is still declared compatible. It was produced by an earlier round's
-procedure, though, and was not re-run against this build, so presenting it as newly verified
-would overstate the evidence.
+The results fall into five groups, kept apart on purpose. The first group is the row measured
+for 0.9.3 on dsh 0.2.1-rc.2 and 0.2.1-rc.1. The second group is the row measured for 0.9.2 on
+dsh 0.2.1-alpha.2. The third group is the row re-measured in the 2026-10-05 round against the
+0.9.1 build, on dsh 0.2.1-alpha.1. The fourth group is the rows re-measured in the 2026-09-29
+round against the same build. The last group is the rows carried over from earlier rounds. A
+carried-over row is still declared compatible. It was produced by an earlier round's procedure,
+though, and was not re-run against this build, so presenting it as newly verified would
+overstate the evidence.
+
+### Measured on `0.2.1-rc.2` and `0.2.1-rc.1` (`0.9.3` on 2026-10-18)
+
+| dsh release | install | mount row | skills + locale installed | headless boot | gate entries in session history | second step re-injects | uninstall |
+|---|---|---:|---:|---|---:|---:|---:|
+| 0.2.1-rc.2 | pass | pass | pass | AUTH-only | 1 | no | pass (row gone) |
+| 0.2.1-rc.1 | pass | pass | pass | AUTH-only | 1 | no | pass (row gone) |
+
+Each release ran from its own npm tree, its own fresh `DSH_HOME`, and a `headless` profile
+initialized by the first `plugin add`:
+
+```bash
+npm install --prefix <scratch>/<version> @deepseek-ai/dsh@<version>
+DSH_HOME=<scratch>/home-<version> node <prefix>/node_modules/@deepseek-ai/dsh/lib/bin.js \
+  plugin --profile headless add "file:<this-repo>"
+DSH_HOME=<scratch>/home-<version> node <prefix>/node_modules/@deepseek-ai/dsh/lib/bin.js \
+  --profile headless --dump-config
+```
+
+The composed tree carried the row enabled, with no `disabling profile plugin`, `incompatible`,
+or `skipping profile bundle` line:
+
+```text
+# == dsh-embedded-workbench
+- id: embedded-workbench
+  name: dsh-embedded-workbench
+  config:
+    enabled: true
+```
+
+The installed package under the profile carried `skills/` with the shipped skill directories and
+`locale/` with `en.json` and `zh.json`. The headless boot with a fake key reached the provider
+and stopped there with one line and no plugin load error:
+
+```text
+dsh: AUTH: Authentication Fails, Your api key: ****test is invalid (request_id: …)
+```
+
+For the gate, a local Messages-compatible endpoint logged every request body and streamed a fixed
+reply. The first headless run opened the session and its first step; the second adopted the same
+session with `--session-id` and ran the next turn. On both releases the decompressed v4 log held
+exactly one `user/message` whose `source.kind` is `plugin:embedded-workbench`, and the gate text
+appeared once in the whole log. Each model step's request body carried the gate once: the first
+from the injection, the second from durable history, with no second injected message. Both runs
+exited 0 and printed the final text.
+
+`pnpm` printed its advisory `[WARN] Issues with peer dependencies found` on the add, and every
+`add` and `remove` exited 0. After `dsh plugin --profile headless remove dsh-embedded-workbench`,
+neither release's `--dump-config` contained the row.
+
+Two caveats belong here. It is a **headless** round: `rows active`, `__DSH_BOOT__`, the settings
+namespace and the live Web switch were not probed, so this row does not replace the 2026-09-29
+Web measurements. And the gate ran against a stand-in endpoint, not a model.
+
+Under semver, the previous `^0.2.1-alpha.2` branch already admits both rc releases, so the added
+`|| ^0.2.1-rc.2` branch records the release this round ran. It is a declaration, not a gate the
+host imposes — the same practice as the alpha rows.
 
 ### Re-measured on `0.2.1-alpha.2` (`0.9.2` on 2026-10-09)
 
@@ -322,7 +391,7 @@ unverified.
 
 ## Declared compatibility (package.json)
 
-Quoted from the manifest of 0.9.2. The `peerDependencies` block is included
+Quoted from the manifest of 0.9.3. The `peerDependencies` block is included
 because it, not `dshReleases`, is what the install preflight evaluates
 (`@deepseek-ai/dsh-app-boot/lib/index.js:289-293`).
 
@@ -330,16 +399,16 @@ because it, not `dshReleases`, is what the install preflight evaluates
 "engines": { "node": ">=20" },
 "peerDependencies": {
   "@deepseek-ai/cordis": "^4.0.4",
-  "@deepseek-ai/dsh-agent": "^0.1.0-rc.6 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2",
-  "@deepseek-ai/dsh-llm": "^0.1.0-rc.6 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2",
-  "@deepseek-ai/dsh-session": "^0.1.0-rc.6 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2",
-  "@deepseek-ai/dsh-skill-filesystem": "^0.1.0-rc.8 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2",
+  "@deepseek-ai/dsh-agent": "^0.1.0-rc.6 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2 || ^0.2.1-rc.2",
+  "@deepseek-ai/dsh-llm": "^0.1.0-rc.6 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2 || ^0.2.1-rc.2",
+  "@deepseek-ai/dsh-session": "^0.1.0-rc.6 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2 || ^0.2.1-rc.2",
+  "@deepseek-ai/dsh-skill-filesystem": "^0.1.0-rc.8 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2 || ^0.2.1-rc.2",
   "@deepseek-ai/schemastery": "^3.18.4"
 },
 "dsh": {
   "engines": { "dsh": ">=0.1.0-rc.7" },
   "compatibility": {
-    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1 || ^0.1.3-alpha.1 || ^0.1.3-alpha.2 || ^0.1.5-alpha.1 || ^0.1.5-rc.1 || ^0.1.5-alpha.2 || ^0.1.5-rc.2 || ^0.1.5-rc.3 || ^0.1.6-alpha.1 || ^0.1.6-alpha.2 || ^0.1.7-alpha.1 || ^0.1.7-alpha.2 || ^0.1.7-rc.1 || ^0.1.7-rc.2 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2",
+    "dsh": "^0.1.0-rc.7 || ^0.1.1-rc.1 || ^0.1.2-alpha.2 || ^0.1.2-alpha.3 || ^0.1.2-alpha.4 || ^0.1.2-alpha.5 || ^0.1.2-rc.1 || ^0.1.3-alpha.1 || ^0.1.3-alpha.2 || ^0.1.5-alpha.1 || ^0.1.5-rc.1 || ^0.1.5-alpha.2 || ^0.1.5-rc.2 || ^0.1.5-rc.3 || ^0.1.6-alpha.1 || ^0.1.6-alpha.2 || ^0.1.7-alpha.1 || ^0.1.7-alpha.2 || ^0.1.7-rc.1 || ^0.1.7-rc.2 || ^0.2.0-rc.1 || ^0.2.1-alpha.1 || ^0.2.1-alpha.2 || ^0.2.1-rc.2",
     "dshReleases": {
       "0.1.0-rc.7": "compatible",
       "0.1.0-rc.8": "compatible",
@@ -366,7 +435,9 @@ because it, not `dshReleases`, is what the install preflight evaluates
       "0.2.0-rc.1": "compatible",
       "0.2.0-rc.2": "compatible",
       "0.2.1-alpha.1": "compatible",
-      "0.2.1-alpha.2": "compatible"
+      "0.2.1-alpha.2": "compatible",
+      "0.2.1-rc.1": "compatible",
+      "0.2.1-rc.2": "compatible"
     },
     "profiles": ["headless", "web"]
   }
@@ -393,14 +464,29 @@ boundary the host enforces. That release ships `schemastery` 3.18.5-alpha.1, whi
 satisfies the declared `^3.18.4` peer, so the preflight has no schemastery reason to
 refuse this bundle there either.
 
+The `|| ^0.2.1-rc.2` branch comes from the 2026-10-18 round: 0.2.1-rc.2 was installed,
+mounted, booted, gate-checked and uninstalled from its own npm tree, and its `plugin add`
+did not report the preflight refusal. Under semver the previous `^0.2.1-alpha.2` branch
+already admitted it, so the branch records the release that was run rather than a
+boundary the host enforces. That round also measured 0.2.1-rc.1, which the same previous
+branch admits; it is a `compatible` entry in `dshReleases` for that reason, not a branch
+of its own. Both releases ship `schemastery` 3.18.5, which satisfies the declared peer.
+
 ## Notes
 
 These bullets are grouped by the round that produced them. The first governs
-0.9.2. Several later ones describe what an **older** plugin version was verified
+0.9.3. Several later ones describe what an **older** plugin version was verified
 against, so where one reads "keeps 0.1.0-rc.7 … X working" it means that round's
 plugin version, not this one. The Results tables above are the authoritative
-statement for 0.9.2.
+statement for 0.9.3.
 
+- **The 0.2.1-rc.1 / 0.2.1-rc.2 round measured the gate, not the Web half.**
+  Install, mount, headless boot, gate injection and uninstall ran on 2026-10-18,
+  one isolated npm tree and one fresh `DSH_HOME` per release, with the plugin
+  added from this checkout. `rows active`, `__DSH_BOOT__`, the settings namespace
+  and the live Web switch were **not** probed. The gate check used a local
+  Messages-compatible endpoint instead of a model, so it measures the injection
+  path and the durable history guard, not model behaviour.
 - **The 0.2.1-alpha.2 round measured four steps, not the Web half.** Install,
   mount, headless boot and uninstall were re-run on 2026-10-09 for this plugin and
   its sibling `dsh-logicprobe` 1.0.0, both in one disposable `headless` profile
