@@ -280,8 +280,11 @@ To report a security vulnerability, do **not** open a public issue. Use the priv
 
 | Plugin | Description |
 |--------|-------------|
+| dsh-model-everything | Design and code modelling plus automated review, by the same author: UML diagrams rendered, read and reviewed; state-machine and protocol verification; data-model and migration checks; concurrency claim routing; dependency-graph review; design review; export to external checkers; report diffing. No npm package or public repository yet. |
 | [logicprobe](https://github.com/AmethystLuna/logicprobe) | Claim-verification skill: checks every verifiable claim in design docs, architecture specs, and refactoring plans against the codebase, and escalates behavioral claims to executable-model verification. It was split out of this plugin. The Plan Verification Gate prefers it, and falls back to the built-in `fact-check` skill when it is not installed. Install with `claude plugin install logicprobe@logicprobe`, or on dsh with `dsh plugin --profile <name> add dsh-logicprobe`. |
 | [superpowers](https://github.com/obra/superpowers) | The original agent discipline engine: skill loading enforcement, Red Flags, subagent-driven development. Many of this plugin's agent-compliance patterns (1% Rule, Red Flags, `<SUBAGENT-STOP>`, instruction priority) were adapted from Superpowers. |
+
+dsh-model-everything covers modelling and automated review of designs and code. It does not replace this plugin. This plugin remains the embedded C/C++ firmware workbench: its firmware skills, agent roles and the Plan Verification Gate stay here.
 
 ## Acknowledgments
 
