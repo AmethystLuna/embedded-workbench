@@ -278,7 +278,7 @@ bash tests/skill-triggering/run-all.sh
 
 | 插件 | 简介 |
 |------|------|
-| dsh-model-everything | 同一作者的设计与代码建模、自动审查插件：UML 图渲染、读取与审查，状态机与协议验证，数据模型与迁移检查，并发声称分流，依赖图审查，设计审查，导出到外部验证器，报告对比。目前没有 npm 包，也没有公开仓库。 |
+| [dsh-model-everything](https://github.com/AmethystLuna/dsh-model-everything) | 同一作者的设计与代码建模、自动审查插件：UML 图渲染、读取与审查，状态机与协议验证，数据模型与迁移检查，并发声称分流，依赖图审查，设计审查，导出到外部验证器，报告对比。安装：`dsh plugin --profile <name> add dsh-model-everything`（[npm](https://www.npmjs.com/package/dsh-model-everything)）。 |
 | [logicprobe](https://github.com/AmethystLuna/logicprobe) | 声称核查技能：逐条核验设计文档、架构规格、重构计划中的可验证声称与代码库是否一致，行为类声称升级为可执行模型验证。它自本插件拆分而来。Plan Verification Gate 优先使用它，未安装时回退到内置 `fact-check` 技能。安装：Claude 侧 `claude plugin install logicprobe@logicprobe`；dsh 侧 `dsh plugin --profile <name> add dsh-logicprobe`。 |
 | [superpowers](https://github.com/obra/superpowers) | 原始 agent 纪律引擎：技能加载强制、Red Flags、子代理驱动开发。本插件的多项 agent 合规模式（1% Rule、Red Flags、`<SUBAGENT-STOP>`、指令优先级）均借鉴自 Superpowers。 |
 

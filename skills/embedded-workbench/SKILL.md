@@ -113,7 +113,7 @@ Claude Code's built-in `EnterPlanMode` / `ExitPlanMode` maps to the **plan phase
 
 ### Plan Verification Gate
 
-> **⚠️ The verification skill ships in another plugin.** It started in `logicprobe` (v0.6.0, <https://github.com/AmethystLuna/logicprobe>) and that plugin continues as `dsh-model-everything`, which is the superset: the same claim verification plus diagram review, data-model checks, a concurrency claim family and export to external checkers. Load `Skill("model-everything")` when `dsh-model-everything` is installed, `Skill("logicprobe")` when only the older plugin is, and the built-in `Skill("fact-check")` when neither is — behavioral and model claims then degrade to manual confirmation.
+> **⚠️ The verification skill ships in another plugin.** It started in `logicprobe` (v0.6.0, <https://github.com/AmethystLuna/logicprobe>) and that plugin continues as [`dsh-model-everything`](https://github.com/AmethystLuna/dsh-model-everything), which is the superset: the same claim verification plus diagram review, data-model checks, a concurrency claim family and export to external checkers. Load `Skill("model-everything")` when `dsh-model-everything` is installed, `Skill("logicprobe")` when only the older plugin is, and the built-in `Skill("fact-check")` when neither is — behavioral and model claims then degrade to manual confirmation.
 
 **Before calling `ExitPlanMode`**, exactly one of the following must happen:
 
