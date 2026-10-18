@@ -2,6 +2,14 @@
 
 <p align="center"><a href="README.en-US.md">English</a> · <strong>中文</strong></p>
 
+<p align="center">
+  <a href="https://github.com/AmethystLuna/embedded-workbench/actions/workflows/dsh-bundle.yml"><img src="https://github.com/AmethystLuna/embedded-workbench/actions/workflows/dsh-bundle.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D20-blue.svg" alt="Node 20+"></a>
+  <a href="https://github.com/hashgraph-online/hol-guard"><img src="https://img.shields.io/badge/HOL%20Guard-passing-00a67e" alt="HOL Guard"></a>
+  <a href="https://afdian.com/a/amethystluna"><img src="https://img.shields.io/badge/%E7%88%B1%E5%8F%91%E7%94%B5-Afdian-946CE6" alt="在爱发电上赞助"></a>
+</p>
+
 嵌入式 C/C++ 固件开发工具箱：覆盖 FreeRTOS、中断、NVM 存储、Keil MDK（AC5/AC6）、ARMCLANG、HardFault 分析、状态机、架构原则与 LVGL 陷阱。
 
 **跨平台**：支持 Claude Code、Codex CLI、Cursor、Kimi CLI、OpenCode、ZCode、DeepSeek Harness (dsh)。基于 [Agent Skills](https://agentskills.io) 开放标准构建。

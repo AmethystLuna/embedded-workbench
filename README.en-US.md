@@ -2,7 +2,13 @@
 
 <p align="center"><strong>English</strong> · <a href="README.md">中文</a></p>
 
-[![HOL Guard Scanner](https://img.shields.io/badge/HOL%20Guard-passing-00a67e)](https://github.com/hashgraph-online/hol-guard)
+<p align="center">
+  <a href="https://github.com/AmethystLuna/embedded-workbench/actions/workflows/dsh-bundle.yml"><img src="https://github.com/AmethystLuna/embedded-workbench/actions/workflows/dsh-bundle.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D20-blue.svg" alt="Node 20+"></a>
+  <a href="https://github.com/hashgraph-online/hol-guard"><img src="https://img.shields.io/badge/HOL%20Guard-passing-00a67e" alt="HOL Guard"></a>
+  <a href="https://afdian.com/a/amethystluna"><img src="https://img.shields.io/badge/%E7%88%B1%E5%8F%91%E7%94%B5-Afdian-946CE6" alt="Sponsor on Afdian"></a>
+</p>
 
 Embedded C/C++ firmware toolbox: covering FreeRTOS, ISR, NVM storage, Keil MDK (AC5/AC6), ARMCLANG, HardFault triage, state machines, architecture principles, and LVGL patterns.
 
