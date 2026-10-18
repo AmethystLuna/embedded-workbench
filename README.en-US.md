@@ -299,3 +299,9 @@ This plugin's agent-compliance architecture is adapted from [Superpowers](https:
 - **Trigger test framework**: `tests/skill-triggering/` structure and methodology
 
 Superpowers is a general-purpose development plugin. Embedded Workbench applies the same discipline patterns to the embedded C/C++ domain.
+
+## Sponsor
+
+This plugin is open source under the MIT license. If it saves you time, you can support development on [Afdian](https://afdian.com/a/amethystluna).
+
+Sponsorship is voluntary and changes neither the license nor the features.

@@ -116,6 +116,10 @@
         "type": "git",
         "url": "git+https://github.com/AmethystLuna/embedded-workbench.git"
     },
+    "funding": {
+        "type": "custom",
+        "url": "https://afdian.com/a/amethystluna"
+    },
     "keywords": [
         "embedded",
         "firmware",

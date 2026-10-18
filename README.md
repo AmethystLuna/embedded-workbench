@@ -297,3 +297,9 @@ dsh-model-everything 覆盖设计与代码的建模和审查，不替代本插�
 - **触发测试框架**：`tests/skill-triggering/` 的结构和方法论
 
 Superpowers 是通用开发插件。Embedded Workbench 把相同的纪律模式应用到嵌入式 C/C++ 领域。
+
+## 赞助
+
+本插件以 MIT 许可证开源。如果它节省了你的时间，可以在[爱发电](https://afdian.com/a/amethystluna)赞助开发。
+
+赞助完全自愿，不影响许可证，也不改变任何功能。
