@@ -18,7 +18,7 @@ user declines.
 ## Rules
 
 - **Suggest once per task**, not repeatedly. If the user declines, don't push.
-- **Say what the check finds**, not which tool runs it. If logicprobe is not installed,
+- **Say what the check finds**, not which tool runs it. If neither `dsh-model-everything` nor `logicprobe` is installed,
   offer the built-in `fact-check` skill instead — "I can check every claim in the plan
   against the codebase" — and note that behavioral/model claims then degrade to manual
   confirmation.

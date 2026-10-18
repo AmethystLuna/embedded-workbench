@@ -36,9 +36,9 @@ If you catch yourself thinking any of these, STOP — you are rationalizing:
 | "The worker can figure out the details" | The worker has NO context from previous calls. A vague plan = the worker guessing. |
 | "I'll review it myself, no need for quality-coordinator" | Self-review is enough for a bounded, reversible edit. A second pass earns its cost when the blast radius is unclear or the change is hard to undo. |
 | "This change is too small for a Detailed Change Plan" | Bounded, reversible, single-site edits do not need the ceremony. Crossing a module boundary, a public interface, or a non-obvious failure mode does. Name the invariants either way. |
-| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("logicprobe")` or, if it is not installed, the built-in fallback `Skill("fact-check")`? Every plan — simple or complex — must pass this gate before exit. |
-| "This plan is too simple for logicprobe" | logicprobe auto-classifies depth (LIGHTWEIGHT/STANDARD/ESCALATED); the fallback fact-check verifies every claim regardless. You don't decide whether verification is needed. |
-| "I already read the code, I know the file paths and API names are correct" | Organic verification leaves no audit trail. Load `Skill("logicprobe")` or the fallback `Skill("fact-check")`, verify each claim, append the `## Plan Verification` block. |
+| "I've explored enough, time to exit plan mode" | ExitPlanMode is the verification gate. Have you loaded `Skill("model-everything")` (or `Skill("logicprobe")` if only the older plugin is installed), or the built-in fallback `Skill("fact-check")` when neither is? Every plan — simple or complex — must pass this gate before exit. |
+| "This plan is too simple for the verification skill" | `model-everything` (and `logicprobe` before it) auto-classifies depth (LIGHTWEIGHT/STANDARD/ESCALATED); the fallback fact-check verifies every claim regardless. You don't decide whether verification is needed. |
+| "I already read the code, I know the file paths and API names are correct" | Organic verification leaves no audit trail. Load `Skill("model-everything")` (or `Skill("logicprobe")` if only the older plugin is installed), or the fallback `Skill("fact-check")`, verify each claim, append the `## Plan Verification` block. |
 
 ---
 
@@ -84,7 +84,7 @@ Sub-agents are **optional equipment, not mandatory stages** — dispatch one whe
 
 Plan the change, make it, verify it. Self-review is sufficient for a bounded, reversible edit.
 
-If the plan rests on claims about the codebase (API names, file paths, enum values, counts), verify those claims before implementing — inline for a small change, or with `logicprobe` / the built-in `fact-check` skill. Escalate to Full when the change turns out to cross a boundary, or when two revisions fail to converge.
+If the plan rests on claims about the codebase (API names, file paths, enum values, counts), verify those claims before implementing — inline for a small change, or with `model-everything` (or `logicprobe` if only the older plugin is installed) / the built-in `fact-check` skill. Escalate to Full when the change turns out to cross a boundary, or when two revisions fail to converge.
 
 ### Full — cross-module, new interfaces, state-ownership changes
 
@@ -113,12 +113,12 @@ Claude Code's built-in `EnterPlanMode` / `ExitPlanMode` maps to the **plan phase
 
 ### Plan Verification Gate
 
-> **⚠️ logicprobe 已拆分为独立插件 / moved to a standalone plugin** (v0.6.0): the full verification skill (executable model checks, adversarial probing) now ships in its own plugin — <https://github.com/AmethystLuna/logicprobe> (install commands are in the README's "Other Plugins"). This plugin ships a built-in simplified fallback — `Skill("fact-check")` — for claim-by-claim verification when logicprobe is not installed; behavioral/model claims then degrade to manual confirmation.
+> **⚠️ The verification skill ships in another plugin.** It started in `logicprobe` (v0.6.0, <https://github.com/AmethystLuna/logicprobe>) and that plugin continues as `dsh-model-everything` (<https://github.com/AmethystLuna/dsh-model-everything>), which is the superset: the same claim verification plus diagram review, data-model checks, a concurrency claim family and export to external checkers. Load `Skill("model-everything")` when `dsh-model-everything` is installed, `Skill("logicprobe")` when only the older plugin is, and the built-in `Skill("fact-check")` when neither is — behavioral and model claims then degrade to manual confirmation.
 
 **Before calling `ExitPlanMode`**, exactly one of the following must happen:
 
-1. **Load `Skill("logicprobe")`** (standalone plugin) — it classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED), runs the verification including executable model checks, and appends a `## Plan Verification` summary block to the plan.
-2. **Load `Skill("fact-check")`** (built-in fallback, only when logicprobe is not installed) — verifies every verifiable claim against the codebase with evidence, appends a `## Plan Verification` block marked `fact-check (fallback)`, and tells the user that state-machine/behavioral claims degrade to manual confirmation.
+1. **Load the verification skill** — `Skill("model-everything")` when `dsh-model-everything` is installed (the successor of `logicprobe`), otherwise `Skill("logicprobe")` if the older plugin is installed. It classifies depth (LIGHTWEIGHT / STANDARD / ESCALATED), runs the verification including executable model checks, and appends a `## Plan Verification` summary block to the plan.
+2. **Load `Skill("fact-check")`** (built-in fallback, only when neither plugin is installed) — verifies every verifiable claim against the codebase with evidence, appends a `## Plan Verification` block marked `fact-check (fallback)`, and tells the user that state-machine/behavioral claims degrade to manual confirmation.
 3. **Inform the user** — if you load neither, say: *"此计划未经核查。是否需要我在审批前运行事实核查？（This plan has not been fact-verified. Would you like me to run verification before approving?）"*
 
 Silent skip is not an option. Plan mode permits `Read`, `Glob`, `Grep`, and `Skill` calls, so all of this executes before exit.
@@ -169,8 +169,9 @@ Each domain skill is classified by how strictly it should be followed:
 **Rigid** — follow exactly. These are rules and checklists. Don't adapt away the discipline.
 
 - `debug-methodology`: 8 iron rules are non-negotiable
-- `logicprobe` (external plugin): claim verification must check every claim
-- `fact-check` (built-in fallback): claim-by-claim verification when logicprobe is not installed
+- `model-everything` (external plugin, `dsh-model-everything`): claim verification and model checks must cover every claim
+- `logicprobe` (external plugin, the predecessor): the same gate when only the older plugin is installed
+- `fact-check` (built-in fallback): claim-by-claim verification when neither is installed
 
 **Flexible** — adapt principles to context. These are patterns and references, not commands.
 
@@ -186,7 +187,7 @@ If unsure, treat a skill as Rigid until you confirm otherwise.
 
 When multiple skills could apply, use this order:
 
-1. **Diagnosis skills first** — `debug-methodology`, `hardfault-triage`, `logicprobe` (external plugin; use the built-in `fact-check` fallback if logicprobe is not installed). These determine WHAT is wrong.
+1. **Diagnosis skills first** — `debug-methodology`, `hardfault-triage`, and the verification skill (`model-everything` from `dsh-model-everything`, or `logicprobe` if only the older plugin is installed; the built-in `fact-check` fallback if neither is). These determine WHAT is wrong.
 2. **Design skills second** — `state-machine-design`. These determine HOW to fix it.
 3. **Implementation skills third** — `c-cpp-dev`, `embedded-firmware-dev`, `keil-mdk-build`. These guide execution.
 

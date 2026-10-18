@@ -1,13 +1,14 @@
 ---
 name: fact-check
-description: "Use when reviewing design documents, architecture specs, technical proposals, or plans that make claims about API names, file paths, enum values, counts, or mechanism feasibility — a lightweight claim-by-claim check against the codebase with evidence. Built into embedded-workbench as the fallback when the full logicprobe plugin is not installed. NOT for state machines, protocol/retry logic, or 'always'/'never' behavioral claims that need executable model verification — those require the logicprobe plugin."
+description: "Use when reviewing design documents, architecture specs, technical proposals, or plans that make claims about API names, file paths, enum values, counts, or mechanism feasibility — a lightweight claim-by-claim check against the codebase with evidence. Built into embedded-workbench as the fallback when the full dsh-model-everything plugin (or its predecessor logicprobe) is not installed. NOT for state machines, protocol/retry logic, or 'always'/'never' behavioral claims that need executable model verification — those require dsh-model-everything (or logicprobe)."
 ---
 
 # Fact Check (fallback)
 
 Lightweight claim verification built into this plugin. Use it when the full
-`logicprobe` plugin is not installed — it checks every verifiable claim in a
-document/plan against the codebase with evidence, without model escalation.
+`dsh-model-everything` plugin — or its predecessor `logicprobe` — is not installed.
+It checks every verifiable claim in a document/plan against the codebase with
+evidence, without model escalation.
 
 ## When to use
 

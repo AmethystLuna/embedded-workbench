@@ -9,6 +9,8 @@ This is a domain implementation skill. If you are planning, designing, or enteri
 
 # State Machine Design
 
+> **For a design that has to be decided rather than reviewed:** `dsh-model-everything` verifies the machine itself — `model_verify` explores every interleaving for unreachable states, deadlock, a timeout that can never fire, and a lock held across an await; `model_compose_verify` decides two mechanisms interacting, including a lost update on a shared location. Load its `model-everything` skill when the plugin is installed. This skill stays the implementation guide: the C code, the flags, the timeouts.
+
 ## Core Rules
 
 - Fix the state model, not the symptom. Every in-progress or pending flag must have explicit success, failure, timeout, and reset exits.
