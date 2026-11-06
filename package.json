@@ -110,7 +110,7 @@
         "@deepseek-ai/dsh-skill": "^0.2.0-rc.2",
         "@deepseek-ai/dsh-skill-filesystem": "^0.2.0-rc.2",
         "@deepseek-ai/schemastery": "^3.18.5",
-        "@types/node": "^26.6.5",
+        "@types/node": "^26.6.6",
         "typescript": "^7.0.2"
     },
     "author": {
