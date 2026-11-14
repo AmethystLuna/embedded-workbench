@@ -110,7 +110,7 @@ export interface Config {
   gateContent: string
 }
 
-export const Config = z.object({
+export const Config: z<{ enabled: boolean; gateContent: string }, Config> = z.object({
   // Live so the Web Plugins page can flip the gate injection inside a running
   // session: dsh's settings service projects ONLY fields under a `.volatile()`
   // node and rejects writes to every other path. The price is that the injection
