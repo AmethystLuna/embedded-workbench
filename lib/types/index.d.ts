@@ -49,11 +49,8 @@ export interface Config {
     enabled: Volatile<boolean> | boolean;
     gateContent: string;
 }
-export declare const Config: z<Schemastery.ObjectS<NoInfer<{
-    enabled: z<boolean, boolean, "defined">;
-    gateContent: z<string, string, "defined">;
-}>>, Schemastery.ObjectT<NoInfer<{
-    enabled: z<boolean, boolean, "defined">;
-    gateContent: z<string, string, "defined">;
-}>>, "plain">;
+export declare const Config: z<{
+    enabled: boolean;
+    gateContent: string;
+}, Config>;
 export declare function apply(ctx: Context, config: Config): void;
