@@ -9,18 +9,34 @@ This is a domain implementation skill. If you are planning, designing, or enteri
 
 # C/C++ Development
 
-Language baseline is project-specific: check the project's CLAUDE.md, build system (`-std=` flags), or compiler configuration. All rules assume 32-bit ARM target unless otherwise noted.
+Language baseline is project-specific: respect the project's configured language standard, and don't assume a default. Check CLAUDE.md, build-system `-std=` flags, or compiler configuration. All rules assume 32-bit ARM target unless otherwise noted.
 
-## Code Generation
+Sections run top-down: structure, then the contract, then implementation, then the target's specifics, then change. Settle the higher level before writing the lower one.
 
-- Respect the project's configured language standard. Don't assume a default.
+## Structure
+
+Structure decides where code lives and what a module may see. Everything below is detail inside those boundaries.
+
+- **The directory tree is the architecture** — one directory is one module or one layer, and its files carry that responsibility. A reader should read the layers, and the allowed dependency direction, from the tree alone. If the layout needs a diagram to explain where a file belongs, move the files until it does not.
+- **A module holds only its own direct members** — it does not hold another layer's members, and it does not reach through them. `a.b` is a direct member and fine. `a.b.c` across a module boundary means the boundary leaked: ask the owner to act, or to return the value.
+- **Design to the interface, encapsulate behind an object** — callers depend on a declared contract, not the representation behind it. In C, that is an opaque struct plus the functions that take it. In C++, an abstract class with no public data. A caller that breaks when a field is renamed was never behind an interface.
+
+## Declarations and Interfaces
+
+A header is a module's contract. Keep it small, complete, and free of representation.
+
 - When a header is shared between C and C++ translation units, never define variables in the header — not even with `static`. Use `extern` in the header and exactly one definition in a single `.c` file.
-- Allow `goto` when it simplifies cleanup or reduces complexity, but use it as a maintenance tool, not a first choice.
 - Place Doxygen comments in header files. Keep implementation files focused on behavior.
 - Avoid inline functions in header files. Keep function definitions in source files so the interface stays small.
 - In C, lightweight macros or helper wrappers are acceptable if simple, local, and clearly named.
 
-## Memory Layout
+## Implementation
+
+### Control Flow
+
+- Allow `goto` when it simplifies cleanup or reduces complexity, but use it as a maintenance tool, not a first choice.
+
+### Memory Layout
 
 - Watch local variable bursts inside functions. Large automatic arrays, structs, or many temporaries are stack budget items.
 - Design structures with both semantics and byte alignment in mind. For protocol parsing, byte streams, and wire formats, make packing and endianness explicit.
@@ -28,7 +44,7 @@ Language baseline is project-specific: check the project's CLAUDE.md, build syst
 - Use double precision and 64-bit integers with caution on 32-bit targets. Operations on 64-bit objects create performance, compatibility, and atomicity problems unless the wider width is clearly required.
 - When a 64-bit value crosses a task, interrupt, or module boundary, make its access pattern explicit: copied, split, guarded, or protected from tearing.
 
-## Heap and Pointer Ownership
+### Heap and Pointer Ownership
 
 - Treat heap objects and pointer-owned state as lifetime-sensitive resources.
 - Make ownership, release point, and invalidation rules explicit.
@@ -110,6 +126,8 @@ __attribute__((naked)) void HardFault_Handler(void) {
 ```
 
 ## Refactoring
+
+A refactor moves code across the boundaries above. Check the highest boundary it touches first: a file move changes the architecture, an exposed type changes the contract, anything else is implementation.
 
 - Keep the intent of the original code clear while changing structure. A refactor should improve cohesion, readability, or maintainability without quietly changing behavior.
 - Skip smell-only changes that don't materially improve correctness, risk, maintainability, or clarity.
